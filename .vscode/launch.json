@@ -1,0 +1,55 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch KeystoneJS",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm run dev",
+      "presentation": {
+        "hidden": true,
+        "group": "all"
+      }
+    },
+    {
+      "name": "Launch Edge",
+      "request": "launch",
+      "type": "msedge",
+      "url": "http://localhost:3000",
+      "presentation": {
+        "hidden": true,
+        "group": "all"
+      }
+    },
+    {
+      "name": "Launch Chrome",
+      "request": "launch",
+      "type": "chrome",
+      "url": "http://localhost:3000",
+      "presentation": {
+        "hidden": true,
+        "group": "all"
+      }
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Debug (Edge)",
+      "configurations": ["Launch KeystoneJS", "Launch Edge"],
+      "presentation": {
+        "group": "all",
+        "order": 0
+      },
+      "stopAll": true
+    },
+    {
+      "name": "Debug (Chrome)",
+      "configurations": ["Launch KeystoneJS", "Launch Chrome"],
+      "presentation": {
+        "group": "all",
+        "order": 1
+      },
+      "stopAll": true
+    }
+  ]
+}
