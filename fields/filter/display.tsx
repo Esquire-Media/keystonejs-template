@@ -21,6 +21,7 @@ export const Field = ({
   onChange,
   autoFocus,
 }: FieldProps<typeof controller>) => {
+  let filterOptions: FilterOptions = field.meta.filterOptions || {};
   if (field.meta.dependency?.field) {
     const dependent: any = (itemValue as any)?.[field.meta.dependency.field] || null;
 
@@ -38,7 +39,7 @@ export const Field = ({
   return (
     <FieldContainer as="fieldset">
       <FieldLabel as="legend">{field.label}</FieldLabel>
-      <div>{JSON.stringify(field.meta.filterOptions)}</div>
+      <div>{JSON.stringify(filterOptions)}</div>
     </FieldContainer>
   );
 };
