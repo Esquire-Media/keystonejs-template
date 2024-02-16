@@ -1,10 +1,18 @@
-# KeystoneJS Template
+# KeystoneJS (v6) Template
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed on your system:
+
+- **node.js**: Visit the [node.js official website](https://nodejs.org/) and download the installer for your operating system. This will also install `npm` automatically, as it comes bundled with Node.js.
+- **npm** (Node Package Manager): If you need to update npm after installing Node.js, you can do so by running `npm install -g npm` in your terminal.
+- **pnpm**: After installing Node.js and npm, you can install pnpm by running `npm install -g pnpm` in your terminal. pnpm is a fast and disk space efficient package manager.
 
 ## Development
 
 ### CLI
 ```
-pnpm install && pnpm dev
+pnpm i && pnpm dev
 ```
 
 ### VSCode
@@ -14,7 +22,7 @@ Press F5 to start debugging with defaults. Or press Ctrl + Shift + D and select 
 
 ### CLI
 ```
-pnpm install && pnpm start
+pnpm i && pnpm start
 ```
 
 ## Configuration

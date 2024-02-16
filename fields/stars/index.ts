@@ -91,3 +91,5 @@ export const stars =
         return { maxStars, icon };
       },
     });
+
+export default stars
