@@ -11,7 +11,7 @@ import {
   checkbox,
   json,
 } from "@keystone-6/core/fields";
-import { stars } from "./fields/stars"
+import { stars } from "./fields";
 
 const auditable_fields: BaseFields<any> = {
   createdBy: relationship({
@@ -127,7 +127,7 @@ export const lists: Lists = {
         },
         isIndexed: "unique",
       }),
-      rating: stars()
+      rating: stars(),
     },
   }),
   ProcessingStep: list({
@@ -154,6 +154,22 @@ export const lists: Lists = {
       customCoding: json(),
     },
   }),
+
+  DemandSidePlatform: list({
+    access: allowAll,
+    fields: {
+      ...auditable_fields,
+      title: text()
+    },
+  }),
+  DSPEntity: list({
+    access: allowAll,
+    fields: {
+      ...auditable_fields,
+      title: text()
+    },
+  }),
+
   Audience: list({
     access: allowAll,
     fields: {
