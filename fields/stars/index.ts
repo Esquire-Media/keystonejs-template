@@ -12,16 +12,19 @@ import { graphql } from "@keystone-6/core";
 // and a different input in the Admin UI
 // https://github.com/keystonejs/keystone/tree/main/packages/core/src/fields/types/integer
 
-type StarsFieldConfig<ListTypeInfo extends BaseListTypeInfo> =
-  CommonFieldConfig<ListTypeInfo> & {
-    isIndexed?: boolean | "unique";
-    maxStars?: number;
-  };
+export type IconUsed = "hex" | "star";
+
+type StarsFieldConfig<ListTypeInfo extends BaseListTypeInfo> = CommonFieldConfig<ListTypeInfo> & {
+  isIndexed?: boolean | "unique";
+  maxStars?: number;
+  icon?: IconUsed;
+};
 
 export const stars =
   <ListTypeInfo extends BaseListTypeInfo>({
     isIndexed,
     maxStars = 5,
+    icon = "star",
     ...config
   }: StarsFieldConfig<ListTypeInfo> = {}): FieldTypeFunc<ListTypeInfo> =>
   (meta) =>
@@ -41,9 +44,7 @@ export const stars =
         async validateInput(args) {
           const val = args.resolvedData[meta.fieldKey];
           if (!(val == null || (val >= 0 && val <= maxStars))) {
-            args.addValidationError(
-              `The value must be within the range of 0-${maxStars}`
-            );
+            args.addValidationError(`The value must be within the range of 0-${maxStars}`);
           }
           await config.hooks?.validateInput?.(args);
         },
@@ -87,7 +88,7 @@ export const stars =
       }),
       views: "./fields/stars/display",
       getAdminMeta() {
-        return { maxStars };
+        return { maxStars, icon };
       },
     });
 
