@@ -152,7 +152,6 @@ export const lists: Lists = {
       sort: integer({ ui: { createView: { fieldMode: "hidden" } } }),
       customCoding: json(),
     },
-    // ui: { labelField: "outputType" },
   }),
   Audience: list({
     access: allowAll,
