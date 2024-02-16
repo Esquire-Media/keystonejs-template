@@ -1,5 +1,6 @@
 import { list, BaseFields } from "@keystone-6/core";
 import { allowAll } from "@keystone-6/core/access";
+import type { Lists } from ".keystone/types";
 
 import {
   text,
@@ -10,8 +11,7 @@ import {
   checkbox,
   json,
 } from "@keystone-6/core/fields";
-
-import type { Lists } from ".keystone/types";
+import { stars } from "./fields/stars"
 
 const auditable_fields: BaseFields<any> = {
   createdBy: relationship({
@@ -127,6 +127,7 @@ export const lists: Lists = {
         },
         isIndexed: "unique",
       }),
+      rating: stars()
     },
   }),
   ProcessingStep: list({
