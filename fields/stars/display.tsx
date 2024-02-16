@@ -27,6 +27,7 @@ export const Field = ({ field, value, onChange, autoFocus }: FieldProps<typeof c
   </FieldContainer>
 );
 
+
 // this is shown on the list view in the table
 export const Cell: CellComponent = ({ item, field, linkTo }) => {
   let value = item[field.path] + "";
@@ -55,6 +56,7 @@ export const controller = (
   return {
     icon: config.fieldMeta.icon,
     maxStars: config.fieldMeta.maxStars,
+    listKey: config.listKey,
     path: config.path,
     label: config.label,
     description: config.description,
