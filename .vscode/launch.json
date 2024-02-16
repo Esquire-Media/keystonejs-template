@@ -5,7 +5,7 @@
       "name": "Launch KeystoneJS",
       "type": "node-terminal",
       "request": "launch",
-      "command": "npm run dev",
+      "command": "pnpm dev",
       "presentation": {
         "hidden": true,
         "group": "all"
@@ -40,7 +40,8 @@
         "group": "all",
         "order": 0
       },
-      "stopAll": true
+      "stopAll": true,
+      "preLaunchTask": "Install"
     },
     {
       "name": "Debug (Chrome)",
@@ -49,7 +50,8 @@
         "group": "all",
         "order": 1
       },
-      "stopAll": true
+      "stopAll": true,
+      "preLaunchTask": "Install"
     }
   ]
 }
