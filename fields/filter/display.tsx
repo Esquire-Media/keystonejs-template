@@ -1,5 +1,9 @@
-import React from "react";
-import { FieldContainer, FieldDescription, FieldLabel } from "@keystone-ui/fields";
+import React, { useEffect } from "react";
+import {
+  FieldContainer,
+  FieldDescription,
+  FieldLabel,
+} from "@keystone-ui/fields";
 import {
   type CardValueComponent,
   type CellComponent,
@@ -8,27 +12,57 @@ import {
   type FieldProps,
 } from "@keystone-6/core/types";
 import { CellContainer, CellLink } from "@keystone-6/core/admin-ui/components";
-import { FilterOptions } from ".";
+import { FilterOptions, Dependency } from ".";
 
-export const Field = ({ field, value, onChange, autoFocus }: FieldProps<typeof controller>) => {
-  console.log(field);
+export const Field = ({
+  field,
+  value,
+  itemValue,
+  onChange,
+  autoFocus,
+}: FieldProps<typeof controller>) => {
+  if (field.meta.dependency?.field) {
+    const dependent: any = (itemValue as any)?.[field.meta.dependency.field] || null;
+
+    useEffect(() => {
+      if (dependent) onChange?.("");
+    }, [onChange, dependent]);
+
+    if (!dependent) return null;
+
+    const dependentValue =
+      dependent.value.inner?.value ?? dependent.value?.value ?? dependent.value;
+
+    console.log(dependentValue);
+  }
   return (
     <FieldContainer as="fieldset">
       <FieldLabel as="legend">{field.label}</FieldLabel>
-      <div>{JSON.stringify(field)}</div>
+      <div>{JSON.stringify(field.meta.filterOptions)}</div>
     </FieldContainer>
   );
 };
 
-export const Cell: CellComponent<typeof controller> = ({ item, field, linkTo }) => {
+export const Cell: CellComponent<typeof controller> = ({
+  item,
+  field,
+  linkTo,
+}) => {
   let value = "hello world";
-  return linkTo ? <CellLink {...linkTo}>{value}</CellLink> : <CellContainer>{value}</CellContainer>;
+  return linkTo ? (
+    <CellLink {...linkTo}>{value}</CellLink>
+  ) : (
+    <CellContainer>{value}</CellContainer>
+  );
 };
 
 Cell.supportsLinkTo = true;
 
 // this is shown on the item page in relationship fields with `displayMode: 'cards'`
-export const CardValue: CardValueComponent<typeof controller> = ({ item, field }) => {
+export const CardValue: CardValueComponent<typeof controller> = ({
+  item,
+  field,
+}) => {
   return (
     <FieldContainer>
       <FieldLabel>{field.label}</FieldLabel>
@@ -37,20 +71,25 @@ export const CardValue: CardValueComponent<typeof controller> = ({ item, field }
   );
 };
 
-type Options = { filterOptions: FilterOptions | null; basedOn: string; };
+type FieldMeta = {
+  filterOptions: FilterOptions | null;
+  dependency: Dependency | null;
+};
+
 export const controller = (
-  config: FieldControllerConfig<Options>
-): FieldController<number | null, string> & Options => {
-  console.log(config);
+  config: FieldControllerConfig<FieldMeta>
+): FieldController<string | null, string> & { meta: FieldMeta } => {
   return {
-    basedOn: config.fieldMeta.basedOn,
-    filterOptions: config.fieldMeta.filterOptions,
+    meta: config.fieldMeta,
     path: config.path,
     label: config.label,
     description: config.description,
     graphqlSelection: config.path,
     defaultValue: null,
-    deserialize: (data) => data[config.path],
+    deserialize: (data) => {
+      const value = data[config.path];
+      return typeof value === "string" ? value : null;
+    },
     serialize: (value) => ({ [config.path]: value }),
   };
 };

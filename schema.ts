@@ -12,9 +12,9 @@ import {
   json,
 } from "@keystone-6/core/fields";
 
-import { stars } from "./fields";
+import * as Fields from "./fields";
 
-const auditable_fields: BaseFields<any> = {
+const auditable: BaseFields<any> = {
   createdBy: relationship({
     ref: "User",
     ui: {
@@ -104,7 +104,7 @@ export const lists: Lists = {
   DataType: list({
     access: allowAll,
     fields: {
-      ...auditable_fields,
+      ...auditable,
       title: text({
         validation: { isRequired: true },
         isIndexed: "unique",
@@ -115,7 +115,7 @@ export const lists: Lists = {
   DataSource: list({
     access: allowAll,
     fields: {
-      ...auditable_fields,
+      ...auditable,
       dataType: relationship({
         ref: "DataType",
         ui: {
@@ -128,13 +128,13 @@ export const lists: Lists = {
         },
         isIndexed: "unique",
       }),
-      rating: stars({ maxStars: 4, icon: "star" }),
+      rating: Fields.stars({ maxStars: 4, icon: "star" }),
     },
   }),
   ProcessingStep: list({
     access: allowAll,
     fields: {
-      ...auditable_fields,
+      ...auditable,
       outputType: relationship({
         ref: "DataType",
         ui: {
@@ -159,22 +159,22 @@ export const lists: Lists = {
   DemandSidePlatform: list({
     access: allowAll,
     fields: {
-      ...auditable_fields,
-      title: text()
+      ...auditable,
+      title: text(),
     },
   }),
   DSPEntity: list({
     access: allowAll,
     fields: {
-      ...auditable_fields,
-      title: text()
+      ...auditable,
+      title: text(),
     },
   }),
 
   Audience: list({
     access: allowAll,
     fields: {
-      ...auditable_fields,
+      ...auditable,
       tags: text(),
       status: checkbox(),
       dataSource: relationship({
@@ -184,11 +184,13 @@ export const lists: Lists = {
           hideCreate: true,
         },
       }),
-      dataFilter: filter({
+      dataFilter: Fields.filter({
         // ref: "self.dataSource.dataType",
         ui: {
-          basedOn: "dataSource"
-        }
+          dependency: {
+            field: "dataSource",
+          },
+        },
       }),
       processes: relationship({
         ref: "ProcessingStep.audience",

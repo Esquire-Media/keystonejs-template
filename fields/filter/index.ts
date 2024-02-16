@@ -8,13 +8,17 @@ import {
 import { getNamedType } from "graphql";
 
 export type FilterOptions = Record<string, string>;
-type FilterFieldConfig<ListTypeInfo extends BaseListTypeInfo> = CommonFieldConfig<ListTypeInfo> & {
-  ui?: {
-    filterOptions?: FilterOptions;
-    basedOn?: string;
+export type Dependency = { field: string }
+
+
+type FilterFieldConfig<ListTypeInfo extends BaseListTypeInfo> =
+  CommonFieldConfig<ListTypeInfo> & {
+    ui?: {
+      filterOptions?: FilterOptions;
+      dependency?: Dependency;
+    };
+    ref?: string;
   };
-  ref?: string;
-};
 
 export const filter =
   <ListTypeInfo extends BaseListTypeInfo>({
@@ -47,7 +51,8 @@ export const filter =
               }
             } else {
               if (meta.lists[listName]) {
-                let field = meta.lists[listName].types.output.graphQLType.getFields()[v];
+                let field =
+                  meta.lists[listName].types.output.graphQLType.getFields()[v];
                 if (Object.keys(field.type).includes("_fields")) {
                   listName = getNamedType(field.type).name;
                 }
@@ -63,10 +68,12 @@ export const filter =
         } else if (config.ui?.filterOptions) {
           filterOptions = config.ui.filterOptions;
         }
-        
+
         return {
           filterOptions: filterOptions || null,
-          basedOn: config.ui?.basedOn || null
+          dependency: config.ui?.dependency || null,
         };
       },
     });
+
+export default filter;
