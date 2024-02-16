@@ -1,3 +1,4 @@
+import filter from "./filter";
 import stars from "./stars";
 
-export { stars };
+export { filter, stars };
