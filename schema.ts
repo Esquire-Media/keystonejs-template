@@ -11,7 +11,8 @@ import {
   checkbox,
   json,
 } from "@keystone-6/core/fields";
-import { stars } from "./fields/stars"
+import { stars } from "./fields/stars";
+import { filter } from "./fields/filter";
 
 const auditable_fields: BaseFields<any> = {
   createdBy: relationship({
@@ -127,7 +128,7 @@ export const lists: Lists = {
         },
         isIndexed: "unique",
       }),
-      rating: stars()
+      rating: stars({ maxStars: 4, icon: "star" }),
     },
   }),
   ProcessingStep: list({
@@ -167,7 +168,12 @@ export const lists: Lists = {
           hideCreate: true,
         },
       }),
-      dataFilter: json(),
+      dataFilter: filter({
+        // ref: "self.dataSource.dataType",
+        ui: {
+          basedOn: "dataSource"
+        }
+      }),
       processes: relationship({
         ref: "ProcessingStep.audience",
         many: true,
