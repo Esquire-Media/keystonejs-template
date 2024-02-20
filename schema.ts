@@ -124,9 +124,7 @@ export const lists: Lists = {
         },
       }),
       title: text({
-        validation: {
-          isRequired: true,
-        },
+        validation: { isRequired: true },
         isIndexed: "unique",
       }),
       rating: Fields.stars({ ui: { maxStars: 4, icon: "star" } }),
@@ -161,14 +159,33 @@ export const lists: Lists = {
     access: allowAll,
     fields: {
       ...auditable,
-      title: text(),
+      title: text({
+        validation: { isRequired: true },
+        isIndexed: "unique",
+      }),
     },
   }),
   DSPEntity: list({
     access: allowAll,
     fields: {
       ...auditable,
-      title: text(),
+      demandSidePlatform: relationship({
+        ref: "DemandSidePlatform",
+        ui: {
+          listView: { fieldMode: "hidden" },
+          createView: { fieldMode: "hidden" },
+          itemView: { fieldMode: "read" },
+        },
+        many: false,
+      }),
+      entityType: select({
+        type: "enum",
+        options: [{ label: "Audience", value: "audience" }],
+        defaultValue: "audience",
+      }),
+      entityId: text({
+        validation: { isRequired: true },
+      }),
     },
   }),
 
@@ -177,7 +194,7 @@ export const lists: Lists = {
     fields: {
       ...auditable,
       tags: text(),
-      status: checkbox(),
+      status: checkbox({ defaultValue: true }),
       rebuildFrequency: integer({ defaultValue: 1 }),
       rebuildUnit: select({
         type: "enum",
@@ -204,7 +221,6 @@ export const lists: Lists = {
         },
       }),
       dataFilter: Fields.filter({
-        // ref: "self.dataSource.dataType",
         ui: {
           dependency: {
             field: "dataSource",
@@ -221,6 +237,14 @@ export const lists: Lists = {
           inlineCreate: { fields: ["outputType", "customCoding"] },
         },
       }),
+    },
+    db: {
+      extendPrismaSchema: (schema) => {
+        return schema.replace(
+          /(model [^}]+)}/g,
+          "$1@@unique([tags, dataSourceId, dataFilter])\n}"
+        );
+      },
     },
   }),
 };
