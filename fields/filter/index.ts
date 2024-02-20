@@ -11,8 +11,8 @@ export type FilterOptions = Record<string, string>;
 export type Dependency = { field: string };
 
 export type FieldMeta = {
-  filterOptions: FilterOptions | null;
-  dependency: Dependency | null;
+  filterOptions?: FilterOptions | null;
+  dependency?: Dependency | null;
 };
 
 type FilterFieldConfig<ListTypeInfo extends BaseListTypeInfo> =
