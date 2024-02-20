@@ -1,9 +1,5 @@
-import React, { useEffect } from "react";
-import {
-  FieldContainer,
-  FieldDescription,
-  FieldLabel,
-} from "@keystone-ui/fields";
+import React, { useEffect, useState } from "react";
+import { FieldContainer, FieldLabel } from "@keystone-ui/fields";
 import {
   type CardValueComponent,
   type CellComponent,
@@ -13,6 +9,7 @@ import {
 } from "@keystone-6/core/types";
 import { CellContainer, CellLink } from "@keystone-6/core/admin-ui/components";
 import { FieldMeta } from ".";
+import Interface from "./interface";
 
 export const Field = ({
   field,
@@ -21,25 +18,51 @@ export const Field = ({
   onChange,
   autoFocus,
 }: FieldProps<typeof controller>) => {
-  let filterOptions: FieldMeta['filterOptions'] = field.meta.filterOptions || {};
+  const [filterOptions, setFilterOptions] = useState<
+    FieldMeta["filterOptions"]
+  >(field.meta.filterOptions || {});
+  // Return null if there's no dependent value to avoid rendering
   if (field.meta.dependency?.field) {
-    const dependent: any = (itemValue as any)?.[field.meta.dependency.field] || null;
+    if (!itemValue?.[field.meta.dependency?.field]) return null;
+    const dependent: any =
+      (itemValue as any)?.[field.meta.dependency.field] || null;
 
     useEffect(() => {
-      if (dependent) onChange?.("");
-    }, [onChange, dependent]);
+      if (dependent) {
+        // Calculate the new filter options based on the dependency
+        const dependentValue =
+          dependent.value.inner?.value ??
+          dependent.value?.value ??
+          dependent.value;
 
-    if (!dependent) return null;
+        let newFilterOptions = {};
+        if (dependentValue instanceof Object) {
+          if (dependentValue.hasOwnProperty("data")) {
+            newFilterOptions = {
+              id: dependentValue.id,
+              listKey: dependentValue.data.__typename,
+            };
+          } else {
+            newFilterOptions = {
+              id: dependentValue.id,
+            };
+          }
+        } else {
+          newFilterOptions = dependentValue;
+        }
 
-    const dependentValue =
-      dependent.value.inner?.value ?? dependent.value?.value ?? dependent.value;
-
-    console.log(dependentValue);
+        // Update the filterOptions state
+        setFilterOptions(newFilterOptions);
+        // Optionally, trigger any change handlers if needed
+        onChange?.(value);
+      }
+    }, [dependent, onChange, value]);
   }
+
   return (
     <FieldContainer as="fieldset">
       <FieldLabel as="legend">{field.label}</FieldLabel>
-      <div>{JSON.stringify(filterOptions)}</div>
+      <Interface value={value || ""} filterOptions={filterOptions || {}} />
     </FieldContainer>
   );
 };
