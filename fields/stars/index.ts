@@ -12,21 +12,24 @@ import { graphql } from "@keystone-6/core";
 // and a different input in the Admin UI
 // https://github.com/keystonejs/keystone/tree/main/packages/core/src/fields/types/integer
 
-export type IconUsed = "hex" | "star";
+export type Icon = "hex" | "star";
 
-type StarsFieldConfig<ListTypeInfo extends BaseListTypeInfo> = CommonFieldConfig<ListTypeInfo> & {
-  isIndexed?: boolean | "unique";
-  maxStars?: number;
-  icon?: IconUsed;
+export type FieldMeta = {
+  maxStars: number | null;
+  icon: string | null;
 };
+
+type FilterFieldConfig<ListTypeInfo extends BaseListTypeInfo> =
+  CommonFieldConfig<ListTypeInfo> & {
+    isIndexed?: boolean | "unique";
+    ui?: FieldMeta;
+  };
 
 export const stars =
   <ListTypeInfo extends BaseListTypeInfo>({
     isIndexed,
-    maxStars = 5,
-    icon = "star",
     ...config
-  }: StarsFieldConfig<ListTypeInfo> = {}): FieldTypeFunc<ListTypeInfo> =>
+  }: FilterFieldConfig<ListTypeInfo> = {}): FieldTypeFunc<ListTypeInfo> =>
   (meta) =>
     fieldType({
       // this configures what data is stored in the database
@@ -43,8 +46,14 @@ export const stars =
         // This hook is the key difference on the backend between the stars field type and the integer field type.
         async validateInput(args) {
           const val = args.resolvedData[meta.fieldKey];
-          if (!(val == null || (val >= 0 && val <= maxStars))) {
-            args.addValidationError(`The value must be within the range of 0-${maxStars}`);
+          if (
+            !(val == null || (val >= 0 && val <= (config.ui?.maxStars || 5)))
+          ) {
+            args.addValidationError(
+              `The value must be within the range of 0-${
+                config.ui?.maxStars || 5
+              }`
+            );
           }
           await config.hooks?.validateInput?.(args);
         },
@@ -88,8 +97,11 @@ export const stars =
       }),
       views: "./fields/stars/display",
       getAdminMeta() {
-        return { maxStars, icon };
+        return {
+          maxStars: config.ui?.maxStars || null,
+          icon: config.ui?.icon || null,
+        };
       },
     });
 
-export default stars
+export default stars;

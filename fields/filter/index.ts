@@ -8,15 +8,16 @@ import {
 import { getNamedType } from "graphql";
 
 export type FilterOptions = Record<string, string>;
-export type Dependency = { field: string }
+export type Dependency = { field: string };
 
+export type FieldMeta = {
+  filterOptions: FilterOptions | null;
+  dependency: Dependency | null;
+};
 
 type FilterFieldConfig<ListTypeInfo extends BaseListTypeInfo> =
   CommonFieldConfig<ListTypeInfo> & {
-    ui?: {
-      filterOptions?: FilterOptions;
-      dependency?: Dependency;
-    };
+    ui?: FieldMeta;
     ref?: string;
   };
 

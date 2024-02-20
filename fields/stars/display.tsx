@@ -10,7 +10,7 @@ import {
   type FieldProps,
 } from "@keystone-6/core/types";
 import StarsInterface from "./interface";
-import { IconUsed } from ".";
+import { FieldMeta } from ".";
 
 // this is the component shown in the create modal and item page
 export const Field = ({ field, value, onChange, autoFocus }: FieldProps<typeof controller>) => (
@@ -18,8 +18,8 @@ export const Field = ({ field, value, onChange, autoFocus }: FieldProps<typeof c
     <FieldLabel as="legend">{field.label}</FieldLabel>
     <FieldDescription id={`${field.path}-description`}>{field.description}</FieldDescription>
     <StarsInterface
-      icon={field.icon}
-      maxStars={field.maxStars}
+      icon={field.meta.icon}
+      maxStars={field.meta.maxStars || 5}
       onChange={onChange}
       value={value}
       autoFocus={autoFocus}
@@ -49,13 +49,15 @@ export const CardValue: CardValueComponent = ({ item, field }) => {
 };
 
 export const controller = (
-  // the type parameter here needs to align with what is returned from `getAdminMeta`
-  // in the server-side portion of the field type
-  config: FieldControllerConfig<{ maxStars: number; icon: IconUsed }>
-): FieldController<number | null, string> & { maxStars: number; icon: IconUsed } => {
+  config: FieldControllerConfig<FieldMeta>
+): FieldController<number | null, string> & { meta: FieldMeta } => {
   return {
+<<<<<<< Updated upstream
     icon: config.fieldMeta.icon,
     maxStars: config.fieldMeta.maxStars,
+=======
+    meta: config.fieldMeta,
+>>>>>>> Stashed changes
     path: config.path,
     label: config.label,
     description: config.description,

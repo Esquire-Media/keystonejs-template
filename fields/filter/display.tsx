@@ -12,7 +12,7 @@ import {
   type FieldProps,
 } from "@keystone-6/core/types";
 import { CellContainer, CellLink } from "@keystone-6/core/admin-ui/components";
-import { FilterOptions, Dependency } from ".";
+import { FieldMeta } from ".";
 
 export const Field = ({
   field,
@@ -21,7 +21,7 @@ export const Field = ({
   onChange,
   autoFocus,
 }: FieldProps<typeof controller>) => {
-  let filterOptions: FilterOptions = field.meta.filterOptions || {};
+  let filterOptions: FieldMeta['filterOptions'] = field.meta.filterOptions || {};
   if (field.meta.dependency?.field) {
     const dependent: any = (itemValue as any)?.[field.meta.dependency.field] || null;
 
@@ -70,11 +70,6 @@ export const CardValue: CardValueComponent<typeof controller> = ({
       hello world
     </FieldContainer>
   );
-};
-
-type FieldMeta = {
-  filterOptions: FilterOptions | null;
-  dependency: Dependency | null;
 };
 
 export const controller = (
