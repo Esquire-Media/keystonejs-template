@@ -32,6 +32,10 @@ export const filter =
       scalar: "String",
     })({
       ...config,
+      input: {
+        create: { arg: graphql.arg({ type: graphql.String }) },
+        update: { arg: graphql.arg({ type: graphql.String }) },
+      },
       output: graphql.field({
         type: graphql.String,
       }),
