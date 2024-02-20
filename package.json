@@ -6,13 +6,14 @@
     "dev": "cross-env NODE_ENV=development keystone dev",
     "start": "cross-env NODE_ENV=production keystone start",
     "build": "cross-env NODE_ENV=production keystone build",
-    "postinstall": "cross-env NODE_ENV=development keystone build --no-ui && keystone prisma db push && ts-node seed-data.ts"
+    "postinstall": "cross-env NODE_ENV=development keystone build --no-ui && keystone prisma generate && keystone prisma db push && ts-node seed-data.ts"
   },
   "dependencies": {
     "@keystone-6/auth": "^7.0.2",
     "@keystone-6/core": "^5.7.2",
     "@keystone-ui/core": "^5.0.2",
-    "@prisma/client": "^5.9.1"
+    "@prisma/client": "^5.9.1",
+    "dotenv": "^16.4.5"
   },
   "devDependencies": {
     "@apollo/client": "^3.9.5",

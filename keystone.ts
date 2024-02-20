@@ -6,6 +6,7 @@
 //   you can find out more at https://keystonejs.com/docs/apis/config
 
 import { config } from '@keystone-6/core';
+import { DatabaseProvider } from '@keystone-6/core/types';
 
 // to keep this file tidy, we define our schema in a different file
 import { lists } from './schema';
@@ -14,14 +15,18 @@ import { lists } from './schema';
 // when you write your list-level access control functions, as they typically rely on session data
 import { withAuth, session } from './auth';
 
+// load runtime environmental variables
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 export default withAuth(
   config({
     db: {
       // we're using sqlite for the fastest startup experience
       //   for more information on what database might be appropriate for you
       //   see https://keystonejs.com/docs/guides/choosing-a-database#title
-      provider: 'sqlite',
-      url: 'file:./keystone.db',
+      provider: process.env.DB_TYPE as DatabaseProvider || 'sqlite',
+      url: process.env.DB_URL || 'file:./keystone.db',
     },
     lists,
     session,
