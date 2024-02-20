@@ -1,10 +1,9 @@
 import React from "react";
-import { IconUsed } from ".";
 
-type InterfaceProps = {
+export type InterfaceProps = {
   maxStars: number;
   value: number | null;
-  icon: IconUsed;
+  icon: string;
   onChange?: (value: number | null) => void;
   autoFocus?: boolean;
 };

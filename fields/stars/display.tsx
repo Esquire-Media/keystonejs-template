@@ -18,7 +18,7 @@ export const Field = ({ field, value, onChange, autoFocus }: FieldProps<typeof c
     <FieldLabel as="legend">{field.label}</FieldLabel>
     <FieldDescription id={`${field.path}-description`}>{field.description}</FieldDescription>
     <StarsInterface
-      icon={field.meta.icon}
+      icon={field.meta.icon || "star"}
       maxStars={field.meta.maxStars || 5}
       onChange={onChange}
       value={value}
