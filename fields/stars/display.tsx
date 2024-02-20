@@ -52,12 +52,7 @@ export const controller = (
   config: FieldControllerConfig<FieldMeta>
 ): FieldController<number | null, string> & { meta: FieldMeta } => {
   return {
-<<<<<<< Updated upstream
-    icon: config.fieldMeta.icon,
-    maxStars: config.fieldMeta.maxStars,
-=======
     meta: config.fieldMeta,
->>>>>>> Stashed changes
     path: config.path,
     label: config.label,
     description: config.description,
