@@ -10,6 +10,7 @@ import {
   integer,
   checkbox,
   json,
+  select,
 } from "@keystone-6/core/fields";
 
 import * as Fields from "./fields";
@@ -128,7 +129,7 @@ export const lists: Lists = {
         },
         isIndexed: "unique",
       }),
-      rating: Fields.stars({ maxStars: 4, icon: "star" }),
+      rating: Fields.stars({ ui: { maxStars: 4, icon: "star" } }),
     },
   }),
   ProcessingStep: list({
@@ -177,6 +178,24 @@ export const lists: Lists = {
       ...auditable,
       tags: text(),
       status: checkbox(),
+      rebuildFrequency: integer({ defaultValue: 1 }),
+      rebuildUnit: select({
+        type: "enum",
+        options: [
+          { label: "Day(s)", value: "days" },
+          { label: "Month(s)", value: "months" },
+        ],
+        defaultValue: "days",
+      }),
+      timeToLive: integer({ defaultValue: 0 }),
+      TTLUnit: select({
+        type: "enum",
+        options: [
+          { label: "Day(s)", value: "days" },
+          { label: "Month(s)", value: "months" },
+        ],
+        defaultValue: "days",
+      }),
       dataSource: relationship({
         ref: "DataSource",
         ui: {
