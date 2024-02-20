@@ -56,7 +56,6 @@ export const controller = (
   return {
     icon: config.fieldMeta.icon,
     maxStars: config.fieldMeta.maxStars,
-    listKey: config.listKey,
     path: config.path,
     label: config.label,
     description: config.description,
