@@ -1,27 +1,31 @@
 import React, { useState, useCallback } from "react";
 import type {
-  JsonGroup,
   Config,
   ImmutableTree,
   BuilderProps,
 } from "@react-awesome-query-builder/ui";
-import { Query, Builder, Utils as QbUtils } from "@react-awesome-query-builder";
-import { FilterOptions } from "."; // Make sure this import path is correct
-import "antd/dist/antd.css"; // Import styles if you're using Ant Design
-import "@react-awesome-query-builder/css/styles.scss";
-import "@react-awesome-query-builder/css/compact_styles.scss"; // or import compact styles
+import { Utils as QbUtils } from "@react-awesome-query-builder/core";
+import { Query, Builder } from "@react-awesome-query-builder/ui";
+import "@react-awesome-query-builder/ui/css/styles.css";
 
 export type InterfaceProps = {
-  value: string | null;
-  config: FilterOptions;
+  value: Object | null;
+  config: Config;
   onChange?: (value: string | null) => void;
   autoFocus?: boolean;
 };
 
 export default function Interface(props: InterfaceProps) {
+  const config = props.config;
+  let tree: ImmutableTree = QbUtils.loadTree({ id: QbUtils.uuid(), type: "group" });
+  try {
+    if (props.value) {
+      tree = QbUtils.loadFromJsonLogic(props.value, config) || tree
+    }
+  } catch {}
   const [state, setState] = useState({
-    tree: QbUtils.checkTree(QbUtils.loadTree(props.value), props.config),
-    config: props.config,
+    tree: QbUtils.checkTree(tree, config),
+    config: config,
   });
 
   const onChange = useCallback(
@@ -32,9 +36,10 @@ export default function Interface(props: InterfaceProps) {
         config: config,
       }));
 
-      if (props.onChange) {
-        props.onChange(QbUtils.getTree(immutableTree));
-      }
+      if (props.onChange)
+        props.onChange(
+          JSON.stringify(QbUtils.jsonLogicFormat(immutableTree, config)["logic"])
+        );
     },
     []
   );
@@ -53,7 +58,7 @@ export default function Interface(props: InterfaceProps) {
   return (
     <div>
       <Query
-        {...props.config}
+        {...config}
         value={state.tree}
         onChange={onChange}
         renderBuilder={renderBuilder}

@@ -10,17 +10,19 @@ import {
 import { CellContainer, CellLink } from "@keystone-6/core/admin-ui/components";
 import { FieldMeta } from ".";
 import Interface from "./interface";
+import { BasicConfig } from "@react-awesome-query-builder/ui";
 
 export const Field = ({
   field,
   value,
   itemValue,
-  onChange,
-  autoFocus,
+  onChange
 }: FieldProps<typeof controller>) => {
-  const [config, setFilterOptions] = useState<
-    FieldMeta["config"]
-  >(field.meta.config || {});
+  const init = BasicConfig;
+  const [config, setConfig] = useState<BasicConfig>({
+    ...init,
+    fields: field.meta.fields || {},
+  });
   // Return null if there's no dependent value to avoid rendering
   if (field.meta.dependency?.field) {
     if (!itemValue?.[field.meta.dependency?.field]) return null;
@@ -50,19 +52,18 @@ export const Field = ({
         } else {
           newFilterOptions = dependentValue;
         }
-
-        // Update the config state
-        setFilterOptions(newFilterOptions);
-        // Optionally, trigger any change handlers if needed
-        onChange?.(value);
+        setConfig({ ...init, fields: {} });
       }
-    }, [dependent, onChange, value]);
+    }, [dependent, value]);
   }
-
   return (
     <FieldContainer as="fieldset">
       <FieldLabel as="legend">{field.label}</FieldLabel>
-      <Interface value={value || ""} config={config || {}} onChange={onChange} />
+      <Interface
+        value={JSON.parse(value || "null")}
+        config={config || {}}
+        onChange={onChange}
+      />
     </FieldContainer>
   );
 };
