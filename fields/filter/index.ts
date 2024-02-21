@@ -6,12 +6,12 @@ import {
   type CommonFieldConfig,
 } from "@keystone-6/core/types";
 import { getNamedType } from "graphql";
+import type { Config } from "@react-awesome-query-builder/ui";
 
-export type FilterOptions = Record<string, string>;
 export type Dependency = { field: string };
 
 export type FieldMeta = {
-  filterOptions?: FilterOptions | null;
+  config?: Config | null;
   dependency?: Dependency | null;
 };
 
@@ -41,7 +41,7 @@ export const filter =
       }),
       views: "./fields/filter/display",
       getAdminMeta() {
-        let filterOptions: FilterOptions = {};
+        let config: Config = {};
 
         if (config.ref) {
           const ref = config.ref?.split(".");
@@ -68,14 +68,14 @@ export const filter =
           for (const [key, value] of Object.entries(
             meta.lists[listName].types.output.graphQLType.getFields()
           )) {
-            filterOptions[key] = getNamedType(value.type).name;
+            config[key] = getNamedType(value.type).name;
           }
-        } else if (config.ui?.filterOptions) {
-          filterOptions = config.ui.filterOptions;
+        } else if (config.ui?.config) {
+          config = config.ui.config;
         }
 
         return {
-          filterOptions: filterOptions || null,
+          config: config || null,
           dependency: config.ui?.dependency || null,
         };
       },

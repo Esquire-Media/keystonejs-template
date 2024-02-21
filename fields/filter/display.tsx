@@ -18,9 +18,9 @@ export const Field = ({
   onChange,
   autoFocus,
 }: FieldProps<typeof controller>) => {
-  const [filterOptions, setFilterOptions] = useState<
-    FieldMeta["filterOptions"]
-  >(field.meta.filterOptions || {});
+  const [config, setFilterOptions] = useState<
+    FieldMeta["config"]
+  >(field.meta.config || {});
   // Return null if there's no dependent value to avoid rendering
   if (field.meta.dependency?.field) {
     if (!itemValue?.[field.meta.dependency?.field]) return null;
@@ -51,7 +51,7 @@ export const Field = ({
           newFilterOptions = dependentValue;
         }
 
-        // Update the filterOptions state
+        // Update the config state
         setFilterOptions(newFilterOptions);
         // Optionally, trigger any change handlers if needed
         onChange?.(value);
@@ -62,7 +62,7 @@ export const Field = ({
   return (
     <FieldContainer as="fieldset">
       <FieldLabel as="legend">{field.label}</FieldLabel>
-      <Interface value={value || ""} filterOptions={filterOptions || {}} />
+      <Interface value={value || ""} config={config || {}} onChange={onChange} />
     </FieldContainer>
   );
 };
