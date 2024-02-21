@@ -127,7 +127,7 @@ export const lists: Lists = {
         validation: { isRequired: true },
         isIndexed: "unique",
       }),
-      rating: Fields.stars({ ui: { maxStars: 4, icon: "star" } }),
+      filtering: json({ defaultValue: {} }),
     },
   }),
   ProcessingStep: list({
@@ -224,7 +224,7 @@ export const lists: Lists = {
         // ref: "DataSource.dataType",
         ui: {
           // dependency: {
-          //   field: "dataSource",
+          //   field: "dataSource.filtering",
           // },
           fields: {
             qty: {
