@@ -221,9 +221,53 @@ export const lists: Lists = {
         },
       }),
       dataFilter: Fields.filter({
+        // ref: "DataSource.dataType",
         ui: {
-          dependency: {
-            field: "dataSource",
+          // dependency: {
+          //   field: "dataSource",
+          // },
+          fields: {
+            qty: {
+              label: "Qty",
+              type: "number",
+              fieldSettings: {
+                min: 0,
+              },
+              valueSources: ["value"],
+              preferWidgets: ["number"],
+            },
+            price: {
+              label: "Price",
+              type: "number",
+              valueSources: ["value"],
+              fieldSettings: {
+                min: 10,
+                max: 100,
+              },
+              preferWidgets: ["slider", "rangeslider"],
+            },
+            name: {
+              label: "Name",
+              type: "text",
+            },
+            color: {
+              label: "Color",
+              type: "select",
+              valueSources: ["value"],
+              fieldSettings: {
+                listValues: [
+                  { value: "yellow", title: "Yellow" },
+                  { value: "green", title: "Green" },
+                  { value: "orange", title: "Orange" },
+                ],
+              },
+            },
+            is_promotion: {
+              label: "Promo?",
+              type: "boolean",
+              operators: ["equal"],
+              valueSources: ["value"],
+            },
           },
         },
       }),

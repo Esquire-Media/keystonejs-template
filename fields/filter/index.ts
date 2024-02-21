@@ -6,12 +6,11 @@ import {
   type CommonFieldConfig,
 } from "@keystone-6/core/types";
 import { getNamedType } from "graphql";
-import type { Config } from "@react-awesome-query-builder/ui";
 
 export type Dependency = { field: string };
 
 export type FieldMeta = {
-  config?: Config | null;
+  fields?: {} | null;
   dependency?: Dependency | null;
 };
 
@@ -21,7 +20,7 @@ type FilterFieldConfig<ListTypeInfo extends BaseListTypeInfo> =
     ref?: string;
   };
 
-export const filter =
+  export const filter =
   <ListTypeInfo extends BaseListTypeInfo>({
     ...config
   }: FilterFieldConfig<ListTypeInfo>): FieldTypeFunc<ListTypeInfo> =>
@@ -41,7 +40,7 @@ export const filter =
       }),
       views: "./fields/filter/display",
       getAdminMeta() {
-        let config: Config = {};
+        let fields = {};
 
         if (config.ref) {
           const ref = config.ref?.split(".");
@@ -65,20 +64,24 @@ export const filter =
             }
           });
 
-          for (const [key, value] of Object.entries(
-            meta.lists[listName].types.output.graphQLType.getFields()
-          )) {
-            config[key] = getNamedType(value.type).name;
-          }
-        } else if (config.ui?.config) {
-          config = config.ui.config;
+          // for (const [key, value] of Object.entries(
+          //   meta.lists[listName].types.output.graphQLType.getFields()
+          // )) {
+          //   fields[key] = {
+          //     label: getNamedType(value.type).name,
+          //     type: value.name
+          //   }
+          // }
+        } else if (config.ui?.fields) {
+          fields = config.ui.fields;
         }
 
         return {
-          config: config || null,
+          fields: fields || null,
           dependency: config.ui?.dependency || null,
         };
       },
     });
+
 
 export default filter;
