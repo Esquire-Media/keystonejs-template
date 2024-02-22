@@ -24,6 +24,7 @@ export default function Interface(props: InterfaceProps) {
   try {
     if (props.value) {
       tree = QbUtils.loadFromJsonLogic(props.value, config) || tree;
+      tree = QbUtils.loadFromJsonLogic(props.value, config) || tree;
     }
   } catch {}
   const [state, setState] = useState({
