@@ -44,7 +44,6 @@ export default function Interface(props: InterfaceProps) {
       Object.keys(props.value).length > 0
     ) {
       setTree((prev) => {
-        console.log(config);
         return props.value
           ? QbUtils.loadFromJsonLogic(props.value, config) || prev
           : prev;
