@@ -45,8 +45,9 @@ export const Field = ({
     if (dependent) {
       const dependentID =
         dependent.value.inner?.value ??
-        dependent.value?.value.id ??
+        dependent.value?.value?.id ??
         dependent.value;
+      if (typeof dependentID === "object") return
       if (field.meta.dependency?.list && field.meta.dependency?.field) {
         fetchGraphQL(
           `
@@ -80,11 +81,11 @@ export const Field = ({
   return (
     <FieldContainer as="fieldset">
       <FieldLabel as="legend">{field.label}</FieldLabel>
-      <Interface
+      {Object.keys(fields).length === 0 ? (<Interface
         value={JSON.parse(value || "null")}
         fields={fields}
         onChange={onChange}
-      />
+      />) : null}
     </FieldContainer>
   );
 };

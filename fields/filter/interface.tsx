@@ -5,8 +5,9 @@ import type {
   BuilderProps,
 } from "@react-awesome-query-builder/ui";
 import { Utils as QbUtils } from "@react-awesome-query-builder/core";
-import { Query, Builder, BasicConfig } from "@react-awesome-query-builder/ui";
+import { Query, Builder } from "@react-awesome-query-builder/ui";
 import "@react-awesome-query-builder/ui/css/styles.css";
+import InitConfig from "./config";
 
 export type InterfaceProps = {
   value: Object | null;
@@ -16,7 +17,7 @@ export type InterfaceProps = {
 };
 
 export default function Interface(props: InterfaceProps) {
-  const config: Config = { ...BasicConfig, fields: props.fields };
+  const config: Config = { ...InitConfig(), fields: props.fields };
   let tree: ImmutableTree = QbUtils.loadTree({
     id: QbUtils.uuid(),
     type: "group",
