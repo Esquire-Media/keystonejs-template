@@ -221,6 +221,83 @@ const common = {
   },
 };
 
+const filters = {
+  address: {
+    primaryNumber: {
+      label: "Address: Primary Number",
+      type: "text",
+    },
+    streetPredirection: {
+      label: "Address: Pre-Direction",
+      type: "select",
+      valueSources: ["value"],
+      fieldSettings: {
+        listValues: common.listValues.cardinalDirections,
+      },
+    },
+    streetName: {
+      label: "Address: Street Name",
+      type: "text",
+    },
+    streetSuffix: {
+      label: "Address: Street Suffix",
+      type: "select",
+      valueSources: ["value"],
+      fieldSettings: {
+        listValues: common.listValues.streetSuffixes,
+      },
+    },
+    streetPostdirection: {
+      label: "Address: Post-Direction",
+      type: "select",
+      valueSources: ["value"],
+      fieldSettings: {
+        listValues: common.listValues.cardinalDirections,
+      },
+    },
+    secondaryDesignator: {
+      label: "Address: Secondary Designator",
+      type: "text",
+    },
+    secondaryNumber: {
+      label: "Address: Secondary Number",
+      type: "text",
+    },
+    city: {
+      label: "Address: City",
+      type: "text",
+    },
+    state: {
+      label: "Address: State",
+      type: "select",
+      valueSources: ["value"],
+      fieldSettings: {
+        listValues: common.listValues.states,
+      },
+    },
+    zipCode: {
+      label: "Address: Zip Code",
+      type: "text",
+    },
+    plus4Code: {
+      label: "Address: +4 Code",
+      type: "text",
+    },
+    latitude: {
+      label: "Geography: Latitude",
+      type: "number",
+    },
+    longitude: {
+      label: "Geography: Longitude",
+      type: "number",
+    },
+    h3_index: {
+      label: "Geography: H3 (7)",
+      type: "text",
+    },
+  },
+};
+
 const seed_data: { [listKey: string]: any } = {
   DemandSidePlatform: [
     { title: "Meta" },
@@ -245,161 +322,19 @@ const seed_data: { [listKey: string]: any } = {
           label: "FIPS",
           type: "text",
         },
-        primaryNumber: {
-          label: "Address: Primary Number",
-          type: "text",
-        },
-        streetPredirection: {
-          label: "Address: Pre-Direction",
-          type: "select",
-          valueSources: ["value"],
-          fieldSettings: {
-            listValues: common.listValues.cardinalDirections,
-          },
-        },
-        streetName: {
-          label: "Address: Street Name",
-          type: "test",
-        },
-        streetSuffix: {
-          label: "Address: Street Suffix",
-          type: "select",
-          valueSources: ["value"],
-          fieldSettings: {
-            listValues: common.listValues.streetSuffixes,
-          },
-        },
-        streetPostdirection: {
-          label: "Address: Post-Direction",
-          type: "select",
-          valueSources: ["value"],
-          fieldSettings: {
-            listValues: common.listValues.cardinalDirections,
-          },
-        },
-        secondaryDesignator: {
-          label: "Address: Secondary Designator",
-          type: "text",
-        },
-        secondaryNumber: {
-          label: "Address: Secondary Number",
-          type: "text",
-        },
-        city: {
-          label: "Address: City",
-          type: "text",
-        },
-        state: {
-          label: "Address: State",
-          type: "select",
-          valueSources: ["value"],
-          fieldSettings: {
-            listValues: common.listValues.states,
-          },
-        },
-        zipCode: {
-          label: "Address: Zip Code",
-          type: "text",
-        },
-        plus4Code: {
-          label: "Address: +4 Code",
-          type: "text",
-        },
-        latitude: {
-          label: "Geography: Latitude",
-          type: "float",
-        },
-        longitude: {
-          label: "Geography: Longitude",
-          type: "fl+oat",
-        },
-        h3_index: {
-          label: "Geography: H3 (7)",
-          type: "text",
-        },
         datePublished: {
           label: "Meta: Date Published",
           type: "date",
         },
+        ...filters,
       }),
     },
     {
       title: "DeepSync's Movers Data",
       dataType: { title: "Addresses" },
       filtering: JSON.stringify({
-        primaryNumber: {
-          label: "Address: Primary Number",
-          type: "text",
-        },
-        streetPredirection: {
-          label: "Address: Pre-Direction",
-          type: "select",
-          valueSources: ["value"],
-          fieldSettings: {
-            listValues: common.listValues.cardinalDirections,
-          },
-        },
-        streetName: {
-          label: "Address: Street Name",
-          type: "test",
-        },
-        streetSuffix: {
-          label: "Address: Street Suffix",
-          type: "select",
-          valueSources: ["value"],
-          fieldSettings: {
-            listValues: common.listValues.streetSuffixes,
-          },
-        },
-        streetPostdirection: {
-          label: "Address: Post-Direction",
-          type: "select",
-          valueSources: ["value"],
-          fieldSettings: {
-            listValues: common.listValues.cardinalDirections,
-          },
-        },
-        secondaryDesignator: {
-          label: "Address: Secondary Designator",
-          type: "text",
-        },
-        secondaryNumber: {
-          label: "Address: Secondary Number",
-          type: "text",
-        },
-        city: {
-          label: "Address: City",
-          type: "text",
-        },
-        state: {
-          label: "Address: State",
-          type: "select",
-          valueSources: ["value"],
-          fieldSettings: {
-            listValues: common.listValues.states,
-          },
-        },
-        zipcode: {
-          label: "Address: Zip Code",
-          type: "text",
-        },
-        plus4Code: {
-          label: "Address: +4 Code",
-          type: "text",
-        },
-        latitude: {
-          label: "Geography: Latitude",
-          type: "float",
-        },
-        longitude: {
-          label: "Geography: Longitude",
-          type: "float",
-        },
-        h3_index: {
-          label: "Geography: H3 (7)",
-          type: "text",
-        },
-        datePublished: {
+        ...filters,
+        date: {
           label: "Meta: Date Published",
           type: "date",
         },
@@ -431,57 +366,190 @@ const seed_data: { [listKey: string]: any } = {
         },
         estimatedIncome: {
           label: "Demographics: Estimated Income",
-          type: "int",
+          type: "number",
         },
         estimatedHomeValue: {
           label: "Demographics: Estimated Home Value",
-          type: "int",
+          type: "number",
         },
         estimatedAge: {
           label: "Demographics: Estimated Age",
-          type: "int",
+          type: "number",
         },
       }),
     },
     {
       title: "Esquire's Audience Data",
       dataType: { title: "Device IDs" },
+      filtering: JSON.stringify({
+        id: {
+          label: "ID",
+          type: "text",
+        },
+        tags: {
+          label: "Tags",
+          type: "text",
+        },
+      }),
     },
     {
       title: "Esquire's GeoFrame Data",
       dataType: { title: "Polygons" },
+      filtering: JSON.stringify({
+        id: {
+          label: "ID",
+          type: "text",
+        },
+        esqid: {
+          label: "ESQ ID (Legacy)",
+          type: "text",
+        },
+      }),
     },
     {
       title: "Esquire's Sales Data",
       dataType: { title: "Addresses" },
+      filtering: JSON.stringify({
+        ...filters,
+      })
     },
     {
       title: "FourSquare's POI Data",
       dataType: { title: "Addresses" },
+      filtering: JSON.stringify({
+        ...filters,
+      })
     },
     {
       title: "OpenStreetMaps' Building Footprints",
       dataType: { title: "Polygons" },
+      filtering: JSON.stringify({
+        ...filters,
+      })
     },
   ],
   Audience: [
     {
       tags: "AFW,Ashley,Arizona",
       dataSource: { title: "Esquire's Sales Data" },
-      dataFilter:
-        '{"_and":[{"client":{"_eq":"AFW???"},"date":{"_between":["???","???"]},"???":{"_???":"???"}}]}',
+      dataFilter: JSON.stringify({
+        and: [{ "==": [{ var: "client" }, "AFW???"] }],
+      }),
     },
     {
       tags: "California Closets,Atlanta",
       dataSource: { title: "DeepSync's Movers Data" },
-      dataFilter:
-        '{"_and":[{"zipcode":{"_in":["30004","30005","30009","30022","30024","30030","30040","30041","30062","30066","30067","30068","30075","30076","30092","30097","30269","30305","30306","30307","30308","30309","30319","30327","30328","30338","30339","30342","30345","30350","30363","35213","35223","35242","35243","35244","35406","28801","28803","28804","28805","28806","29607","29609","29642","29644","29650","29651","29687","29690","31901","31902","31903","31904","31906","31907","31908","31909","31914","31917","31993","31997","31998"]}},{"date":{"_gt":"$NOW(-9 months)"}},{"estimatedHomeValue":{"_gt":600000}}]}',
+      dataFilter: JSON.stringify({
+        and: [
+          {
+            "<=": [
+              "2024-01-01T05:00:00.000Z",
+              { var: "date" },
+              "2024-02-29T05:00:00.000Z",
+            ],
+          },
+          {
+            in: [
+              { var: "zipCode" },
+              [
+                "30004",
+                "30005",
+                "30009",
+                "30022",
+                "30024",
+                "30030",
+                "30040",
+                "30041",
+                "30062",
+                "30066",
+                "30067",
+                "30068",
+                "30075",
+                "30076",
+                "30092",
+                "30097",
+                "30269",
+                "30305",
+                "30306",
+                "30307",
+                "30308",
+                "30309",
+                "30319",
+                "30327",
+                "30328",
+                "30338",
+                "30339",
+                "30342",
+                "30345",
+                "30350",
+                "30363",
+                "35213",
+                "35223",
+                "35242",
+                "35243",
+                "35244",
+                "35406",
+                "28801",
+                "28803",
+                "28804",
+                "28805",
+                "28806",
+                "29607",
+                "29609",
+                "29642",
+                "29644",
+                "29650",
+                "29651",
+                "29687",
+                "29690",
+                "31901",
+                "31902",
+                "31903",
+                "31904",
+                "31906",
+                "31907",
+                "31908",
+                "31909",
+                "31914",
+                "31917",
+                "31993",
+                "31997",
+                "31998",
+              ],
+            ],
+          },
+          { ">=": [{ var: "estimatedHomeValue" }, 600000] },
+        ],
+      }),
     },
     {
       tags: "California Closets,Atlanta",
       dataSource: { title: "Esquire's GeoFrame Data" },
-      dataFilter:
-        '{"_and":[{"esqid":{"_in":["EF~06491","EF~06492","EF~06993","EF~06994","EF~32577","EF~32578","EF~32934","EF~32935","EF~32936","EF~32937","EF~32938","EF~32939","EF~32940","EF~32941"]}}]}',
+      dataFilter: JSON.stringify({
+        and: [
+          {
+            in: [
+              { var: "esqid" },
+              [
+                "EF~06491",
+                "EF~06492",
+                "EF~06993",
+                "EF~06994",
+                "EF~32577",
+                "EF~32578",
+                "EF~32934",
+                "EF~32935",
+                "EF~32936",
+                "EF~32937",
+                "EF~32938",
+                "EF~32939",
+                "EF~32940",
+                "EF~32941",
+              ],
+            ],
+          },
+        ],
+      }),
     },
   ],
 };
