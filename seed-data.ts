@@ -326,14 +326,14 @@ const seed_data: { [listKey: string]: any } = {
           label: "Meta: Date Published",
           type: "date",
         },
-        ...filters,
+        ...filters.address,
       }),
     },
     {
       title: "DeepSync's Movers Data",
       dataType: { title: "Addresses" },
       filtering: JSON.stringify({
-        ...filters,
+        ...filters.address,
         date: {
           label: "Meta: Date Published",
           type: "date",
@@ -410,21 +410,21 @@ const seed_data: { [listKey: string]: any } = {
       title: "Esquire's Sales Data",
       dataType: { title: "Addresses" },
       filtering: JSON.stringify({
-        ...filters,
+        ...filters.address,
       })
     },
     {
       title: "FourSquare's POI Data",
       dataType: { title: "Addresses" },
       filtering: JSON.stringify({
-        ...filters,
+        ...filters.address,
       })
     },
     {
       title: "OpenStreetMaps' Building Footprints",
       dataType: { title: "Polygons" },
       filtering: JSON.stringify({
-        ...filters,
+        ...filters.address,
       })
     },
   ],
