@@ -5,22 +5,25 @@ import type {
   BuilderProps,
 } from "@react-awesome-query-builder/ui";
 import { Utils as QbUtils } from "@react-awesome-query-builder/core";
-import { Query, Builder } from "@react-awesome-query-builder/ui";
+import { Query, Builder, BasicConfig } from "@react-awesome-query-builder/ui";
 import "@react-awesome-query-builder/ui/css/styles.css";
 
 export type InterfaceProps = {
   value: Object | null;
-  config: Config;
+  fields: any;
   onChange?: (value: string | null) => void;
   autoFocus?: boolean;
 };
 
 export default function Interface(props: InterfaceProps) {
-  const config = props.config;
-  let tree: ImmutableTree = QbUtils.loadTree({ id: QbUtils.uuid(), type: "group" });
+  const config: Config = { ...BasicConfig, fields: props.fields };
+  let tree: ImmutableTree = QbUtils.loadTree({
+    id: QbUtils.uuid(),
+    type: "group",
+  });
   try {
     if (props.value) {
-      tree = QbUtils.loadFromJsonLogic(props.value, config) || tree
+      tree = QbUtils.loadFromJsonLogic(props.value, config) || tree;
     }
   } catch {}
   const [state, setState] = useState({
@@ -38,7 +41,9 @@ export default function Interface(props: InterfaceProps) {
 
       if (props.onChange)
         props.onChange(
-          JSON.stringify(QbUtils.jsonLogicFormat(immutableTree, config)["logic"])
+          JSON.stringify(
+            QbUtils.jsonLogicFormat(immutableTree, config)["logic"]
+          )
         );
     },
     []
