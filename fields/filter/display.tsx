@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { FieldContainer, FieldLabel } from "@keystone-ui/fields";
 import {
+  getGqlNames,
   type CardValueComponent,
   type CellComponent,
   type FieldController,
@@ -10,58 +11,78 @@ import {
 import { CellContainer, CellLink } from "@keystone-6/core/admin-ui/components";
 import { FieldMeta } from ".";
 import Interface from "./interface";
-import { BasicConfig } from "@react-awesome-query-builder/ui";
+import { useKeystone } from "@keystone-6/core/admin-ui/context";
+import {
+  fetchGraphQLClient,
+  createNestedString,
+  selectNestedKey,
+} from "../../admin/utils";
 
 export const Field = ({
   field,
   value,
   itemValue,
-  onChange
+  onChange,
 }: FieldProps<typeof controller>) => {
-  const init = BasicConfig;
-  const [config, setConfig] = useState<BasicConfig>({
-    ...init,
-    fields: field.meta.fields || {},
+  const keystone = useKeystone();
+  const fetchGraphQL = fetchGraphQLClient(keystone.apiPath);
+  const listKey = field.meta.dependency?.list
+    ? field.meta.dependency.list
+    : field.listKey;
+  const gqlNames = getGqlNames({
+    listKey,
+    pluralGraphQLName: keystone.adminMeta.lists[listKey].plural.replace(
+      " ",
+      ""
+    ),
   });
-  // Return null if there's no dependent value to avoid rendering
-  if (field.meta.dependency?.field) {
-    if (!itemValue?.[field.meta.dependency?.field]) return null;
-    const dependent: any =
-      (itemValue as any)?.[field.meta.dependency.field] || null;
-
-    useEffect(() => {
-      if (dependent) {
-        // Calculate the new filter options based on the dependency
-        const dependentValue =
-          dependent.value.inner?.value ??
-          dependent.value?.value ??
-          dependent.value;
-
-        let newFilterOptions = {};
-        if (dependentValue instanceof Object) {
-          if (dependentValue.hasOwnProperty("data")) {
-            newFilterOptions = {
-              id: dependentValue.id,
-              listKey: dependentValue.data.__typename,
-            };
-          } else {
-            newFilterOptions = {
-              id: dependentValue.id,
-            };
+  const [fields, setFields] = useState<any>(field.meta.fields || {});
+  const dependent =
+    itemValue && field.meta.dependency?.field
+      ? itemValue?.[field.meta.dependency.field.split(".")[0]]
+      : undefined;
+  useEffect(() => {
+    if (dependent) {
+      const dependentID =
+        dependent.value.inner?.value ??
+        dependent.value?.value.id ??
+        dependent.value;
+      if (field.meta.dependency?.list && field.meta.dependency?.field) {
+        fetchGraphQL(
+          `
+          query($id: ID!) {
+            item: ${gqlNames.itemQueryName}(where: {id: $id}) {
+              ${createNestedString(
+                field.meta.dependency.field.split(".").slice(1)
+              )}
+            }
           }
-        } else {
-          newFilterOptions = dependentValue;
-        }
-        setConfig({ ...init, fields: {} });
+        `,
+          { id: dependentID }
+        ).then((data) => {
+          if (data.item) {
+            if (field.meta.dependency?.field) {
+              setFields(
+                selectNestedKey(
+                  field.meta.dependency.field.split("."),
+                  data.item
+                ) || {}
+              );
+            }
+          }
+        });
       }
-    }, [dependent, value]);
-  }
+    }
+  }, [dependent]);
+  useEffect(() => {
+    console.log(fields);
+  }, [fields]);
   return (
     <FieldContainer as="fieldset">
       <FieldLabel as="legend">{field.label}</FieldLabel>
       <Interface
         value={JSON.parse(value || "null")}
-        config={config || {}}
+        fields={fields}
         onChange={onChange}
       />
     </FieldContainer>
@@ -98,9 +119,13 @@ export const CardValue: CardValueComponent<typeof controller> = ({
 
 export const controller = (
   config: FieldControllerConfig<FieldMeta>
-): FieldController<string | null, string> & { meta: FieldMeta } => {
+): FieldController<string | null, string> & {
+  meta: FieldMeta;
+  listKey: string;
+} => {
   return {
     meta: config.fieldMeta,
+    listKey: config.listKey,
     path: config.path,
     label: config.label,
     description: config.description,
