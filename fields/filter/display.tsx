@@ -81,11 +81,11 @@ export const Field = ({
   return (
     <FieldContainer as="fieldset">
       <FieldLabel as="legend">{field.label}</FieldLabel>
-      {Object.keys(fields).length === 0 ? (<Interface
+      <Interface
         value={JSON.parse(value || "null")}
         fields={fields}
         onChange={onChange}
-      />) : null}
+      />
     </FieldContainer>
   );
 };
