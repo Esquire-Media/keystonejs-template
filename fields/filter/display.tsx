@@ -62,12 +62,12 @@ export const Field = ({
         ).then((data) => {
           if (data.item) {
             if (field.meta.dependency?.field) {
-              setFields(
+              const value =
                 selectNestedKey(
-                  field.meta.dependency.field.split("."),
+                  field.meta.dependency.field.split(".").slice(1),
                   data.item
-                ) || {}
-              );
+                ) || "{}";
+              setFields(JSON.parse(value));
             }
           }
         });
