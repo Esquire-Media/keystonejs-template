@@ -119,9 +119,11 @@ async function main() {
             whereClause
           )}`
         );
-        await context.db[listKey].createOne({
-          data: await format_query(gqlt, data),
-        });
+        try {
+          await context.db[listKey].createOne({
+            data: await format_query(gqlt, data),
+          });
+        } catch {}
       } else {
         console.log(
           `Updating existing ${listKey} record with unique fields: ${JSON.stringify(
