@@ -4,10 +4,7 @@ import type {
   ImmutableTree,
   BuilderProps,
 } from "@react-awesome-query-builder/ui";
-import { Utils as QbUtils } from "@react-awesome-query-builder/core";
-import { Query, Builder } from "@react-awesome-query-builder/ui";
-import "@react-awesome-query-builder/ui/css/styles.css";
-import InitConfig from "./config";
+import { QbUtils, Query, Builder, BasicConfig as InitConfig } from "./configs";
 
 // Define TypeScript interface for component props.
 export type InterfaceProps = {
@@ -19,7 +16,10 @@ export type InterfaceProps = {
 // Define the Interface component.
 export default function Interface(props: InterfaceProps) {
   // State for the query builder configuration, initialized with the initial configuration and fields.
-  const [config, setConfig] = useState<Config>({ ...InitConfig(), fields: {} });
+  const [config, setConfig] = useState<Config>({
+    ...InitConfig(),
+    fields: {},
+  });
 
   // Effect hook to update fields in the configuration whenever props.fields change.
   useEffect(() => {
