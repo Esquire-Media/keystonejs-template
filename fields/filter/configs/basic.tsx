@@ -1,8 +1,9 @@
 import React from 'react';
 import { mergeDeep } from "@apollo/client/utilities";
-import type { Config, Operator, WidgetProps } from "@react-awesome-query-builder/ui";
+import type { Config, WidgetProps } from "@react-awesome-query-builder/ui";
 import { BasicConfig } from "@react-awesome-query-builder/ui";
-import ListInputWidget from "./widgets/ListInput";
+import ListInputWidget from "../widgets/ListInput";
+import '@react-awesome-query-builder/ui/css/styles.css';
 
 export default (init: Config = BasicConfig): Config =>
   mergeDeep(init, {
@@ -23,7 +24,7 @@ export default (init: Config = BasicConfig): Config =>
         reversedOp: "not_in",
         valueSources: ["value", "values"],
         valueTypes: ["text"],
-      } as Operator,
+      },
       not_in: {
         elasticSearchQueryType: "term",
         jsonLogic: "in",
@@ -39,7 +40,7 @@ export default (init: Config = BasicConfig): Config =>
         reversedOp: "in",
         valueSources: ["value", "values"],
         valueTypes: ["text"],
-      } as Operator,
+      },
     },
     types: {
       text: {
