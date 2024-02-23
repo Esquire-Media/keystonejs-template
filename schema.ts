@@ -4,7 +4,6 @@ import type { Lists } from ".keystone/types";
 
 import {
   text,
-  relationship,
   password,
   timestamp,
   integer,
@@ -16,7 +15,7 @@ import {
 import * as Fields from "./fields";
 
 const auditable: BaseFields<any> = {
-  createdBy: relationship({
+  createdBy: Fields.relationship({
     ref: "User",
     ui: {
       listView: { fieldMode: "hidden" },
@@ -53,7 +52,7 @@ const auditable: BaseFields<any> = {
       },
     },
   }),
-  updatedBy: relationship({
+  updatedBy: Fields.relationship({
     ref: "User",
     ui: {
       listView: { fieldMode: "hidden" },
@@ -117,7 +116,7 @@ export const lists: Lists = {
     access: allowAll,
     fields: {
       ...auditable,
-      dataType: relationship({
+      dataType: Fields.relationship({
         ref: "DataType",
         ui: {
           labelField: "title",
@@ -134,14 +133,14 @@ export const lists: Lists = {
     access: allowAll,
     fields: {
       ...auditable,
-      outputType: relationship({
+      outputType: Fields.relationship({
         ref: "DataType",
         ui: {
           labelField: "title",
           hideCreate: true,
         },
       }),
-      audience: relationship({
+      audience: Fields.relationship({
         ref: "Audience.processes",
         ui: {
           listView: { fieldMode: "hidden" },
@@ -169,7 +168,7 @@ export const lists: Lists = {
     access: allowAll,
     fields: {
       ...auditable,
-      demandSidePlatform: relationship({
+      demandSidePlatform: Fields.relationship({
         ref: "DemandSidePlatform",
         ui: {
           listView: { fieldMode: "hidden" },
@@ -213,7 +212,7 @@ export const lists: Lists = {
         ],
         defaultValue: "days",
       }),
-      dataSource: relationship({
+      dataSource: Fields.relationship({
         ref: "DataSource",
         ui: {
           labelField: "title",
@@ -271,10 +270,12 @@ export const lists: Lists = {
           // },
         },
       }),
-      processes: relationship({
+      processes: Fields.relationship({
         ref: "ProcessingStep.audience",
         many: true,
+        refSortField: "sort",
         ui: {
+          views: "./fields/relationship/wrapper",
           displayMode: "cards",
           cardFields: ["outputType"],
           inlineEdit: { fields: ["outputType", "customCoding"] },
