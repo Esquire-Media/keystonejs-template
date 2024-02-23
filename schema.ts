@@ -275,19 +275,17 @@ export const lists: Lists = {
         ref: "ProcessingStep.audience",
         many: true,
         ui: {
+          views: "./fields/relationship/views",
           displayMode: "cards",
           cardFields: ["outputType"],
-          inlineEdit: { fields: ["outputType", "customCoding"] },
-          inlineCreate: { fields: ["outputType", "customCoding"] },
-        },
+          inlineEdit: { fields: ["outputType", "customCoding", "sort"] },
+          inlineCreate: { fields: ["outputType", "customCoding", "sort"] },
+        }
       }),
     },
     db: {
       extendPrismaSchema: (schema) => {
-        return schema.replace(
-          /(model [^}]+)}/g,
-          "$1@@unique([tags, dataSourceId, dataFilter])\n}"
-        );
+        return schema.replace(/(model [^}]+)}/g, "$1@@unique([tags, dataSourceId, dataFilter])\n}");
       },
     },
   }),
