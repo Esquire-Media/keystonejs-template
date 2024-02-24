@@ -15,7 +15,7 @@ import { graphql } from "@keystone-6/core";
 export type Icon = "hex" | "star";
 
 export type FieldMeta = {
-  maxStars: number | null;
+  maxRating: number | null;
   icon: string | null;
 };
 
@@ -47,11 +47,11 @@ export const stars =
         async validateInput(args) {
           const val = args.resolvedData[meta.fieldKey];
           if (
-            !(val == null || (val >= 0 && val <= (config.ui?.maxStars || 5)))
+            !(val == null || (val >= 0 && val <= (config.ui?.maxRating || 5)))
           ) {
             args.addValidationError(
               `The value must be within the range of 0-${
-                config.ui?.maxStars || 5
+                config.ui?.maxRating || 5
               }`
             );
           }
@@ -95,10 +95,10 @@ export const stars =
           return value;
         },
       }),
-      views: "./fields/stars/display",
+      views: "./fields/stars/wrapper",
       getAdminMeta() {
         return {
-          maxStars: config.ui?.maxStars || null,
+          maxRating: config.ui?.maxRating || null,
           icon: config.ui?.icon || null,
         };
       },
