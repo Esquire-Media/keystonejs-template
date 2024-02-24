@@ -222,6 +222,7 @@ export const lists: Lists = {
       dataFilter: Fields.filter({
         ui: {
           // ref: "DataSource.dataType",
+          style: "antd",
           dependency: {
             field: "dataSource.filtering",
           },
