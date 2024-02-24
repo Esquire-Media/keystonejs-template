@@ -9,7 +9,7 @@ import {
   type FieldControllerConfig,
   type FieldProps,
 } from "@keystone-6/core/types";
-import StarsInterface from "./interface";
+import StarsInterface from "./views/stars";
 import { FieldMeta } from ".";
 
 // this is the component shown in the create modal and item page
@@ -19,7 +19,7 @@ export const Field = ({ field, value, onChange, autoFocus }: FieldProps<typeof c
     <FieldDescription id={`${field.path}-description`}>{field.description}</FieldDescription>
     <StarsInterface
       icon={field.meta.icon || "star"}
-      maxStars={field.meta.maxStars || 5}
+      maxRating={field.meta.maxRating || 5}
       onChange={onChange}
       value={value}
       autoFocus={autoFocus}

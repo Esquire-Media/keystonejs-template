@@ -18,7 +18,7 @@ import {
 
 import filter from "./filter";
 import relationship from "./relationship";
-import stars from "./stars";
+import rating from "./rating";
 
 export {
   checkbox,
@@ -38,5 +38,5 @@ export {
   multiselect,
   filter,
   relationship,
-  stars,
+  rating,
 };

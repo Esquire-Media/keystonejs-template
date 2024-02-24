@@ -20,7 +20,7 @@ import {
   // multiselect,
   filter,
   relationship,
-  // stars,
+  // rating,
 } from "./fields";
 
 const auditable: BaseFields<any> = {
@@ -285,7 +285,6 @@ export const lists: Lists = {
         many: true,
         refSortField: "sort",
         ui: {
-          views: "./fields/relationship/wrapper",
           displayMode: "cards",
           cardFields: ["outputType"],
           inlineEdit: { fields: ["outputType", "customCoding"] },
