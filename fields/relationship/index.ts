@@ -5,9 +5,9 @@ import {
 import {
   type FieldController,
   type FieldControllerConfig,
-  type FieldProps,
   type FieldTypeFunc,
   type BaseListTypeInfo,
+  JSONValue,
 } from "@keystone-6/core/types";
 import {
   relationship as _relationship,
@@ -104,12 +104,14 @@ const relationship =
     RelationshipExtensions): FieldTypeFunc<ListTypeInfo> =>
   (data) => {
     const original = _relationship({ ref, ...config })(data);
-    const _getAdminMeta = original.getAdminMeta;
+    const AdminMeta = original.getAdminMeta;
+    original.views = "./fields/relationship/wrapper"
     original.getAdminMeta = () => {
+      const meta = AdminMeta ? AdminMeta() : {};
       return {
-        ...(_getAdminMeta ? _getAdminMeta.apply(this) : {}),
+        ...(typeof meta === "object" ? meta : {}),
         refSortField: config.refSortField,
-      };
+      } as JSONValue;
     };
     return original;
   };

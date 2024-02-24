@@ -22,7 +22,6 @@ export const Field = (props: WrapperProps) => {
 export const controller = (
   config: RelationshipFieldControllerConfig
 ): RelationshipController => {
-  console.log(config.fieldMeta.refSortField)
   return {
     ..._controller(config),
     refSortField: config.fieldMeta.refSortField,
