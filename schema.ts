@@ -3,19 +3,28 @@ import { allowAll } from "@keystone-6/core/access";
 import type { Lists } from ".keystone/types";
 
 import {
-  text,
-  password,
-  timestamp,
-  integer,
   checkbox,
+  // decimal,
+  // file,
+  // float,
+  integer,
+  // bigInt,
+  // image,
   json,
+  password,
   select,
-} from "@keystone-6/core/fields";
-
-import * as Fields from "./fields";
+  text,
+  timestamp,
+  // virtual,
+  // calendarDay,
+  // multiselect,
+  filter,
+  relationship,
+  // stars,
+} from "./fields";
 
 const auditable: BaseFields<any> = {
-  createdBy: Fields.relationship({
+  createdBy: relationship({
     ref: "User",
     ui: {
       listView: { fieldMode: "hidden" },
@@ -52,7 +61,7 @@ const auditable: BaseFields<any> = {
       },
     },
   }),
-  updatedBy: Fields.relationship({
+  updatedBy: relationship({
     ref: "User",
     ui: {
       listView: { fieldMode: "hidden" },
@@ -116,7 +125,7 @@ export const lists: Lists = {
     access: allowAll,
     fields: {
       ...auditable,
-      dataType: Fields.relationship({
+      dataType: relationship({
         ref: "DataType",
         ui: {
           labelField: "title",
@@ -133,14 +142,14 @@ export const lists: Lists = {
     access: allowAll,
     fields: {
       ...auditable,
-      outputType: Fields.relationship({
+      outputType: relationship({
         ref: "DataType",
         ui: {
           labelField: "title",
           hideCreate: true,
         },
       }),
-      audience: Fields.relationship({
+      audience: relationship({
         ref: "Audience.processes",
         ui: {
           listView: { fieldMode: "hidden" },
@@ -168,7 +177,7 @@ export const lists: Lists = {
     access: allowAll,
     fields: {
       ...auditable,
-      demandSidePlatform: Fields.relationship({
+      demandSidePlatform: relationship({
         ref: "DemandSidePlatform",
         ui: {
           listView: { fieldMode: "hidden" },
@@ -212,14 +221,14 @@ export const lists: Lists = {
         ],
         defaultValue: "days",
       }),
-      dataSource: Fields.relationship({
+      dataSource: relationship({
         ref: "DataSource",
         ui: {
           labelField: "title",
           hideCreate: true,
         },
       }),
-      dataFilter: Fields.filter({
+      dataFilter: filter({
         ui: {
           // ref: "DataSource.dataType",
           style: "antd",
@@ -271,7 +280,7 @@ export const lists: Lists = {
           // },
         },
       }),
-      processes: Fields.relationship({
+      processes: relationship({
         ref: "ProcessingStep.audience",
         many: true,
         refSortField: "sort",
