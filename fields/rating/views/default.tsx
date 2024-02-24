@@ -1,14 +1,7 @@
 import React from "react";
+import type { WrapperProps } from "../wrapper";
 
-export type InterfaceProps = {
-  maxRating: number;
-  value: number | null;
-  icon: string;
-  onChange?: (value: number | null) => void;
-  autoFocus?: boolean;
-};
-
-export default function View(props: InterfaceProps) {
+export default function View(props: WrapperProps) {
   return (
     <div>
       <div>
@@ -26,7 +19,7 @@ export default function View(props: InterfaceProps) {
         </label>
       </div>
       {Array.from({
-        length: props.maxRating,
+        length: props.field.meta.maxRating || 5,
       }).map((_, i) => {
         const star = i + 1;
         return (
@@ -41,8 +34,8 @@ export default function View(props: InterfaceProps) {
                 }}
               />
               {props.value !== null && props.value >= star
-                ? icons[props.icon].full
-                : icons[props.icon].empty}
+                ? icons[props.field.meta.icon || "star"].full
+                : icons[props.field.meta.icon || "star"].empty}
               {star} Star{star === 1 ? "" : "s"}
             </label>
           </div>
