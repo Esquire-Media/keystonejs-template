@@ -10,7 +10,7 @@ import {
   type FieldProps,
 } from "@keystone-6/core/types";
 import DefaultView from "./views/default";
-import { FieldMeta } from ".";
+import type { FieldMeta } from ".";
 
 // this is the component shown in the create modal and item page
 export const Field = (props: FieldProps<typeof controller>) => (
