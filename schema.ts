@@ -230,11 +230,11 @@ export const lists: Lists = {
       }),
       dataFilter: filter({
         ui: {
-          // ref: "DataSource.dataType",
           style: "antd",
           dependency: {
             field: "dataSource.filtering",
           },
+          // ref: "DataSource.dataType",
           // fields: {
           //   qty: {
           //     label: "Qty",
@@ -283,7 +283,7 @@ export const lists: Lists = {
       processes: relationship({
         ref: "ProcessingStep.audience",
         many: true,
-        refSortField: "sort",
+        // refSortField: "sort",
         ui: {
           displayMode: "cards",
           cardFields: ["outputType"],
