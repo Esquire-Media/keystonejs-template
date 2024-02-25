@@ -31,13 +31,7 @@ type RelationshipFieldControllerConfig = FieldControllerConfig<
         }
       | {
           displayMode: "cards";
-          cardFields: readonly string[];
-          linkToItem: boolean;
-          removeMode: "disconnect" | "none";
-          inlineCreate: { fields: readonly string[] } | null;
-          inlineEdit: { fields: readonly string[] } | null;
-          inlineConnect: boolean;
-        }
+        } & CardsDisplayModeOptions
       | {
           displayMode: "count";
         }
@@ -116,5 +110,5 @@ const relationship =
     return original;
   };
 
-export { RelationshipFieldControllerConfig, RelationshipController };
+export { RelationshipFieldControllerConfig, RelationshipController, CardsRelationshipValue };
 export default relationship;
