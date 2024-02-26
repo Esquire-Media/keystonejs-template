@@ -3,17 +3,25 @@ import { allowAll } from "@keystone-6/core/access";
 import type { Lists } from ".keystone/types";
 
 import {
-  text,
-  relationship,
-  password,
-  timestamp,
-  integer,
   checkbox,
+  // decimal,
+  // file,
+  // float,
+  integer,
+  // bigInt,
+  // image,
   json,
+  password,
   select,
-} from "@keystone-6/core/fields";
-
-import * as Fields from "./fields";
+  text,
+  timestamp,
+  // virtual,
+  // calendarDay,
+  // multiselect,
+  filter,
+  relationship,
+  // rating,
+} from "./fields";
 
 const auditable: BaseFields<any> = {
   createdBy: relationship({
@@ -220,12 +228,13 @@ export const lists: Lists = {
           hideCreate: true,
         },
       }),
-      dataFilter: Fields.filter({
+      dataFilter: filter({
         ui: {
-          // ref: "DataSource.dataType",
+          style: "antd",
           dependency: {
             field: "dataSource.filtering",
           },
+          // ref: "DataSource.dataType",
           // fields: {
           //   qty: {
           //     label: "Qty",
@@ -274,6 +283,7 @@ export const lists: Lists = {
       processes: relationship({
         ref: "ProcessingStep.audience",
         many: true,
+        // refSortField: "sort",
         ui: {
           views: "./fields/relationship/views",
           displayMode: "cards",

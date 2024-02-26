@@ -9,24 +9,17 @@ import {
   type FieldControllerConfig,
   type FieldProps,
 } from "@keystone-6/core/types";
-import StarsInterface from "./interface";
-import { FieldMeta } from ".";
+import DefaultView from "./views/default";
+import type { FieldMeta } from ".";
 
 // this is the component shown in the create modal and item page
-export const Field = ({ field, value, onChange, autoFocus }: FieldProps<typeof controller>) => (
+export const Field = (props: FieldProps<typeof controller>) => (
   <FieldContainer as="fieldset">
-    <FieldLabel as="legend">{field.label}</FieldLabel>
-    <FieldDescription id={`${field.path}-description`}>{field.description}</FieldDescription>
-    <StarsInterface
-      icon={field.meta.icon || "star"}
-      maxStars={field.meta.maxStars || 5}
-      onChange={onChange}
-      value={value}
-      autoFocus={autoFocus}
-    />
+    <FieldLabel as="legend">{props.field.label}</FieldLabel>
+    <FieldDescription id={`${props.field.path}-description`}>{props.field.description}</FieldDescription>
+    <DefaultView {...props} />
   </FieldContainer>
 );
-
 
 // this is shown on the list view in the table
 export const Cell: CellComponent = ({ item, field, linkTo }) => {
@@ -47,6 +40,8 @@ export const CardValue: CardValueComponent = ({ item, field }) => {
     </FieldContainer>
   );
 };
+
+export type WrapperProps = FieldProps<typeof controller>;
 
 export const controller = (
   config: FieldControllerConfig<FieldMeta>

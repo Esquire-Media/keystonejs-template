@@ -19,6 +19,7 @@ export type Dependency = {
 export type FieldMeta = {
   fields?: any | null; // Additional fields related to the filter functionality.
   dependency?: Dependency | null; // Dependency information for dynamic behavior.
+  style?: "default" | "antd"
 };
 
 // Extend common field configuration with UI-specific metadata.
@@ -49,7 +50,7 @@ export const filter =
       output: graphql.field({
         type: graphql.String, // The output type of the field is a string.
       }),
-      views: "./fields/filter/display", // Custom UI view for the field.
+      views: "./fields/filter/wrapper", // Custom UI view for the field.
       getAdminMeta() {
         // Generate metadata for the admin UI.
         if (!config.ui) {
@@ -99,6 +100,7 @@ export const filter =
 
         // Return the UI configuration for the admin interface.
         return {
+          style: config.ui.style || null,
           fields: config.ui?.fields || null,
           dependency: config.ui?.dependency || null,
         };

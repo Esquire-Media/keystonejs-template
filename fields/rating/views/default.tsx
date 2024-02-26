@@ -1,14 +1,7 @@
 import React from "react";
+import type { WrapperProps } from "../wrapper";
 
-export type InterfaceProps = {
-  maxStars: number;
-  value: number | null;
-  icon: string;
-  onChange?: (value: number | null) => void;
-  autoFocus?: boolean;
-};
-
-export default function StarsInterface(props: InterfaceProps) {
+export default function View(props: WrapperProps) {
   return (
     <div>
       <div>
@@ -26,7 +19,7 @@ export default function StarsInterface(props: InterfaceProps) {
         </label>
       </div>
       {Array.from({
-        length: props.maxStars,
+        length: props.field.meta.maxRating || 5,
       }).map((_, i) => {
         const star = i + 1;
         return (
@@ -41,8 +34,8 @@ export default function StarsInterface(props: InterfaceProps) {
                 }}
               />
               {props.value !== null && props.value >= star
-                ? icons[props.icon].full
-                : icons[props.icon].empty}
+                ? icons[props.field.meta.icon || "star"].full
+                : icons[props.field.meta.icon || "star"].empty}
               {star} Star{star === 1 ? "" : "s"}
             </label>
           </div>
@@ -131,24 +124,3 @@ const icons = {
     ),
   },
 };
-const fullStar = (
-  <svg width="22" height="21" viewBox="0 0 44 42" xmlns="http://www.w3.org/2000/svg">
-    <path
-      stroke="#ED5910"
-      strokeWidth="2"
-      fill="#F8E71C"
-      d="M22 30.972L10.244 39.18l4.175-13.717-11.44-8.643 14.335-.27L22 3l4.686 13.55 14.335.27-11.44 8.643 4.175 13.717z"
-    />
-  </svg>
-);
-
-const emptyStar = (
-  <svg width="22" height="21" viewBox="0 0 44 42" xmlns="http://www.w3.org/2000/svg">
-    <path
-      stroke="#BBB"
-      strokeWidth="2"
-      fill="#FFF"
-      d="M22 30.972L10.244 39.18l4.175-13.717-11.44-8.643 14.335-.27L22 3l4.686 13.55 14.335.27-11.44 8.643 4.175 13.717z"
-    />
-  </svg>
-);

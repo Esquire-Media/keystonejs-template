@@ -1,38 +1,36 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { FieldContainer, FieldLabel } from "@keystone-ui/fields";
 import {
   getGqlNames,
-  type CardValueComponent,
-  type CellComponent,
   type FieldController,
   type FieldControllerConfig,
   type FieldProps,
+  CellComponent,
+  CardValueComponent,
 } from "@keystone-6/core/types";
-import { CellContainer, CellLink } from "@keystone-6/core/admin-ui/components";
 import { FieldMeta } from ".";
-import Interface from "./interface";
 import { useKeystone } from "@keystone-6/core/admin-ui/context";
+import { CellContainer } from "@keystone-6/core/admin-ui/components";
 import {
   fetchGraphQLClient,
   createNestedString,
   selectNestedKey,
 } from "../../admin/utils";
 
+import type { Config } from "@react-awesome-query-builder/core";
+import DefaultView from "./views/default";
+import AntdView from "./views/antd";
+
 // The main Field component, responsible for rendering the custom field in the Admin UI.
-export const Field = ({
-  field,
-  value,
-  itemValue,
-  onChange,
-}: FieldProps<typeof controller>) => {
+export const Field = (props: FieldProps<typeof controller>) => {
   // Utilizes the Keystone context for global state and GraphQL endpoint access.
   const keystone = useKeystone();
   const fetchGraphQL = fetchGraphQLClient(keystone.apiPath);
 
   // Determines the GraphQL list key and names based on field metadata.
-  const listKey = field.meta.dependency?.list
-    ? field.meta.dependency.list
-    : field.listKey;
+  const listKey = props.field.meta.dependency?.list
+    ? props.field.meta.dependency.list
+    : props.field.listKey;
   const gqlNames = getGqlNames({
     listKey,
     pluralGraphQLName: keystone.adminMeta.lists[listKey].plural.replace(
@@ -42,12 +40,12 @@ export const Field = ({
   });
 
   // State to manage the fields data, fetched based on dependency.
-  const [fields, setFields] = useState<any>(field.meta.fields || {});
+  const [fields, setFields] = useState<any>(props.field.meta.fields || {});
 
   // Identifies if there's a dependency value to fetch related fields dynamically.
   const dependent =
-    itemValue && field.meta.dependency?.field
-      ? itemValue?.[field.meta.dependency.field.split(".")[0]]
+    props.itemValue && props.field.meta.dependency?.field
+      ? props.itemValue?.[props.field.meta.dependency.field.split(".")[0]]
       : undefined;
 
   // Fetches and updates the field's options based on the dependency's value.
@@ -58,22 +56,25 @@ export const Field = ({
         dependent.value?.value?.id ??
         dependent.value;
       if (typeof dependentID === "object") return;
-      if (field.meta.dependency?.list && field.meta.dependency?.field) {
+      if (
+        props.field.meta.dependency?.list &&
+        props.field.meta.dependency?.field
+      ) {
         fetchGraphQL(
           `
           query($id: ID!) {
             item: ${gqlNames.itemQueryName}(where: {id: $id}) {
               ${createNestedString(
-                field.meta.dependency.field.split(".").slice(1)
+                props.field.meta.dependency.field.split(".").slice(1)
               )}
             }
           }
         `,
           { id: dependentID }
         ).then((data) => {
-          if (data.item && field.meta.dependency?.field) {
+          if (data.item && props.field.meta.dependency?.field) {
             const value = selectNestedKey(
-              field.meta.dependency.field.split(".").slice(1),
+              props.field.meta.dependency.field.split(".").slice(1),
               data.item
             );
             if (value) setFields(JSON.parse(value));
@@ -83,45 +84,47 @@ export const Field = ({
     }
   }, [dependent]);
 
+  const wrappedProps:WrapperProps = {
+    ...props,
+    value: JSON.parse(props.value || "null"),
+    fields: fields,
+  };
+  let Interface;
+  switch (props.field.meta.style) {
+    case "antd":
+      Interface = AntdView;
+      break;
+    default:
+      Interface = DefaultView;
+  }
+
   // Renders the field's UI in the admin interface.
   return (
     <FieldContainer as="fieldset">
-      <FieldLabel as="legend">{field.label}</FieldLabel>
-      <Interface
-        value={JSON.parse(value || "null")}
-        fields={fields}
-        onChange={onChange}
-      />
+      <FieldLabel as="legend">{props.field.label}</FieldLabel>
+      <Interface {...wrappedProps} />
     </FieldContainer>
   );
 };
 
-// Cell component for displaying the field's value in list views.
-export const Cell: CellComponent<typeof controller> = ({
-  item,
-  field,
-  linkTo,
-}) => {
-  let value = "hello world"; // Placeholder value, adjust as needed.
-  return linkTo ? (
-    <CellLink {...linkTo}>{value}</CellLink>
-  ) : (
-    <CellContainer>{value}</CellContainer>
-  );
+// this is shown on the list view in the table
+export const Cell: CellComponent = ({ item, field, linkTo }) => {
+  let value = item[field.path] + "";
+  return <CellContainer>{value}</CellContainer>;
 };
-Cell.supportsLinkTo = true;
-
-// CardValue component for displaying the field in card views, such as in relationship fields.
-export const CardValue: CardValueComponent<typeof controller> = ({
-  item,
-  field,
-}) => {
+// this is shown on the item page in relationship fields with `displayMode: 'cards'`
+export const CardValue: CardValueComponent = ({ item, field }) => {
   return (
     <FieldContainer>
       <FieldLabel>{field.label}</FieldLabel>
-      hello world // Placeholder content, customize as needed.
+      {item[field.path]}
     </FieldContainer>
   );
+};
+
+export type WrapperProps = FieldProps<typeof controller> & {
+  fields: any;
+  config?: Config;
 };
 
 // Controller for managing the field's state and interactions with the Keystone backend.
