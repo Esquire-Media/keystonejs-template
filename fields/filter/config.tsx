@@ -1,11 +1,8 @@
-import React from 'react';
-import { mergeDeep } from "@apollo/client/utilities";
-import type { Config, Operator, WidgetProps } from "@react-awesome-query-builder/ui";
-import { BasicConfig } from "@react-awesome-query-builder/ui";
+import React from "react";
+import type { WidgetProps } from "@react-awesome-query-builder/ui";
 import ListInputWidget from "./widgets/ListInput";
 
-export default (init: Config = BasicConfig): Config =>
-  mergeDeep(init, {
+export const Config = {
     operators: {
       in: {
         elasticSearchQueryType: "term",
@@ -13,7 +10,6 @@ export default (init: Config = BasicConfig): Config =>
         label: "Any In",
         labelForFormat: "IN",
         formatOp: (field, op, value: string, valueSrc, valueType, opDef) => {
-          console.log(field, op, value, valueSrc, valueType, opDef)
           const formattedValues = value
             .split(",")
             .map((v) => `'${v}'`)
@@ -23,7 +19,7 @@ export default (init: Config = BasicConfig): Config =>
         reversedOp: "not_in",
         valueSources: ["value", "values"],
         valueTypes: ["text"],
-      } as Operator,
+      },
       not_in: {
         elasticSearchQueryType: "term",
         jsonLogic: "in",
@@ -39,7 +35,7 @@ export default (init: Config = BasicConfig): Config =>
         reversedOp: "in",
         valueSources: ["value", "values"],
         valueTypes: ["text"],
-      } as Operator,
+      },
     },
     types: {
       text: {
@@ -60,4 +56,4 @@ export default (init: Config = BasicConfig): Config =>
         factory: (props: WidgetProps) => <ListInputWidget {...props} />,
       },
     }
-  });
+  }

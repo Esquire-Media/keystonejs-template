@@ -1,25 +1,29 @@
 import React, { useState, useCallback, useEffect } from "react";
+import { WrapperProps } from "../wrapper";
+import { mergeDeep } from "@apollo/client/utilities";
+import { Config as InitConfig } from "../config";
+
 import type {
   Config,
   ImmutableTree,
   BuilderProps,
-} from "@react-awesome-query-builder/ui";
-import { Utils as QbUtils } from "@react-awesome-query-builder/core";
-import { Query, Builder } from "@react-awesome-query-builder/ui";
-import "@react-awesome-query-builder/ui/css/styles.css";
-import InitConfig from "./config";
+} from "@react-awesome-query-builder/antd"; // for TS example
+import {
+  Query,
+  Builder,
+  Utils as QbUtils,
+  AntdConfig,
+  AntdWidgets,
+} from "@react-awesome-query-builder/antd";
+import "@react-awesome-query-builder/antd/css/styles.css";
 
-// Define TypeScript interface for component props.
-export type InterfaceProps = {
-  value?: Object; // Optional prop to specify the initial value of the query builder.
-  fields?: any; // Optional prop to specify the fields available in the query builder.
-  onChange?: (value: string | null) => void; // Optional prop to handle changes in the query builder value.
-};
-
-// Define the Interface component.
-export default function Interface(props: InterfaceProps) {
+// Define the View component.
+export default function View(props: WrapperProps) {
   // State for the query builder configuration, initialized with the initial configuration and fields.
-  const [config, setConfig] = useState<Config>({ ...InitConfig(), fields: {} });
+  const [config, setConfig] = useState<Config>({
+    ...mergeDeep(AntdConfig, InitConfig),
+    fields: props.fields,
+  });
 
   // Effect hook to update fields in the configuration whenever props.fields change.
   useEffect(() => {
@@ -68,14 +72,16 @@ export default function Interface(props: InterfaceProps) {
     return (
       <div className="query-builder-container">
         <div className="query-builder qb-lite">
-          <Builder {...props} />
+          {Object.keys(props.config.fields).length > 0 ? (
+            <Builder {...props} />
+          ) : null}
         </div>
       </div>
     );
   }, []);
 
   // Render the Query component with the current configuration and tree, or null if no fields are defined.
-  return Object.keys(config.fields).length > 0 ? (
+  return (
     <div>
       <Query
         {...config}
@@ -84,5 +90,5 @@ export default function Interface(props: InterfaceProps) {
         renderBuilder={renderBuilder}
       />
     </div>
-  ) : null;
+  );
 }
