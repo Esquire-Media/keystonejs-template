@@ -157,7 +157,7 @@ export function Cards({
   function handleDragEnd(result) {
     console.log(result)
     if (!result.destination) return;
-    const itemsCopy = Array.from(currentIdsArrayWithFetchedItems);
+    const itemsCopy = Array.from(cardsOrder);
     const [reorderedItem] = itemsCopy.splice(result.source.index, 1);
     itemsCopy.splice(result.destination.index, 0, reorderedItem);
     // Update state with reordered items...
