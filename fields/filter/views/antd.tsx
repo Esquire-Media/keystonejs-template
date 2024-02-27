@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { WrapperProps } from "../wrapper";
 import { mergeDeep } from "@apollo/client/utilities";
-import { Config as InitConfig } from "../config";
+import InitConfig from "../config";
 
 import type {
   Config,
@@ -66,6 +66,8 @@ export default function View(props: WrapperProps) {
     },
     [props.onChange]
   );
+
+  console.log(props.value)
 
   // Callback to render the query builder UI.
   const renderBuilder = useCallback((props: BuilderProps) => {
