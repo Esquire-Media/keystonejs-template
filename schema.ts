@@ -149,15 +149,15 @@ export const lists: Lists = {
           hideCreate: true,
         },
       }),
-      audience: relationship({
-        ref: "Audience.processes",
-        ui: {
-          listView: { fieldMode: "hidden" },
-          createView: { fieldMode: "hidden" },
-          itemView: { fieldMode: "read" },
-        },
-        many: false,
-      }),
+      // audience: relationship({
+      //   ref: "Audience",
+      //   ui: {
+      //     listView: { fieldMode: "hidden" },
+      //     createView: { fieldMode: "hidden" },
+      //     itemView: { fieldMode: "read" },
+      //   },
+      //   many: false,
+      // }),
       sort: integer({ ui: { createView: { fieldMode: "hidden" } } }),
       customCoding: json(),
     },
@@ -281,7 +281,7 @@ export const lists: Lists = {
         },
       }),
       processes: relationship({
-        ref: "ProcessingStep.audience",
+        ref: "ProcessingStep",
         many: true,
         // refSortField: "sort",
         ui: {

@@ -1,59 +1,23 @@
-import React from "react";
-import type { WidgetProps } from "@react-awesome-query-builder/ui";
-import ListInputWidget from "./widgets/ListInput";
+import { mergeDeep } from "@apollo/client/utilities";
+import ListInputConfig from "./widgets/ListInput";
+import RelativePeriodConfig from "./widgets/RelativePeriod";
 
-export const Config = {
-    operators: {
-      in: {
-        elasticSearchQueryType: "term",
-        jsonLogic: "in",
-        label: "Any In",
-        labelForFormat: "IN",
-        formatOp: (field, op, value: string, valueSrc, valueType, opDef) => {
-          const formattedValues = value
-            .split(",")
-            .map((v) => `'${v}'`)
-            .join(", ");
-          return `${field} NOT IN (${formattedValues})`;
-        },
-        reversedOp: "not_in",
-        valueSources: ["value", "values"],
-        valueTypes: ["text"],
-      },
-      not_in: {
-        elasticSearchQueryType: "term",
-        jsonLogic: "in",
-        label: "Not In",
-        labelForFormat: "NOT IN",
-        formatOp: (field, op, value: string, valueSrc, valueType, opDef) => {
-          const formattedValues = value
-            .split(",")
-            .map((v) => `'${v}'`)
-            .join(", ");
-          return `${field} NOT IN (${formattedValues})`;
-        },
-        reversedOp: "in",
-        valueSources: ["value", "values"],
-        valueTypes: ["text"],
-      },
+const Config = mergeDeep(ListInputConfig, RelativePeriodConfig, {
+  widgets: {
+    date: {
+      dateFormat: "YYYY-MM-DD",
+      valueFormat: "YYYY-MM-DD",
     },
-    types: {
-      text: {
-        widgets: {
-          listInput: {
-            operators: [
-              "in",
-              "not_in",
-            ]
-          }
-        },
-      },
+    datetime: {
+      timeFormat: "HH:mm:ss",
+      dateFormat: "YYYY-MM-DD",
+      valueFormat: "YYYY-MM-DD HH:mm:ss",
     },
-    widgets: {
-      listInput: {
-        type: 'text',
-        valueSrc: 'value',
-        factory: (props: WidgetProps) => <ListInputWidget {...props} />,
-      },
-    }
-  }
+    time: {
+      timeFormat: "HH:mm:ss",
+      valueFormat: "HH:mm:ss",
+    },
+  },
+});
+
+export default Config;
