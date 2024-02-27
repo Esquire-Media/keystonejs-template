@@ -7,10 +7,8 @@ import { Button } from "@keystone-ui/button";
 import { LoadingDots } from "@keystone-ui/loading";
 import { useEffect, useRef, useState } from "react";
 import { type FieldProps, type ListMeta } from "@keystone-6/core/types";
-import { makeDataGetter } from "@keystone-6/core/admin-ui/utils";
-import { gql, useApolloClient } from "@keystone-6/core/admin-ui/apollo";
+import { useApolloClient } from "@keystone-6/core/admin-ui/apollo";
 import { type controller } from "../index";
-import { RelationshipSelect } from "../RelationshipSelect";
 import { Items, useItemState } from "./useItemState";
 import { InlineCreate } from "./InlineCreate";
 import CardContainer from "./CardContainers/CardContainer";
@@ -101,8 +99,7 @@ export function Cards({
     setCardsOrder(itemsCopy);
   }
   useEffect(() => {
-    if (value.currentIds) {
-      console.log("running currentIds");
+    if (value.currentIds && items) {
       const currentIdsArrayWithFetchedItems = [...value.currentIds]
         .map((id) => ({ itemGetter: items[id], id }))
         .filter((x) => x.itemGetter)
@@ -117,7 +114,7 @@ export function Cards({
         });
       setCardsOrder(currentIdsArrayWithFetchedItems);
     }
-  }, [value.currentIds]);
+  }, [value.currentIds, items]);
 
   if (itemsState.kind === "loading") {
     return (
