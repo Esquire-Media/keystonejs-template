@@ -14,7 +14,7 @@ import {
   type RelationshipFieldConfig,
 } from "@keystone-6/core/fields";
 
-type RelationshipExtensions = { refSortField?: string };
+type RelationshipExtensions = { refOrderBy?: [Record<string, "asc" | "desc">] };
 
 type RelationshipFieldControllerConfig = FieldControllerConfig<
   {
@@ -104,7 +104,7 @@ const relationship =
       const meta = AdminMeta ? AdminMeta() : {};
       return {
         ...(typeof meta === "object" ? meta : {}),
-        refSortField: config.refSortField,
+        refOrderBy: config.refOrderBy,
       } as JSONValue;
     };
     return original;

@@ -7,9 +7,8 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { Button } from "@keystone-ui/button";
 import { LoadingDots } from "@keystone-ui/loading";
 import { useEffect, useRef, useState } from "react";
-import { getGqlNames, type FieldProps, type ListMeta } from "@keystone-6/core/types";
+import { getGqlNames, type ListMeta } from "@keystone-6/core/types";
 import { ApolloClient, InMemoryCache } from "@keystone-6/core/admin-ui/apollo";
-import { type controller } from "../index";
 import { Items, useItemState } from "./useItemState";
 import { InlineCreate } from "./InlineCreate";
 import CardContainer from "./CardContainers/CardContainer";
@@ -18,6 +17,7 @@ import EditCardContainer from "./CardContainers/EditCardContainer";
 import { DataGetter } from "@keystone-6/core/admin-ui/utils";
 import { useKeystone } from "@keystone-6/core/admin-ui/context";
 import { fetchGraphQLClient } from "../../../../admin/utils";
+import { WrapperProps } from "../../wrapper";
 
 type ItemObject = {
   itemGetter: DataGetter<{
@@ -48,13 +48,14 @@ export function Cards({
 }: {
   foreignList: ListMeta;
   localList: ListMeta;
-  id: string | null;
-  value: { kind: "cards-view" };
-} & FieldProps<typeof controller>) {
+} & WrapperProps) {
   /* selectedFields */
   const { displayOptions } = value;
   let selectedFields = [
-    ...new Set([...displayOptions.cardFields, ...(displayOptions.inlineEdit?.fields || [])]),
+    ...new Set([
+      ...displayOptions.cardFields,
+      ...(displayOptions.inlineEdit?.fields || []),
+    ]),
   ]
     .map((fieldPath) => {
       return foreignList.fields[fieldPath].controller.graphqlSelection;
@@ -78,23 +79,31 @@ export function Cards({
   } = useItemState({
     selectedFields,
     localList,
+    foreignList,
     id,
     field,
+    orderBy: field.refOrderBy,
   });
   const client = new ApolloClient({
-    uri: process.env.APOLLO_CLIENT_GRAPHQL_URI || "http://localhost:3000/api/graphql",
+    uri:
+      process.env.APOLLO_CLIENT_GRAPHQL_URI ||
+      "http://localhost:3000/api/graphql",
     cache: new InMemoryCache(),
   });
   const [isLoadingLazyItems, setIsLoadingLazyItems] = useState(false);
   const [showConnectItems, setShowConnectItems] = useState(false);
-  const [hideConnectItemsLabel, setHideConnectItemsLabel] = useState<"Cancel" | "Done">("Cancel");
+  const [hideConnectItemsLabel, setHideConnectItemsLabel] = useState<
+    "Cancel" | "Done"
+  >("Cancel");
   const editRef = useRef<HTMLDivElement | null>(null);
   // Query
   const keystone = useKeystone();
   const fetchGraphQL = fetchGraphQLClient(keystone.apiPath);
   const gqlNames = getGqlNames({
     listKey: field.refListKey,
-    pluralGraphQLName: keystone.adminMeta.lists[field.refListKey].plural.replace(" ", ""),
+    pluralGraphQLName: keystone.adminMeta.lists[
+      field.refListKey
+    ].plural.replace(" ", ""),
   });
 
   const isMountedRef = useRef(false);
@@ -141,7 +150,10 @@ export function Cards({
   }, [value.currentIds, items]);
 
   /* Handle Reorder Query */
-  async function handleReorderQuery(newSort: ItemObject[], fallback: ItemObject[]) {
+  async function handleReorderQuery(
+    newSort: ItemObject[],
+    fallback: ItemObject[]
+  ) {
     const sortData = newSort
       .map((v, i) => {
         if (v.itemGetter.data.sort !== i) {
@@ -168,7 +180,9 @@ export function Cards({
   `,
       { data: sortData }
     )
-      .then((e) => console.log(e))
+      .then((e) => {
+        // console.log(e);
+      })
       .catch(() => setCardsOrder(fallback));
   }
 
@@ -205,7 +219,9 @@ export function Cards({
                 // style={{ listStyle: "none", padding: 0 }}
               >
                 {cardsOrder.map(({ id, itemGetter }, index) => {
-                  const isEditMode = !!(onChange !== undefined) && value.itemsBeingEdited.has(id);
+                  const isEditMode =
+                    !!(onChange !== undefined) &&
+                    value.itemsBeingEdited.has(id);
                   return (
                     <Draggable key={id} draggableId={id} index={index}>
                       {(provided, snapshot) => {
@@ -218,7 +234,9 @@ export function Cards({
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            className={snapshot.isDragging ? "" : "liSpaceDragging"}
+                            className={
+                              snapshot.isDragging ? "" : "liSpaceDragging"
+                            }
                           >
                             <ListItemCardContainer
                               {...BaseCardContainerProps}
@@ -245,7 +263,8 @@ export function Cards({
             )}
           </Droppable>
         )}
-        {onChange === undefined ? null : displayOptions.inlineConnect && showConnectItems ? (
+        {onChange === undefined ? null : displayOptions.inlineConnect &&
+          showConnectItems ? (
           <EditCardContainer
             {...BaseCardContainerProps}
             client={client}
@@ -271,7 +290,9 @@ export function Cards({
                 onChange({
                   ...value,
                   itemBeingCreated: false,
-                  currentIds: field.many ? new Set([...value.currentIds, id]) : new Set([id]),
+                  currentIds: field.many
+                    ? new Set([...value.currentIds, id])
+                    : new Set([id]),
                 });
               }}
             />
@@ -313,8 +334,9 @@ export function Cards({
         {/* TODO: this may not be visible to the user when they invoke the save action. Maybe scroll to it? */}
         {forceValidation && (
           <Text color="red600" size="small">
-            You must finish creating and editing any related {foreignList.label.toLowerCase()}{" "}
-            before saving the {localList.singular.toLowerCase()}
+            You must finish creating and editing any related{" "}
+            {foreignList.label.toLowerCase()} before saving the{" "}
+            {localList.singular.toLowerCase()}
           </Text>
         )}
       </Stack>

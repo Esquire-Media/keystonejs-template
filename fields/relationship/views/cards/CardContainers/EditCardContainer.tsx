@@ -21,7 +21,15 @@ type EditCardContainerProps = BaseCardContainerProps & {
 };
 
 export default function EditCardContainer(props: EditCardContainerProps) {
-  const { field, foreignList, items, onChange, selectedFields, setItems, value } = props;
+  const {
+    field,
+    foreignList,
+    items,
+    onChange,
+    selectedFields,
+    setItems,
+    value,
+  } = props;
   return (
     <CardContainer mode="edit">
       <Stack
@@ -69,7 +77,9 @@ export default function EditCardContainer(props: EditCardContainerProps) {
                     const dataGetters = makeDataGetter(data, errors);
                     const itemsDataGetter = dataGetters.get("items");
                     let newItems = { ...items };
-                    let newCurrentIds = field.many ? new Set(value.currentIds) : new Set<string>();
+                    let newCurrentIds = field.many
+                      ? new Set(value.currentIds)
+                      : new Set<string>();
                     if (Array.isArray(itemsDataGetter.data)) {
                       itemsDataGetter.data.forEach((item, i) => {
                         if (item?.id != null) {

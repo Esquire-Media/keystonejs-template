@@ -14,7 +14,7 @@ type ListItemProps = BaseCardContainerProps & {
   index: number;
   isEditMode: boolean;
   itemGetter: any;
-}
+};
 
 export default function ListItemCardContainer(props: ListItemProps) {
   const {
@@ -42,7 +42,6 @@ export default function ListItemCardContainer(props: ListItemProps) {
           list={foreignList}
           fields={displayOptions.inlineEdit!.fields}
           onSave={(newItemGetter) => {
-            console.log(newItemGetter);
             setItems({
               ...items,
               [id]: newItemGetter,
@@ -70,7 +69,9 @@ export default function ListItemCardContainer(props: ListItemProps) {
           {displayOptions.cardFields.map((fieldPath) => {
             const field = foreignList.fields[fieldPath];
             const itemForField: Record<string, any> = {};
-            for (const graphqlField of getRootGraphQLFieldsFromFieldController(field.controller)) {
+            for (const graphqlField of getRootGraphQLFieldsFromFieldController(
+              field.controller
+            )) {
               const fieldGetter = itemGetter.get(graphqlField);
               if (fieldGetter.errors) {
                 const errorMessage = fieldGetter.errors[0].message;
@@ -84,7 +85,11 @@ export default function ListItemCardContainer(props: ListItemProps) {
               itemForField[graphqlField] = fieldGetter.data;
             }
             return (
-              <field.views.CardValue key={fieldPath} field={field.controller} item={itemForField} />
+              <field.views.CardValue
+                key={fieldPath}
+                field={field.controller}
+                item={itemForField}
+              />
             );
           })}
           <Stack across gap="small">
@@ -103,28 +108,29 @@ export default function ListItemCardContainer(props: ListItemProps) {
                 Edit
               </Button>
             )}
-            {displayOptions.removeMode === "disconnect" && onChange !== undefined && (
-              <Tooltip content="This item will not be deleted. It will only be removed from this field.">
-                {(props) => (
-                  <Button
-                    size="small"
-                    disabled={onChange === undefined}
-                    onClick={() => {
-                      const currentIds = new Set(value.currentIds);
-                      currentIds.delete(id);
-                      onChange({
-                        ...value,
-                        currentIds,
-                      });
-                    }}
-                    {...props}
-                    tone="negative"
-                  >
-                    Remove
-                  </Button>
-                )}
-              </Tooltip>
-            )}
+            {displayOptions.removeMode === "disconnect" &&
+              onChange !== undefined && (
+                <Tooltip content="This item will not be deleted. It will only be removed from this field.">
+                  {(props) => (
+                    <Button
+                      size="small"
+                      disabled={onChange === undefined}
+                      onClick={() => {
+                        const currentIds = new Set(value.currentIds);
+                        currentIds.delete(id);
+                        onChange({
+                          ...value,
+                          currentIds,
+                        });
+                      }}
+                      {...props}
+                      tone="negative"
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </Tooltip>
+              )}
             {displayOptions.linkToItem && (
               <Button
                 size="small"
