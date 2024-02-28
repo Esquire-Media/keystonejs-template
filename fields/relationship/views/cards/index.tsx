@@ -1,19 +1,31 @@
 /** @jsxRuntime classic */
 /** @jsx jsx */
 
+import "./styles.css";
 import { Stack, Text, jsx } from "@keystone-ui/core";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { Button } from "@keystone-ui/button";
 import { LoadingDots } from "@keystone-ui/loading";
 import { useEffect, useRef, useState } from "react";
-import { type FieldProps, type ListMeta } from "@keystone-6/core/types";
-import { useApolloClient } from "@keystone-6/core/admin-ui/apollo";
+import { getGqlNames, type FieldProps, type ListMeta } from "@keystone-6/core/types";
+import { ApolloClient, InMemoryCache } from "@keystone-6/core/admin-ui/apollo";
 import { type controller } from "../index";
 import { Items, useItemState } from "./useItemState";
 import { InlineCreate } from "./InlineCreate";
 import CardContainer from "./CardContainers/CardContainer";
 import ListItemCardContainer from "./CardContainers/ListItemCardContainer";
 import EditCardContainer from "./CardContainers/EditCardContainer";
+import { DataGetter } from "@keystone-6/core/admin-ui/utils";
+import { useKeystone } from "@keystone-6/core/admin-ui/context";
+import { fetchGraphQLClient } from "../../../../admin/utils";
+
+type ItemObject = {
+  itemGetter: DataGetter<{
+    [key: string]: any;
+    id: string;
+  }>;
+  id: string;
+};
 
 export type BaseCardContainerProps = {
   field: any;
@@ -39,6 +51,7 @@ export function Cards({
   id: string | null;
   value: { kind: "cards-view" };
 } & FieldProps<typeof controller>) {
+  /* selectedFields */
   const { displayOptions } = value;
   let selectedFields = [
     ...new Set([...displayOptions.cardFields, ...(displayOptions.inlineEdit?.fields || [])]),
@@ -57,6 +70,7 @@ export function Cards({
     selectedFields += `\n${foreignList.labelField}`;
   }
 
+  /* Constants + States */
   const {
     items,
     setItems,
@@ -67,12 +81,21 @@ export function Cards({
     id,
     field,
   });
-
-  const client = useApolloClient();
+  const client = new ApolloClient({
+    uri: process.env.APOLLO_CLIENT_GRAPHQL_URI || "http://localhost:3000/api/graphql",
+    cache: new InMemoryCache(),
+  });
   const [isLoadingLazyItems, setIsLoadingLazyItems] = useState(false);
   const [showConnectItems, setShowConnectItems] = useState(false);
   const [hideConnectItemsLabel, setHideConnectItemsLabel] = useState<"Cancel" | "Done">("Cancel");
   const editRef = useRef<HTMLDivElement | null>(null);
+  // Query
+  const keystone = useKeystone();
+  const fetchGraphQL = fetchGraphQLClient(keystone.apiPath);
+  const gqlNames = getGqlNames({
+    listKey: field.refListKey,
+    pluralGraphQLName: keystone.adminMeta.lists[field.refListKey].plural.replace(" ", ""),
+  });
 
   const isMountedRef = useRef(false);
   useEffect(() => {
@@ -88,15 +111,16 @@ export function Cards({
   }, [value]);
 
   /* Cards Ordering */
-  const [cardsOrder, setCardsOrder] = useState<any[]>([]);
+  const [cardsOrder, setCardsOrder] = useState<ItemObject[]>([]);
   function handleDragEnd(result) {
-    console.log(result);
     if (!result.destination) return;
     const itemsCopy = Array.from(cardsOrder);
     const [reorderedItem] = itemsCopy.splice(result.source.index, 1);
     itemsCopy.splice(result.destination.index, 0, reorderedItem);
+
     // Update state with reordered items...
     setCardsOrder(itemsCopy);
+    handleReorderQuery(itemsCopy, cardsOrder);
   }
   useEffect(() => {
     if (value.currentIds && items) {
@@ -115,6 +139,38 @@ export function Cards({
       setCardsOrder(currentIdsArrayWithFetchedItems);
     }
   }, [value.currentIds, items]);
+
+  /* Handle Reorder Query */
+  async function handleReorderQuery(newSort: ItemObject[], fallback: ItemObject[]) {
+    const sortData = newSort
+      .map((v, i) => {
+        if (v.itemGetter.data.sort !== i) {
+          return {
+            data: {
+              sort: i,
+            },
+            where: {
+              id: v.id,
+            },
+          };
+        } else {
+          return null;
+        }
+      })
+      .filter((v) => v !== null);
+    fetchGraphQL(
+      `
+    mutation($data: [${gqlNames.updateManyInputName}!]!) {
+      ${gqlNames.updateManyMutationName}(data: $data) {
+        id
+      }
+    }
+  `,
+      { data: sortData }
+    )
+      .then((e) => console.log(e))
+      .catch(() => setCardsOrder(fallback));
+  }
 
   if (itemsState.kind === "loading") {
     return (
@@ -153,16 +209,16 @@ export function Cards({
                   return (
                     <Draggable key={id} draggableId={id} index={index}>
                       {(provided, snapshot) => {
-                        const style = {
-                          marginBottom: snapshot.isDragging ? 0 : 10,
-                          ...provided.draggableProps.style,
-                        };
+                        // const style = {
+                        //   marginBottom: snapshot.isDragging ? 0 : 10,
+                        //   ...provided.draggableProps.style,
+                        // };
                         return (
                           <li
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            style={style}
+                            className={snapshot.isDragging ? "" : "liSpaceDragging"}
                           >
                             <ListItemCardContainer
                               {...BaseCardContainerProps}
@@ -181,7 +237,7 @@ export function Cards({
                 <div
                   ref={provided.innerRef}
                   {...provided.droppableProps}
-                  style={{ listStyle: "none" }}
+                  className="placeholderDiv"
                 >
                   {provided.placeholder}
                 </div>
