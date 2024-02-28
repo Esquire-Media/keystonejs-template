@@ -3,8 +3,10 @@
     "development"
   ],
   "hints": {
-    "axe/forms": [
+    "axe/structure": [
       "default",
+      {
+        "list": "off"
       {
         "select-name": "off"
       }
