@@ -3,7 +3,6 @@ import { WidgetProps } from "@react-awesome-query-builder/ui";
 import Config from "./config"
 
 const RelativePeriodSelector: React.FC<WidgetProps> = (props) => {
-  console.log(props.value)
   const [amount, setAmount] = useState<number>(props.value?.amount);
   const [unit, setUnit] = useState<string>(props.value?.unit);
 
@@ -18,8 +17,6 @@ const RelativePeriodSelector: React.FC<WidgetProps> = (props) => {
     setUnit(newUnit);
     props.setValue({ ...props.value, unit: newUnit });
   };
-
-  console.log(props.value)
 
   // Render options based on the mode
   const renderUnitOptions = () => {

@@ -67,8 +67,6 @@ export default function View(props: WrapperProps) {
     [props.onChange]
   );
 
-  console.log(props.value)
-
   // Callback to render the query builder UI.
   const renderBuilder = useCallback((props: BuilderProps) => {
     return (
