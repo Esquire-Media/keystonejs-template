@@ -283,13 +283,12 @@ export const lists: Lists = {
       processes: relationship({
         ref: "ProcessingStep",
         many: true,
-        // refSortField: "sort",
+        refOrderBy: [{"sort":"asc"}],
         ui: {
-          views: "./fields/relationship/views",
           displayMode: "cards",
           cardFields: ["outputType"],
-          inlineEdit: { fields: ["outputType", "customCoding", "sort"] },
-          inlineCreate: { fields: ["outputType", "customCoding", "sort"] },
+          inlineEdit: { fields: ["outputType", "customCoding"] },
+          inlineCreate: { fields: ["outputType", "customCoding"] },
         }
       }),
     },

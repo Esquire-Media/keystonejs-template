@@ -14,29 +14,55 @@ type ItemsState =
   | { kind: "error"; message: string }
   | { kind: "loaded" };
 
-export type Items = Record<string, DataGetter<{ id: string; [key: string]: any }>>;
+export type Items = Record<
+  string,
+  DataGetter<{ id: string; [key: string]: any }>
+>;
 
 export function useItemState({
   selectedFields,
   localList,
+  foreignList,
   id,
   field,
+  orderBy,
 }: {
   selectedFields: string;
   localList: ListMeta;
+  foreignList?: ListMeta;
   field: ReturnType<typeof controller>;
   id: string | null;
+  orderBy?: [Record<string, "asc" | "desc">];
 }) {
-  const { data, error, loading } = useQuery(
-    gql`query($id: ID!) {
-  item: ${localList.gqlNames.itemQueryName}(where: {id: $id}) {
-    id
-    relationship: ${field.path} {
-      ${selectedFields}
-    }
+  let query: String;
+  if (foreignList && orderBy) {
+    query = `query($id: ID!, $orderBy: [${foreignList.gqlNames.listOrderName}!]) {
+      item: ${localList.gqlNames.itemQueryName}(where: {id: $id}) {
+        id
+        relationship: ${field.path}(orderBy: $orderBy) {
+          ${selectedFields}
+        }
+      }
+    }`;
+  } else {
+    query = `query($id: ID!) {
+      item: ${localList.gqlNames.itemQueryName}(where: {id: $id}) {
+        id
+        relationship: ${field.path}(orderBy: $orderBy) {
+          ${selectedFields}
+        }
+      }
+    }`;
   }
-}`,
-    { variables: { id }, errorPolicy: "all", skip: id === null }
+  const { data, error, loading } = useQuery(
+    gql`
+      ${query}
+    `,
+    {
+      variables: { id, orderBy },
+      errorPolicy: "all",
+      skip: id === null,
+    }
   );
   const { itemsArrFromData, relationshipGetter } = useMemo(() => {
     const dataGetter = makeDataGetter(data, error?.graphQLErrors);

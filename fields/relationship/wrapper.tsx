@@ -14,11 +14,14 @@ import Sortable from "./views/sortable";
 import { Cards } from "./views/cards";
 
 export { Cell, CardValue };
-export type WrapperProps = FieldProps<typeof controller>;
+export type WrapperProps = FieldProps<typeof controller> & {
+  id: string | null;
+  value: { kind: "cards-view" };
+};
 
 export const Field = (props: WrapperProps) => {
   if (props.value.kind == "cards-view") {
-    if (props.field.refSortField) {
+    if (props.field.refOrderBy) {
       return <Sortable {...props} />;
     }
     // return Cards(props)
@@ -29,8 +32,9 @@ export const Field = (props: WrapperProps) => {
 export const controller = (
   config: RelationshipFieldControllerConfig
 ): RelationshipController => {
+  const original = _controller(config);
   return {
-    ..._controller(config),
-    refSortField: config.fieldMeta.refSortField,
+    ...original,
+    refOrderBy: config.fieldMeta.refOrderBy,
   };
 };
