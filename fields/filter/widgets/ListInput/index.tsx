@@ -1,5 +1,6 @@
 import React, { useState, ChangeEvent, ClipboardEvent } from "react";
 import { WidgetProps } from "@react-awesome-query-builder/ui";
+import { Config } from "./config"
 
 const ListInputWidget: React.FC<WidgetProps> = (props) => {
   const [list, setList] = useState<string[]>(props.value || []);
@@ -59,4 +60,5 @@ const ListInputWidget: React.FC<WidgetProps> = (props) => {
   );
 };
 
-export default ListInputWidget;
+export default Config;
+export { ListInputWidget }
