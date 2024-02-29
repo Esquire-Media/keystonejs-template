@@ -1,82 +1,71 @@
-import React from "react";
-import CardContainer from "./CardContainer";
+import React, { Ref } from "react";
+import CardContainer from "./Container";
 import { Link, Stack, VisuallyHidden } from "@keystone-ui/core";
-import { InlineEdit } from "../InlineEdit";
 import { getRootGraphQLFieldsFromFieldController } from "@keystone-6/core/admin-ui/utils";
 import { FieldContainer, FieldLabel } from "@keystone-ui/fields";
 import { Button } from "@keystone-ui/button";
 import { Tooltip } from "@keystone-ui/tooltip";
-import { BaseCardContainerProps } from "..";
+import { CardProps } from "..";
+import { Items } from "../useItemState";
+import { InlineEdit } from "./Edit";
 
-type ListItemProps = BaseCardContainerProps & {
-  displayOptions: any;
+type ListItemProps = CardProps & {
+  items: Items;
+  selectedFields: string;
+  setItems: (items: Items) => void;
   id: string;
   index: number;
   isEditMode: boolean;
   itemGetter: any;
+  stackRef?: Ref<any>;
 };
 
 export default function ListItemCardContainer(props: ListItemProps) {
-  const {
-    displayOptions,
-    field,
-    foreignList,
-    id,
-    index,
-    isEditMode,
-    itemGetter,
-    items,
-    onChange,
-    selectedFields,
-    setItems,
-    value,
-  } = props;
-
   return (
-    <CardContainer role="status" mode={isEditMode ? "edit" : "view"} key={id}>
-      <VisuallyHidden as="h2">{`${field.label} ${index + 1} ${
-        isEditMode ? "edit" : "view"
+    <CardContainer role="status" mode={props.isEditMode ? "edit" : "view"} key={props.id}>
+      <VisuallyHidden as="h2">{`${props.field.label} ${props.index + 1} ${
+        props.isEditMode ? "edit" : "view"
       } mode`}</VisuallyHidden>
-      {isEditMode ? (
+      {props.isEditMode ? (
         <InlineEdit
-          list={foreignList}
-          fields={displayOptions.inlineEdit!.fields}
+          list={props.foreignList}
+          fields={props.value.displayOptions.inlineEdit!.fields}
           onSave={(newItemGetter) => {
-            setItems({
-              ...items,
-              [id]: newItemGetter,
+            props.setItems({
+              ...props.items,
+              [props.id]: newItemGetter,
             });
-            const itemsBeingEdited = new Set(value.itemsBeingEdited);
-            itemsBeingEdited.delete(id);
-            onChange!({
-              ...value,
+            const itemsBeingEdited = new Set(props.value.itemsBeingEdited);
+            itemsBeingEdited.delete(props.id);
+            props.onChange!({
+              ...props.value,
               itemsBeingEdited,
             });
           }}
-          selectedFields={selectedFields}
-          itemGetter={itemGetter}
+          selectedFields={props.selectedFields}
+          itemGetter={props.itemGetter}
           onCancel={() => {
-            const itemsBeingEdited = new Set(value.itemsBeingEdited);
-            itemsBeingEdited.delete(id);
-            onChange!({
-              ...value,
+            const itemsBeingEdited = new Set(props.value.itemsBeingEdited);
+            itemsBeingEdited.delete(props.id);
+            props.onChange!({
+              ...props.value,
               itemsBeingEdited,
             });
           }}
         />
       ) : (
         <Stack gap="xlarge">
-          {displayOptions.cardFields.map((fieldPath) => {
-            const field = foreignList.fields[fieldPath];
+          {props.value.displayOptions.cardFields.map((fieldPath) => {
+            const field = props.foreignList.fields[fieldPath];
             const itemForField: Record<string, any> = {};
             for (const graphqlField of getRootGraphQLFieldsFromFieldController(
               field.controller
             )) {
-              const fieldGetter = itemGetter.get(graphqlField);
+              const fieldGetter = props.itemGetter.get(graphqlField);
               if (fieldGetter.errors) {
                 const errorMessage = fieldGetter.errors[0].message;
                 return (
-                  <FieldContainer>
+                  <FieldContainer key={fieldPath}>
                     <FieldLabel>{field.label}</FieldLabel>
                     {errorMessage}
                   </FieldContainer>
@@ -93,14 +82,14 @@ export default function ListItemCardContainer(props: ListItemProps) {
             );
           })}
           <Stack across gap="small">
-            {displayOptions.inlineEdit && onChange !== undefined && (
+            {props.value.displayOptions.inlineEdit && props.onChange !== undefined && (
               <Button
                 size="small"
-                disabled={onChange === undefined}
+                disabled={props.onChange === undefined}
                 onClick={() => {
-                  onChange({
-                    ...value,
-                    itemsBeingEdited: new Set([...value.itemsBeingEdited, id]),
+                  props.onChange!({
+                    ...props.value,
+                    itemsBeingEdited: new Set([...props.value.itemsBeingEdited, props.id]),
                   });
                 }}
                 tone="active"
@@ -108,22 +97,22 @@ export default function ListItemCardContainer(props: ListItemProps) {
                 Edit
               </Button>
             )}
-            {displayOptions.removeMode === "disconnect" &&
-              onChange !== undefined && (
+            {props.value.displayOptions.removeMode === "disconnect" &&
+              props.onChange !== undefined && (
                 <Tooltip content="This item will not be deleted. It will only be removed from this field.">
-                  {(props) => (
+                  {(_props) => (
                     <Button
                       size="small"
-                      disabled={onChange === undefined}
+                      disabled={props.onChange === undefined}
                       onClick={() => {
-                        const currentIds = new Set(value.currentIds);
-                        currentIds.delete(id);
-                        onChange({
-                          ...value,
+                        const currentIds = new Set(props.value.currentIds);
+                        currentIds.delete(props.id);
+                        props.onChange!({
+                          ...props.value,
                           currentIds,
                         });
                       }}
-                      {...props}
+                      {..._props}
                       tone="negative"
                     >
                       Remove
@@ -131,16 +120,16 @@ export default function ListItemCardContainer(props: ListItemProps) {
                   )}
                 </Tooltip>
               )}
-            {displayOptions.linkToItem && (
+            {props.value.displayOptions.linkToItem && (
               <Button
                 size="small"
                 weight="link"
                 tone="active"
                 css={{ textDecoration: "none" }}
                 as={Link}
-                href={`/${foreignList.path}/${id}`}
+                href={`/${props.foreignList.path}/${props.id}`}
               >
-                View {foreignList.singular} details
+                View {props.foreignList.singular} details
               </Button>
             )}
           </Stack>

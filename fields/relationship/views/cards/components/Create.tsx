@@ -1,24 +1,111 @@
 /** @jsxRuntime classic */
 /** @jsx jsx */
 
-import { useState } from "react";
 import { jsx, Stack } from "@keystone-ui/core";
+import CardContainer from "./Container";
+import { CardProps } from "..";
 import isDeepEqual from "fast-deep-equal";
-import { useToasts } from "@keystone-ui/toast";
+import { Items, useFieldsObj } from "../useItemState";
 import { Button } from "@keystone-ui/button";
-import { type ListMeta } from "@keystone-6/core/types";
 import {
-  type ItemData,
-  makeDataGetter,
-  type DataGetter,
-  type Value,
-  useInvalidFields,
-  serializeValueToObjByFieldKey,
+  DataGetter,
   Fields,
+  ItemData,
+  makeDataGetter,
+  serializeValueToObjByFieldKey,
+  useInvalidFields,
+  Value,
 } from "@keystone-6/core/admin-ui/utils";
-import { gql, useMutation } from "@keystone-6/core/admin-ui/apollo";
 import { GraphQLErrorNotice } from "@keystone-6/core/admin-ui/components";
-import { useFieldsObj } from "./useItemState";
+import { useState } from "react";
+import { gql, useMutation } from "@keystone-6/core/admin-ui/apollo";
+import { useToasts } from "@keystone-ui/toast";
+import { ListMeta } from "@keystone-6/core/types";
+
+type CreateRecordContainerProps = CardProps & {
+  items: Items;
+  setItems: (items: Items) => void;
+  selectedFields: string;
+};
+
+export function CreateRecordContainer(props: CreateRecordContainerProps) {
+  const { items, setItems, selectedFields, value } = props;
+  return (
+    <CardContainer mode="create">
+      <InlineCreate
+        selectedFields={selectedFields}
+        fields={value.displayOptions.inlineCreate!.fields}
+        list={props.foreignList}
+        onCancel={() => {
+          props.onChange!({ ...props.value, itemBeingCreated: false });
+        }}
+        onCreate={(itemGetter) => {
+          const id = itemGetter.data.id;
+          setItems({ ...items, [id]: itemGetter });
+          props.onChange!({
+            ...props.value,
+            itemBeingCreated: false,
+            currentIds: props.field.many
+              ? new Set([...props.value.currentIds, id])
+              : new Set([id]),
+          });
+        }}
+      />
+    </CardContainer>
+  );
+}
+
+type CreateButtonContainerProps = CardProps & {
+  setHideConnectItemsLabel: (val: "Cancel" | "Done") => void;
+  setShowConnectItems: (val: boolean) => void;
+};
+export function CreateButtonsContainer(props: CreateButtonContainerProps) {
+  return (
+    <CardContainer mode="create">
+      <Stack gap="small" across>
+        {props.value.displayOptions.inlineCreate && (
+          <Button
+            size="small"
+            disabled={props.onChange === undefined}
+            tone="positive"
+            onClick={() => {
+              props.onChange!({
+                ...props.value,
+                itemBeingCreated: true,
+              });
+            }}
+          >
+            Create {props.foreignList.singular}
+          </Button>
+        )}
+        {props.value.displayOptions.inlineConnect && (
+          <Button
+            size="small"
+            weight="none"
+            tone="passive"
+            onClick={() => {
+              props.setShowConnectItems(true);
+              props.setHideConnectItemsLabel("Cancel");
+            }}
+          >
+            Link existing {props.foreignList.singular}
+          </Button>
+        )}
+      </Stack>
+    </CardContainer>
+  );
+}
+
+export default function CreateCardContainer(
+  props: CreateRecordContainerProps & CreateButtonContainerProps
+) {
+  return props.value.itemBeingCreated ? (
+    <CreateRecordContainer {...props} />
+  ) : props.value.displayOptions.inlineCreate ||
+    props.value.displayOptions.inlineConnect ? (
+    <CreateButtonsContainer {...props} />
+  ) : null;
+}
 
 export function InlineCreate({
   list,
@@ -38,10 +125,10 @@ export function InlineCreate({
 
   const [createItem, { loading, error }] = useMutation(
     gql`mutation($data: ${list.gqlNames.createInputName}!) {
-      item: ${list.gqlNames.createMutationName}(data: $data) {
-        ${selectedFields}
-    }
-  }`
+        item: ${list.gqlNames.createMutationName}(data: $data) {
+          ${selectedFields}
+      }
+    }`
   );
 
   const [value, setValue] = useState(() => {
