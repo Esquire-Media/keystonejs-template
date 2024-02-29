@@ -245,8 +245,8 @@ export const lists: Lists = {
         ui: {
           displayMode: "cards",
           cardFields: ["outputType"],
-          inlineEdit: { fields: ["outputType", "customCoding"] },
-          inlineCreate: { fields: ["outputType", "customCoding"] },
+          inlineEdit: { fields: ["outputType", "customCoding"], sort: "sort" },
+          inlineCreate: { fields: ["outputType", "customCoding"], sort: "sort" },
         },
       }),
     },
