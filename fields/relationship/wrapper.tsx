@@ -1,8 +1,8 @@
 import React from "react";
-import {
-  RelationshipFieldControllerConfig,
+import type {
+  RelationshipControllerConfig,
   RelationshipController,
-} from "./index";
+} from "./types";
 import {
   Field as _Field,
   controller as _controller,
@@ -30,7 +30,7 @@ export const Field = (props: WrapperProps) => {
 };
 
 export const controller = (
-  config: RelationshipFieldControllerConfig
+  config: RelationshipControllerConfig
 ): RelationshipController => {
   const original = _controller(config);
   return {
