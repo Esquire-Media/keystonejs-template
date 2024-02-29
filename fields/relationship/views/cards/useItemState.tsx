@@ -25,41 +25,24 @@ export function useItemState({
   foreignList,
   id,
   field,
-  orderBy,
 }: {
   selectedFields: string;
   localList: ListMeta;
-  foreignList?: ListMeta;
+  foreignList: ListMeta;
   field: ReturnType<typeof controller>;
   id: string | null;
-  orderBy?: [Record<string, "asc" | "desc">];
 }) {
-  let query: String;
-  if (foreignList && orderBy) {
-    query = `query($id: ID!, $orderBy: [${foreignList.gqlNames.listOrderName}!]) {
-      item: ${localList.gqlNames.itemQueryName}(where: {id: $id}) {
-        id
-        relationship: ${field.path}(orderBy: $orderBy) {
-          ${selectedFields}
-        }
-      }
-    }`;
-  } else {
-    query = `query($id: ID!) {
-      item: ${localList.gqlNames.itemQueryName}(where: {id: $id}) {
-        id
-        relationship: ${field.path}(orderBy: $orderBy) {
-          ${selectedFields}
-        }
-      }
-    }`;
-  }
   const { data, error, loading } = useQuery(
-    gql`
-      ${query}
-    `,
+    gql`query($id: ID!, $orderBy: [${foreignList.gqlNames.listOrderName}!]) {
+      item: ${localList.gqlNames.itemQueryName}(where: {id: $id}) {
+        id
+        relationship: ${field.path}(orderBy: $orderBy) {
+          ${selectedFields}
+        }
+      }
+    }`,
     {
-      variables: { id, orderBy },
+      variables: { id, orderBy: field.refOrderBy },
       errorPolicy: "all",
       skip: id === null,
     }

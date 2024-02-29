@@ -81,8 +81,7 @@ export function Cards({
     localList,
     foreignList,
     id,
-    field,
-    orderBy: field.refOrderBy,
+    field
   });
   const client = new ApolloClient({
     uri:
