@@ -8,8 +8,9 @@ import { Tooltip } from "@keystone-ui/tooltip";
 import { CardProps } from "..";
 import { Items } from "../useItemState";
 import { InlineEdit } from "./Edit";
+import { ListMeta } from "@keystone-6/core/types";
 
-type ItemProps = CardProps & {
+type ItemProps = ListCardContainerProps & {
   key: string;
   items: Items;
   selectedFields: string;
@@ -147,6 +148,7 @@ type ListCardContainerProps = CardProps & {
   items: Items;
   selectedFields: string;
   setItems: (items: Items) => void;
+  foreignList: ListMeta;
   currentIdsArrayWithFetchedItems: Array<any>;
   itemWrapper?: ItemWrapperFactory
 };
@@ -169,7 +171,8 @@ export default function ListCardContainer(props: ListCardContainerProps) {
           const item = (
             <ItemCardContainer
               {...props}
-              key={id}
+              key={`${props.field.path}-${id}`}
+              id={`${props.field.path}-${id}`}
               index={index}
               itemGetter={itemGetter}
               isEditMode={

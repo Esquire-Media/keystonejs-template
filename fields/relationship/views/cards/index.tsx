@@ -12,15 +12,17 @@ import ListCardContainer, { ItemWrapperFactory } from "./components/List";
 import EditCardContainer from "./components/Edit";
 import CreateCardContainer from "./components/Create";
 import { WrapperProps } from "../../wrapper";
+import { useList } from "@keystone-6/core/admin-ui/context";
+import React from "react";
 
 export type CardProps = {
-  foreignList: ListMeta;
-  localList: ListMeta;
   listRef?: Ref<any>;
-  itemWrapper?: ItemWrapperFactory
+  itemWrapper?: ItemWrapperFactory;
 } & WrapperProps;
 
-export function Cards(props: CardProps) {
+export const Cards = React.forwardRef((props: CardProps, ref) => {
+  const foreignList: ListMeta = useList(props.field.refListKey);
+  const localList: ListMeta = useList(props.field.listKey);
   const { displayOptions } = props.value;
   let selectedFields = [
     ...new Set([
@@ -29,17 +31,17 @@ export function Cards(props: CardProps) {
     ]),
   ]
     .map((fieldPath) => {
-      return props.foreignList.fields[fieldPath].controller.graphqlSelection;
+      return foreignList.fields[fieldPath].controller.graphqlSelection;
     })
     .join("\n");
   if (!displayOptions.cardFields.includes("id")) {
     selectedFields += "\nid";
   }
   if (
-    !displayOptions.cardFields.includes(props.foreignList.labelField) &&
-    props.foreignList.labelField !== "id"
+    !displayOptions.cardFields.includes(foreignList.labelField) &&
+    foreignList.labelField !== "id"
   ) {
-    selectedFields += `\n${props.foreignList.labelField}`;
+    selectedFields += `\n${foreignList.labelField}`;
   }
 
   const {
@@ -48,8 +50,8 @@ export function Cards(props: CardProps) {
     state: itemsState,
   } = useItemState({
     selectedFields,
-    localList: props.localList,
-    foreignList: props.foreignList,
+    localList: localList,
+    foreignList: foreignList,
     id: props.id,
     field: props.field,
   });
@@ -97,6 +99,8 @@ export function Cards(props: CardProps) {
       {currentIdsArrayWithFetchedItems.length !== 0 && (
         <ListCardContainer
           {...props}
+          listRef={ref}
+          foreignList={foreignList}
           items={items}
           setItems={setItems}
           selectedFields={selectedFields}
@@ -121,6 +125,7 @@ export function Cards(props: CardProps) {
       ) : (
         <CreateCardContainer
           {...props}
+          foreignList={foreignList}
           items={items}
           setItems={setItems}
           selectedFields={selectedFields}
@@ -132,10 +137,10 @@ export function Cards(props: CardProps) {
       {props.forceValidation && (
         <Text color="red600" size="small">
           You must finish creating and editing any related{" "}
-          {props.foreignList.label.toLowerCase()} before saving the{" "}
-          {props.localList.singular.toLowerCase()}
+          {foreignList.label.toLowerCase()} before saving the{" "}
+          {localList.singular.toLowerCase()}
         </Text>
       )}
     </Stack>
   );
-}
+});

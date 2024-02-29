@@ -26,6 +26,7 @@ type CreateRecordContainerProps = CardProps & {
   items: Items;
   setItems: (items: Items) => void;
   selectedFields: string;
+  foreignList: ListMeta;
 };
 
 export function CreateRecordContainer(props: CreateRecordContainerProps) {
@@ -56,6 +57,7 @@ export function CreateRecordContainer(props: CreateRecordContainerProps) {
 }
 
 type CreateButtonContainerProps = CardProps & {
+  foreignList: ListMeta;
   setHideConnectItemsLabel: (val: "Cancel" | "Done") => void;
   setShowConnectItems: (val: boolean) => void;
 };
