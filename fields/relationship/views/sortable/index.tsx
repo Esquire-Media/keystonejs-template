@@ -16,14 +16,7 @@ export default function Sortable(props: WrapperProps) {
   const localList: ListMeta = useList(props.field.listKey);
   
   const onDragEnd = (result) => {
-    // Logic to reorder the items array based on the result
-    // You might need to lift state up or manage it in a global store depending on your setup
-    if (!result.destination) {
-      console.log(result)
-      return;
-    }
-    // Example function to reorder items
-    // reorderItems(items, result.source.index, result.destination.index);
+    console.log(result)
   };
   const wrapItemForDragAndDrop: ItemWrapperFactory = (item, index) => (
     <Draggable key={`draggable-${index}`} draggableId={`item-${index}`} index={index}>
