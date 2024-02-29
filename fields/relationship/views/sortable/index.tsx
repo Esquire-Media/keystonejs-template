@@ -1,4 +1,4 @@
-import React, { Ref, useEffect, useRef } from "react";
+import React from "react";
 import { WrapperProps } from "../../wrapper";
 import {
   FieldContainer,
@@ -6,20 +6,38 @@ import {
   FieldLegend,
 } from "@keystone-ui/fields";
 import { useKeystone, useList } from "@keystone-6/core/admin-ui/context";
+import { Droppable, Draggable, DragDropContext } from 'react-beautiful-dnd';
 import { Cards } from "../cards";
 import { ListMeta } from "@keystone-6/core/types";
+import { ItemWrapperFactory } from "../cards/components/List";
 
 export default function Sortable(props: WrapperProps) {
-  const keystone = useKeystone();
-  const listRef:Ref<any> = useRef(null);
   const foreignList: ListMeta = useList(props.field.refListKey);
   const localList: ListMeta = useList(props.field.listKey);
-
-  useEffect(() => {
-    if (listRef.current?.children) {
-      console.log(listRef.current?.children);
+  
+  const onDragEnd = (result) => {
+    // Logic to reorder the items array based on the result
+    // You might need to lift state up or manage it in a global store depending on your setup
+    if (!result.destination) {
+      console.log(result)
+      return;
     }
-  }, [listRef.current?.children]);
+    // Example function to reorder items
+    // reorderItems(items, result.source.index, result.destination.index);
+  };
+  const wrapItemForDragAndDrop: ItemWrapperFactory = (item, index) => (
+    <Draggable key={`draggable-${index}`} draggableId={`item-${index}`} index={index}>
+      {(provided) => (
+        <div
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+        >
+          {item}
+        </div>
+      )}
+    </Draggable>
+  );
 
   return (
     <FieldContainer as="fieldset">
@@ -27,17 +45,28 @@ export default function Sortable(props: WrapperProps) {
       <FieldDescription id={`${props.field.path}-description`}>
         {props.field.description}
       </FieldDescription>
-      <Cards
-        forceValidation={props.forceValidation}
-        field={props.field}
-        id={props.value.id}
-        value={props.value}
-        itemValue={props.itemValue}
-        onChange={props.onChange}
-        foreignList={foreignList}
-        localList={localList}
-        stackRef={listRef}
-      />
+
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId="droppable-cards">
+          {(provided, snapshot) => (
+            <div {...provided.droppableProps} ref={provided.innerRef}>
+              <Cards
+                forceValidation={props.forceValidation}
+                field={props.field}
+                id={props.value.id}
+                value={props.value}
+                itemValue={props.itemValue}
+                onChange={props.onChange}
+                foreignList={foreignList}
+                localList={localList}
+                listRef={provided.innerRef}
+                itemWrapper={wrapItemForDragAndDrop}
+              />
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
     </FieldContainer>
   );
 }

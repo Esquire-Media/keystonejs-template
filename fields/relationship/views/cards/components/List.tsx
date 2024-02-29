@@ -21,11 +21,7 @@ type ItemProps = CardProps & {
 
 export function ItemCardContainer(props: ItemProps) {
   return (
-    <CardContainer
-      role="status"
-      mode={props.isEditMode ? "edit" : "view"}
-      key={props.id}
-    >
+    <CardContainer role="status" mode={props.isEditMode ? "edit" : "view"}>
       <VisuallyHidden as="h2">{`${props.field.label} ${props.index + 1} ${
         props.isEditMode ? "edit" : "view"
       } mode`}</VisuallyHidden>
@@ -146,19 +142,31 @@ export function ItemCardContainer(props: ItemProps) {
   );
 }
 
+export type ItemWrapperFactory = (item: JSX.Element, index: number) => JSX.Element;
 type ListCardContainerProps = CardProps & {
   items: Items;
   selectedFields: string;
   setItems: (items: Items) => void;
   currentIdsArrayWithFetchedItems: Array<any>;
+  itemWrapper?: ItemWrapperFactory
 };
-
 export default function ListCardContainer(props: ListCardContainerProps) {
   return (
-    <Stack gap="medium" ref={props.stackRef}>
+    <Stack
+      as="ol"
+      gap="medium"
+      ref={props.listRef}
+      css={{
+        padding: 0,
+        margin: 0,
+        li: {
+          listStyle: "none",
+        },
+      }}
+    >
       {props.currentIdsArrayWithFetchedItems.map(
         ({ id, itemGetter }, index) => {
-          return (
+          const item = (
             <ItemCardContainer
               {...props}
               key={id}
@@ -170,6 +178,7 @@ export default function ListCardContainer(props: ListCardContainerProps) {
               }
             />
           );
+          return props.itemWrapper ? props.itemWrapper(item, index) : item;
         }
       )}
     </Stack>

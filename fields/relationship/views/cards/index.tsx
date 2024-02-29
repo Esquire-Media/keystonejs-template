@@ -8,7 +8,7 @@ import { Ref, useEffect, useRef, useState } from "react";
 import { type ListMeta } from "@keystone-6/core/types";
 import { useApolloClient } from "@keystone-6/core/admin-ui/apollo";
 import { useItemState } from "./useItemState";
-import ListCardContainer from "./components/List";
+import ListCardContainer, { ItemWrapperFactory } from "./components/List";
 import EditCardContainer from "./components/Edit";
 import CreateCardContainer from "./components/Create";
 import { WrapperProps } from "../../wrapper";
@@ -16,7 +16,8 @@ import { WrapperProps } from "../../wrapper";
 export type CardProps = {
   foreignList: ListMeta;
   localList: ListMeta;
-  stackRef?: Ref<any>;
+  listRef?: Ref<any>;
+  itemWrapper?: ItemWrapperFactory
 } & WrapperProps;
 
 export function Cards(props: CardProps) {
