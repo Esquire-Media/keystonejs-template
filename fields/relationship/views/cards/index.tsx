@@ -8,7 +8,7 @@ import { Ref, useEffect, useRef, useState } from "react";
 import { type ListMeta } from "@keystone-6/core/types";
 import { useApolloClient } from "@keystone-6/core/admin-ui/apollo";
 import { useItemState } from "./useItemState";
-import ListItemCardContainer from "./components/List";
+import ListCardContainer from "./components/List";
 import EditCardContainer from "./components/Edit";
 import CreateCardContainer from "./components/Create";
 import { WrapperProps } from "../../wrapper";
@@ -94,36 +94,13 @@ export function Cards(props: CardProps) {
   return (
     <Stack gap="medium">
       {currentIdsArrayWithFetchedItems.length !== 0 && (
-        <Stack
-          as="ul"
-          gap="medium"
-          css={{
-            padding: 0,
-            margin: 0,
-            li: {
-              listStyle: "none",
-            },
-          }}
-        >
-          {currentIdsArrayWithFetchedItems.map(({ id, itemGetter }, index) => {
-            return (
-              <ListItemCardContainer
-                {...props}
-                items={items}
-                setItems={setItems}
-                selectedFields={selectedFields}
-                id={id}
-                index={index}
-                isEditMode={
-                  !!(props.onChange !== undefined) &&
-                  props.value.itemsBeingEdited.has(id)
-                }
-                itemGetter={itemGetter}
-                stackRef={props.stackRef}
-              />
-            );
-          })}
-        </Stack>
+        <ListCardContainer
+          {...props}
+          items={items}
+          setItems={setItems}
+          selectedFields={selectedFields}
+          currentIdsArrayWithFetchedItems={currentIdsArrayWithFetchedItems}
+        />
       )}
       {props.onChange === undefined ? null : displayOptions.inlineConnect &&
         showConnectItems ? (
