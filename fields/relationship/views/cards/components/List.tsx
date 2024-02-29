@@ -9,20 +9,23 @@ import { CardProps } from "..";
 import { Items } from "../useItemState";
 import { InlineEdit } from "./Edit";
 
-type ListItemProps = CardProps & {
+type ItemProps = CardProps & {
+  key: string;
   items: Items;
   selectedFields: string;
   setItems: (items: Items) => void;
-  id: string;
   index: number;
   isEditMode: boolean;
   itemGetter: any;
-  stackRef?: Ref<any>;
 };
 
-export default function ListItemCardContainer(props: ListItemProps) {
+export function ItemCardContainer(props: ItemProps) {
   return (
-    <CardContainer role="status" mode={props.isEditMode ? "edit" : "view"} key={props.id}>
+    <CardContainer
+      role="status"
+      mode={props.isEditMode ? "edit" : "view"}
+      key={props.id}
+    >
       <VisuallyHidden as="h2">{`${props.field.label} ${props.index + 1} ${
         props.isEditMode ? "edit" : "view"
       } mode`}</VisuallyHidden>
@@ -33,10 +36,10 @@ export default function ListItemCardContainer(props: ListItemProps) {
           onSave={(newItemGetter) => {
             props.setItems({
               ...props.items,
-              [props.id]: newItemGetter,
+              [props.key]: newItemGetter,
             });
             const itemsBeingEdited = new Set(props.value.itemsBeingEdited);
-            itemsBeingEdited.delete(props.id);
+            itemsBeingEdited.delete(props.key);
             props.onChange!({
               ...props.value,
               itemsBeingEdited,
@@ -46,7 +49,7 @@ export default function ListItemCardContainer(props: ListItemProps) {
           itemGetter={props.itemGetter}
           onCancel={() => {
             const itemsBeingEdited = new Set(props.value.itemsBeingEdited);
-            itemsBeingEdited.delete(props.id);
+            itemsBeingEdited.delete(props.key);
             props.onChange!({
               ...props.value,
               itemsBeingEdited,
@@ -82,21 +85,25 @@ export default function ListItemCardContainer(props: ListItemProps) {
             );
           })}
           <Stack across gap="small">
-            {props.value.displayOptions.inlineEdit && props.onChange !== undefined && (
-              <Button
-                size="small"
-                disabled={props.onChange === undefined}
-                onClick={() => {
-                  props.onChange!({
-                    ...props.value,
-                    itemsBeingEdited: new Set([...props.value.itemsBeingEdited, props.id]),
-                  });
-                }}
-                tone="active"
-              >
-                Edit
-              </Button>
-            )}
+            {props.value.displayOptions.inlineEdit &&
+              props.onChange !== undefined && (
+                <Button
+                  size="small"
+                  disabled={props.onChange === undefined}
+                  onClick={() => {
+                    props.onChange!({
+                      ...props.value,
+                      itemsBeingEdited: new Set([
+                        ...props.value.itemsBeingEdited,
+                        props.key,
+                      ]),
+                    });
+                  }}
+                  tone="active"
+                >
+                  Edit
+                </Button>
+              )}
             {props.value.displayOptions.removeMode === "disconnect" &&
               props.onChange !== undefined && (
                 <Tooltip content="This item will not be deleted. It will only be removed from this field.">
@@ -106,7 +113,7 @@ export default function ListItemCardContainer(props: ListItemProps) {
                       disabled={props.onChange === undefined}
                       onClick={() => {
                         const currentIds = new Set(props.value.currentIds);
-                        currentIds.delete(props.id);
+                        currentIds.delete(props.key);
                         props.onChange!({
                           ...props.value,
                           currentIds,
@@ -136,5 +143,35 @@ export default function ListItemCardContainer(props: ListItemProps) {
         </Stack>
       )}
     </CardContainer>
+  );
+}
+
+type ListCardContainerProps = CardProps & {
+  items: Items;
+  selectedFields: string;
+  setItems: (items: Items) => void;
+  currentIdsArrayWithFetchedItems: Array<any>;
+};
+
+export default function ListCardContainer(props: ListCardContainerProps) {
+  return (
+    <Stack gap="medium" ref={props.stackRef}>
+      {props.currentIdsArrayWithFetchedItems.map(
+        ({ id, itemGetter }, index) => {
+          return (
+            <ItemCardContainer
+              {...props}
+              key={id}
+              index={index}
+              itemGetter={itemGetter}
+              isEditMode={
+                !!(props.onChange !== undefined) &&
+                props.value.itemsBeingEdited.has(id)
+              }
+            />
+          );
+        }
+      )}
+    </Stack>
   );
 }

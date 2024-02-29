@@ -36,7 +36,7 @@ export default function Sortable(props: WrapperProps) {
         onChange={props.onChange}
         foreignList={foreignList}
         localList={localList}
-        // stackRef={listRef}
+        stackRef={listRef}
       />
     </FieldContainer>
   );
