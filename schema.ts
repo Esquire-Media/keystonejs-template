@@ -235,66 +235,27 @@ export const lists: Lists = {
             field: "dataSource.filtering",
           },
           // ref: "DataSource.dataType",
-          // fields: {
-          //   qty: {
-          //     label: "Qty",
-          //     type: "number",
-          //     fieldSettings: {
-          //       min: 0,
-          //     },
-          //     valueSources: ["value"],
-          //     preferWidgets: ["number"],
-          //   },
-          //   price: {
-          //     label: "Price",
-          //     type: "number",
-          //     valueSources: ["value"],
-          //     fieldSettings: {
-          //       min: 10,
-          //       max: 100,
-          //     },
-          //     preferWidgets: ["slider", "rangeslider"],
-          //   },
-          //   name: {
-          //     label: "Name",
-          //     type: "text",
-          //   },
-          //   color: {
-          //     label: "Color",
-          //     type: "select",
-          //     valueSources: ["value"],
-          //     fieldSettings: {
-          //       listValues: [
-          //         { value: "yellow", title: "Yellow" },
-          //         { value: "green", title: "Green" },
-          //         { value: "orange", title: "Orange" },
-          //       ],
-          //     },
-          //   },
-          //   is_promotion: {
-          //     label: "Promo?",
-          //     type: "boolean",
-          //     operators: ["equal"],
-          //     valueSources: ["value"],
-          //   },
-          // },
+          // fields: {} // https://github.com/ukrbublik/react-awesome-query-builder/blob/master/CONFIG.adoc#configfields
         },
       }),
       processes: relationship({
         ref: "ProcessingStep",
         many: true,
-        refOrderBy: [{"sort":"asc"}],
+        refOrderBy: [{ sort: "asc" }],
         ui: {
           displayMode: "cards",
           cardFields: ["outputType"],
           inlineEdit: { fields: ["outputType", "customCoding"] },
           inlineCreate: { fields: ["outputType", "customCoding"] },
-        }
+        },
       }),
     },
     db: {
       extendPrismaSchema: (schema) => {
-        return schema.replace(/(model [^}]+)}/g, "$1@@unique([tags, dataSourceId, dataFilter])\n}");
+        return schema.replace(
+          /(model [^}]+)}/g,
+          "$1@@unique([tags, dataSourceId, dataFilter])\n}"
+        );
       },
     },
   }),
