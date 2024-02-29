@@ -24,7 +24,7 @@ export const Field = (props: WrapperProps) => {
     if (props.field.refOrderBy) {
       return <Sortable {...props} />;
     }
-    // return Cards(props)
+    return Cards({ ...props });
   }
   return _Field(props);
 };

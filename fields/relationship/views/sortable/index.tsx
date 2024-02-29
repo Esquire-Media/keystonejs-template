@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Ref, useRef } from "react";
 import { WrapperProps } from "../../wrapper";
 import {
   FieldContainer,
@@ -8,18 +8,15 @@ import {
 import { useKeystone, useList } from "@keystone-6/core/admin-ui/context";
 import { Droppable, Draggable, DragDropContext } from 'react-beautiful-dnd';
 import { Cards } from "../cards";
-import { ListMeta } from "@keystone-6/core/types";
 import { ItemWrapperFactory } from "../cards/components/List";
 
-export default function Sortable(props: WrapperProps) {
-  const foreignList: ListMeta = useList(props.field.refListKey);
-  const localList: ListMeta = useList(props.field.listKey);
-  
+export default function Sortable(props: WrapperProps) {  
+  const droppable: Ref<HTMLOListElement> = useRef(null)
   const onDragEnd = (result) => {
-    console.log(result)
+    console.log(result, droppable.current?.children)
   };
   const wrapItemForDragAndDrop: ItemWrapperFactory = (item, index) => (
-    <Draggable key={`draggable-${index}`} draggableId={`item-${index}`} index={index}>
+    <Draggable key={`draggable-${index}`} draggableId={item.key} index={index}>
       {(provided) => (
         <div
           ref={provided.innerRef}
@@ -38,21 +35,14 @@ export default function Sortable(props: WrapperProps) {
       <FieldDescription id={`${props.field.path}-description`}>
         {props.field.description}
       </FieldDescription>
-
       <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable droppableId="droppable-cards">
+        <Droppable droppableId={`${props.field.path}-droppable`}>
           {(provided, snapshot) => (
             <div {...provided.droppableProps} ref={provided.innerRef}>
               <Cards
-                forceValidation={props.forceValidation}
-                field={props.field}
+                {...props}
                 id={props.value.id}
-                value={props.value}
-                itemValue={props.itemValue}
-                onChange={props.onChange}
-                foreignList={foreignList}
-                localList={localList}
-                listRef={provided.innerRef}
+                ref={droppable}
                 itemWrapper={wrapItemForDragAndDrop}
               />
               {provided.placeholder}
