@@ -21,7 +21,6 @@ type ItemProps = ListCardContainerProps & {
 };
 
 export function ItemCardContainer(props: ItemProps) {
-  console.log(props.itemId)
   return (
     <CardContainer
       role="status"
@@ -184,7 +183,6 @@ export default function ListCardContainer(props: ListCardContainerProps) {
     >
       {props.currentIdsArrayWithFetchedItems.map(
         ({ id, itemGetter }, index) => {
-          console.log(id)
           const item = (
             <ItemCardContainer
               {...props}
