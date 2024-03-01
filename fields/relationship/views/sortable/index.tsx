@@ -53,7 +53,7 @@ export default function Sortable(props: WrapperProps) {
     id,
     itemGetter
   ) => (
-    <Draggable key={`draggable-${index}`} draggableId={item.key} index={index}>
+    <Draggable key={`draggable-${index}`} draggableId={id} index={index}>
       {(provided) => (
         <div
           ref={provided.innerRef}
