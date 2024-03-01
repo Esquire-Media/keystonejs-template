@@ -2,7 +2,6 @@
 /** @jsx jsx */
 
 import { Stack, Text, jsx } from "@keystone-ui/core";
-import "./styles.css";
 import { LoadingDots } from "@keystone-ui/loading";
 import { Ref, useEffect, useRef, useState } from "react";
 import { type ListMeta } from "@keystone-6/core/types";
@@ -116,6 +115,7 @@ export const Cards = React.forwardRef((props: CardProps, ref) => {
           setItems={setItems}
           selectedFields={selectedFields}
           client={client}
+          foreignList={foreignList}
           isLoadingLazyItems={isLoadingLazyItems}
           hideConnectItemsLabel={hideConnectItemsLabel}
           isMountedRef={isMountedRef}
