@@ -11,7 +11,7 @@ import { InlineEdit } from "./Edit";
 import { ListMeta } from "@keystone-6/core/types";
 
 type ItemProps = ListCardContainerProps & {
-  key: string;
+  itemId: string;
   items: Items;
   selectedFields: string;
   setItems: (items: Items) => void;
@@ -21,11 +21,12 @@ type ItemProps = ListCardContainerProps & {
 };
 
 export function ItemCardContainer(props: ItemProps) {
+  console.log(props.itemId)
   return (
     <CardContainer
       role="status"
       mode={props.isEditMode ? "edit" : "view"}
-      key={props.key}
+      key={props.itemId}
     >
       <VisuallyHidden as="h2">{`${props.field.label} ${props.index + 1} ${
         props.isEditMode ? "edit" : "view"
@@ -37,10 +38,10 @@ export function ItemCardContainer(props: ItemProps) {
           onSave={(newItemGetter) => {
             props.setItems({
               ...props.items,
-              [props.key]: newItemGetter,
+              [props.itemId]: newItemGetter,
             });
             const itemsBeingEdited = new Set(props.value.itemsBeingEdited);
-            itemsBeingEdited.delete(props.key);
+            itemsBeingEdited.delete(props.itemId);
             props.onChange!({
               ...props.value,
               itemsBeingEdited,
@@ -50,7 +51,7 @@ export function ItemCardContainer(props: ItemProps) {
           itemGetter={props.itemGetter}
           onCancel={() => {
             const itemsBeingEdited = new Set(props.value.itemsBeingEdited);
-            itemsBeingEdited.delete(props.key);
+            itemsBeingEdited.delete(props.itemId);
             props.onChange!({
               ...props.value,
               itemsBeingEdited,
@@ -69,7 +70,7 @@ export function ItemCardContainer(props: ItemProps) {
               if (fieldGetter.errors) {
                 const errorMessage = fieldGetter.errors[0].message;
                 return (
-                  <FieldContainer key={props.key}>
+                  <FieldContainer>
                     <FieldLabel>{field.label}</FieldLabel>
                     {errorMessage}
                   </FieldContainer>
@@ -79,7 +80,7 @@ export function ItemCardContainer(props: ItemProps) {
             }
             return (
               <field.views.CardValue
-                key={props.key}
+                key={props.itemId}
                 field={field.controller}
                 item={itemForField}
               />
@@ -96,7 +97,7 @@ export function ItemCardContainer(props: ItemProps) {
                       ...props.value,
                       itemsBeingEdited: new Set([
                         ...props.value.itemsBeingEdited,
-                        props.key,
+                        props.itemId,
                       ]),
                     });
                   }}
@@ -114,7 +115,7 @@ export function ItemCardContainer(props: ItemProps) {
                       disabled={props.onChange === undefined}
                       onClick={() => {
                         const currentIds = new Set(props.value.currentIds);
-                        currentIds.delete(props.key);
+                        currentIds.delete(props.itemId);
                         props.onChange!({
                           ...props.value,
                           currentIds,
@@ -135,7 +136,7 @@ export function ItemCardContainer(props: ItemProps) {
                 tone="active"
                 css={{ textDecoration: "none" }}
                 as={Link}
-                href={`/${props.foreignList.path}/${props.id}`}
+                href={`/${props.foreignList.path}/${props.itemId}`}
               >
                 View {props.foreignList.singular} details
               </Button>
@@ -183,11 +184,11 @@ export default function ListCardContainer(props: ListCardContainerProps) {
     >
       {props.currentIdsArrayWithFetchedItems.map(
         ({ id, itemGetter }, index) => {
+          console.log(id)
           const item = (
             <ItemCardContainer
               {...props}
-              key={id}
-              id={`${props.field.path}-${id}`}
+              itemId={id}
               index={index}
               itemGetter={itemGetter}
               isEditMode={
