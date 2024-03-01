@@ -8,7 +8,7 @@ import {
   JSONValue,
 } from "@keystone-6/core/types";
 import { relationship as _relationship } from "@keystone-6/core/fields";
-import type { RelationshipFieldConfig } from "./types"
+import type { RelationshipFieldConfig } from "./types";
 
 const relationship =
   <ListTypeInfo extends BaseListTypeInfo>({
@@ -16,17 +16,19 @@ const relationship =
     ...config
   }: RelationshipFieldConfig<ListTypeInfo>): FieldTypeFunc<ListTypeInfo> =>
   (data) => {
-    const original = _relationship({ ref, ...config })(data);
-    const AdminMeta = original.getAdminMeta;
-    original.views = "./fields/relationship/wrapper";
-    original.getAdminMeta = () => {
-      const meta = AdminMeta ? AdminMeta() : {};
-      return {
-        ...(typeof meta === "object" ? meta : {}),
-        refOrderBy: config.refOrderBy,
-      } as JSONValue;
+    const context = _relationship({ ref, ...config })(data);
+    const AdminMeta = context.getAdminMeta;
+    context.views = "./fields/relationship/wrapper";
+    context.getAdminMeta = () => {
+      const _meta = AdminMeta ? AdminMeta() : {};
+      const meta = { ...(typeof _meta === "object" ? _meta : {}) };
+      if (config.refOrderBy) meta["refOrderBy"] = config.refOrderBy;
+      if (config.ui?.displayMode === "cards" && config.ui.orderBy)
+        meta["orderBy"] = config.ui.orderBy;
+
+      return meta as JSONValue;
     };
-    return original;
+    return context;
   };
 
 export default relationship;

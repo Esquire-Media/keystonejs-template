@@ -20,12 +20,13 @@ type SelectDisplayConfig = {
 };
 type CardInlineMode = {
   fields: readonly string[];
-  sort?: string;
 };
 type CardsDisplayConfig = {
   ui?: {
     // Sets the relationship to display as a list of Cards
     displayMode: "cards";
+    
+    orderBy?: string;
     /* The set of fields to render in the default Card component **/
     cardFields: readonly string[];
     /** Causes the default Card component to render as a link to navigate to the related item */
@@ -107,6 +108,7 @@ type CardsDisplayModeOptions = {
   inlineCreate: CardInlineMode | null;
   inlineEdit: CardInlineMode | null;
   inlineConnect: boolean;
+  orderBy?: string;
 };
 type OrderBy = [Record<string, "asc" | "desc">];
 
