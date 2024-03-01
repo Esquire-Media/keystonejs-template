@@ -21,10 +21,10 @@ export type WrapperProps = FieldProps<typeof controller> & {
 
 export const Field = (props: WrapperProps) => {
   if (props.value.kind == "cards-view") {
-    if (props.field.refOrderBy) {
+    if (props.value.displayOptions.orderBy) {
       return <Sortable {...props} />;
     }
-    return Cards({ ...props });
+    return <Cards { ...props } id={props.value.id} />;
   }
   return _Field(props);
 };
@@ -32,9 +32,13 @@ export const Field = (props: WrapperProps) => {
 export const controller = (
   config: RelationshipControllerConfig
 ): RelationshipController => {
-  const original = _controller(config);
-  return {
-    ...original,
-    refOrderBy: config.fieldMeta.refOrderBy,
-  };
+  const context: RelationshipController = _controller(config);
+  context.refOrderBy = config.fieldMeta.refOrderBy;
+  if (
+    context.defaultValue.kind === "cards-view" &&
+    config.fieldMeta.displayMode === "cards"
+  ) {
+    context.defaultValue.displayOptions.orderBy = config.fieldMeta.orderBy;
+  }
+  return context;
 };

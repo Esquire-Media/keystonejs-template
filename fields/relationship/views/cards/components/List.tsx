@@ -143,14 +143,20 @@ export function ItemCardContainer(props: ItemProps) {
   );
 }
 
-export type ItemWrapperFactory = (item: JSX.Element, index: number) => JSX.Element;
+export type ItemWrapperFactory = (
+  item: JSX.Element,
+  index: number,
+  props: ListCardContainerProps,
+  id: string,
+  itemGetter: any
+) => JSX.Element;
 type ListCardContainerProps = CardProps & {
   items: Items;
   selectedFields: string;
   setItems: (items: Items) => void;
   foreignList: ListMeta;
   currentIdsArrayWithFetchedItems: Array<any>;
-  itemWrapper?: ItemWrapperFactory
+  itemWrapper?: ItemWrapperFactory;
 };
 export default function ListCardContainer(props: ListCardContainerProps) {
   return (
@@ -171,8 +177,7 @@ export default function ListCardContainer(props: ListCardContainerProps) {
           const item = (
             <ItemCardContainer
               {...props}
-              key={`${props.field.path}-${id}`}
-              id={`${props.field.path}-${id}`}
+              key={id}
               index={index}
               itemGetter={itemGetter}
               isEditMode={
@@ -181,7 +186,9 @@ export default function ListCardContainer(props: ListCardContainerProps) {
               }
             />
           );
-          return props.itemWrapper ? props.itemWrapper(item, index) : item;
+          return props.itemWrapper
+            ? props.itemWrapper(item, index, props, id, itemGetter)
+            : item;
         }
       )}
     </Stack>
