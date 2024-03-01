@@ -22,7 +22,11 @@ type ItemProps = ListCardContainerProps & {
 
 export function ItemCardContainer(props: ItemProps) {
   return (
-    <CardContainer role="status" mode={props.isEditMode ? "edit" : "view"}>
+    <CardContainer
+      role="status"
+      mode={props.isEditMode ? "edit" : "view"}
+      key={props.key}
+    >
       <VisuallyHidden as="h2">{`${props.field.label} ${props.index + 1} ${
         props.isEditMode ? "edit" : "view"
       } mode`}</VisuallyHidden>
@@ -65,7 +69,7 @@ export function ItemCardContainer(props: ItemProps) {
               if (fieldGetter.errors) {
                 const errorMessage = fieldGetter.errors[0].message;
                 return (
-                  <FieldContainer key={fieldPath}>
+                  <FieldContainer key={props.key}>
                     <FieldLabel>{field.label}</FieldLabel>
                     {errorMessage}
                   </FieldContainer>
@@ -75,7 +79,7 @@ export function ItemCardContainer(props: ItemProps) {
             }
             return (
               <field.views.CardValue
-                key={fieldPath}
+                key={props.key}
                 field={field.controller}
                 item={itemForField}
               />
@@ -143,6 +147,10 @@ export function ItemCardContainer(props: ItemProps) {
   );
 }
 
+export type ListWrapperFactory = (
+  list: JSX.Element,
+  props: ListCardContainerProps
+) => JSX.Element;
 export type ItemWrapperFactory = (
   item: JSX.Element,
   index: number,
@@ -156,10 +164,11 @@ type ListCardContainerProps = CardProps & {
   setItems: (items: Items) => void;
   foreignList: ListMeta;
   currentIdsArrayWithFetchedItems: Array<any>;
+  listWrapper?: ListWrapperFactory;
   itemWrapper?: ItemWrapperFactory;
 };
 export default function ListCardContainer(props: ListCardContainerProps) {
-  return (
+  const list = (
     <Stack
       as="ol"
       gap="medium"
@@ -178,6 +187,7 @@ export default function ListCardContainer(props: ListCardContainerProps) {
             <ItemCardContainer
               {...props}
               key={id}
+              id={`${props.field.path}-${id}`}
               index={index}
               itemGetter={itemGetter}
               isEditMode={
@@ -193,4 +203,5 @@ export default function ListCardContainer(props: ListCardContainerProps) {
       )}
     </Stack>
   );
+  return props.listWrapper ? props.listWrapper(list, props) : list
 }

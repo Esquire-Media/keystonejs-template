@@ -8,7 +8,10 @@ import {
 import { useKeystone, useList } from "@keystone-6/core/admin-ui/context";
 import { Droppable, Draggable, DragDropContext } from "react-beautiful-dnd";
 import { Cards } from "../cards";
-import { ItemWrapperFactory } from "../cards/components/List";
+import {
+  ItemWrapperFactory,
+  ListWrapperFactory,
+} from "../cards/components/List";
 
 export default function Sortable(props: WrapperProps) {
   const droppable: Ref<HTMLOListElement> = useRef(null);
@@ -20,17 +23,29 @@ export default function Sortable(props: WrapperProps) {
       sortField: props.value.displayOptions.orderBy,
       items: Array.from(droppable.current?.children || []).map(
         (child, index) => {
-          const target = child.firstElementChild
+          const target = child.firstElementChild;
           return {
             id: target?.getAttribute("data-refid"),
-            index
-          }
+            index,
+          };
         }
       ),
     };
 
-    console.log(context, result)
+    console.log(context, result);
   };
+  const listWrapper: ListWrapperFactory = (list, props) => (
+    <DragDropContext onDragEnd={onDragEnd}>
+      <Droppable droppableId={props.field.path}>
+        {(provided, snapshot) => (
+          <div {...provided.droppableProps} ref={provided.innerRef}>
+            {list}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+    </DragDropContext>
+  );
   const itemWrapper: ItemWrapperFactory = (
     item,
     index,
@@ -58,21 +73,13 @@ export default function Sortable(props: WrapperProps) {
       <FieldDescription id={`${props.field.path}-description`}>
         {props.field.description}
       </FieldDescription>
-      <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable droppableId={props.field.path}>
-          {(provided, snapshot) => (
-            <div {...provided.droppableProps} ref={provided.innerRef}>
-              <Cards
-                {...props}
-                id={props.value.id}
-                ref={droppable}
-                itemWrapper={itemWrapper}
-              />
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
+      <Cards
+        {...props}
+        id={props.value.id}
+        ref={droppable}
+        listWrapper={listWrapper}
+        itemWrapper={itemWrapper}
+      />
     </FieldContainer>
   );
 }

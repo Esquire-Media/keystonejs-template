@@ -21,7 +21,7 @@ const relationship =
     context.views = "./fields/relationship/wrapper";
     context.getAdminMeta = () => {
       const _meta = AdminMeta ? AdminMeta() : {};
-      const meta = { ...(typeof _meta === "object" ? _meta : {}) };
+      const meta: any = { ...(typeof _meta === "object" ? _meta : {}) };
       if (config.refOrderBy) meta["refOrderBy"] = config.refOrderBy;
       if (config.ui?.displayMode === "cards" && config.ui.orderBy)
         meta["orderBy"] = config.ui.orderBy;
