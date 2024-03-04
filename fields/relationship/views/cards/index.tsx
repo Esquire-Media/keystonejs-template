@@ -2,13 +2,15 @@
 /** @jsx jsx */
 
 import { Stack, Text, jsx } from "@keystone-ui/core";
-import "./styles.css";
 import { LoadingDots } from "@keystone-ui/loading";
 import { Ref, useEffect, useRef, useState } from "react";
 import { type ListMeta } from "@keystone-6/core/types";
 import { useApolloClient } from "@keystone-6/core/admin-ui/apollo";
 import { useItemState } from "./useItemState";
-import ListCardContainer, { ItemWrapperFactory, ListWrapperFactory } from "./components/List";
+import ListCardContainer, {
+  ItemWrapperFactory,
+  ListWrapperFactory,
+} from "./components/List";
 import EditCardContainer from "./components/Edit";
 import CreateCardContainer from "./components/Create";
 import { WrapperProps } from "../../wrapper";
@@ -92,7 +94,9 @@ export const Cards = React.forwardRef((props: CardProps, ref) => {
   }
 
   const currentIdsArrayWithFetchedItems = [...props.value.currentIds]
-    .map((id) => ({ itemGetter: items[id], id }))
+    .map((id) => {
+      return { itemGetter: items[id], id };
+    })
     .filter((x) => x.itemGetter);
 
   return (
