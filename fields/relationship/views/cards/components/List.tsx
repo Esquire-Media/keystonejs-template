@@ -158,7 +158,7 @@ export type ItemWrapperFactory = (
   id: string,
   itemGetter: DataGetter<ItemData>
 ) => JSX.Element;
-type ListCardContainerProps = CardProps & {
+export type ListCardContainerProps = CardProps & {
   items: Items;
   selectedFields: string;
   setItems: (items: Items) => void;

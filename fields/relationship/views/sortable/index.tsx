@@ -8,31 +8,29 @@ import {
 import { useKeystone, useList } from "@keystone-6/core/admin-ui/context";
 import { Droppable, Draggable, DragDropContext } from "react-beautiful-dnd";
 import { Cards } from "../cards";
-import {
+import type {
   ItemWrapperFactory,
+  ListCardContainerProps,
   ListWrapperFactory,
 } from "../cards/components/List";
 import "./styles.css";
 
 export default function Sortable(props: WrapperProps) {
   const droppable: Ref<HTMLOListElement> = useRef(null);
-  const onDragEnd = (result, listProps) => {
+  const onDragEnd = (result, listProps: ListCardContainerProps) => {
     const context = {
       listKey: props.field.listKey,
       recordId: props.value.id,
       refListKey: props.field.refListKey,
       sortField: props.value.displayOptions.orderBy,
-      items: Array.from(droppable.current?.children || []).map(
-        (child, index) => {
-          const target = child.firstElementChild;
-          return {
-            id: target?.getAttribute("data-refid"),
-            index,
-          };
-        }
-      ),
+      originalItemOrder: listProps.currentIdsArrayWithFetchedItems
+        .sort(
+          (a, b) =>
+            a.itemGetter.path.slice(-1)[0] - b.itemGetter.path.slice(-1)[0]
+        )
+        .map((item) => item.id),
     };
-    console.log(context, listProps, result)
+    console.log(context, result);
   };
   const listWrapper: ListWrapperFactory = (list, props) => (
     <DragDropContext onDragEnd={(results) => onDragEnd(results, props)}>
