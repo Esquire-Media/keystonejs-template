@@ -12,10 +12,11 @@ import {
   ItemWrapperFactory,
   ListWrapperFactory,
 } from "../cards/components/List";
+import "./styles.css";
 
 export default function Sortable(props: WrapperProps) {
   const droppable: Ref<HTMLOListElement> = useRef(null);
-  const onDragEnd = (result) => {
+  const onDragEnd = (result, listProps) => {
     const context = {
       listKey: props.field.listKey,
       recordId: props.value.id,
@@ -31,11 +32,10 @@ export default function Sortable(props: WrapperProps) {
         }
       ),
     };
-
-    console.log(context, result);
+    console.log(context, listProps, result)
   };
   const listWrapper: ListWrapperFactory = (list, props) => (
-    <DragDropContext onDragEnd={onDragEnd}>
+    <DragDropContext onDragEnd={(results) => onDragEnd(results, props)}>
       <Droppable droppableId={props.field.path}>
         {(provided, snapshot) => (
           <div {...provided.droppableProps} ref={provided.innerRef}>
