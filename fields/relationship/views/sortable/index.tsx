@@ -18,7 +18,7 @@ export default function Sortable(props: WrapperProps) {
   const keystone = useKeystone();
   const fetchGraphQL = fetchGraphQLClient(keystone.apiPath);
 
-  const onDragEnd = async (result, listProps: ListCardContainerProps) => {
+  const onDragEnd = (result, listProps: ListCardContainerProps) => {
     if (result.destination) {
       const context = {
         listKey: props.field.listKey,
@@ -58,7 +58,7 @@ export default function Sortable(props: WrapperProps) {
         pluralGraphQLName: keystone.adminMeta.lists[props.field.refListKey].plural.replace(" ", ""),
       });
       if (mutateData.length > 0) {
-        const res = await fetchGraphQL(
+        fetchGraphQL(
           `
           mutation($data: [${gqlNames.updateManyInputName}!]!) {
             ${gqlNames.updateManyMutationName}(data: $data) {
