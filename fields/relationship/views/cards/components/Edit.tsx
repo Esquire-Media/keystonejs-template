@@ -22,7 +22,6 @@ type EditCardContainerProps = CardProps & {
   isLoadingLazyItems: boolean;
   isMountedRef: MutableRefObject<boolean>;
   hideConnectItemsLabel: string;
-  foreignList: ListMeta;
   setHideConnectItemsLabel: (val: "Cancel" | "Done") => void;
   setIsLoadingLazyItems: (val: boolean) => void;
   setShowConnectItems: (val: boolean) => void;

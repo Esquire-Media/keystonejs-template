@@ -22,7 +22,11 @@ type ItemProps = ListCardContainerProps & {
 
 export function ItemCardContainer(props: ItemProps) {
   return (
-    <CardContainer role="status" mode={props.isEditMode ? "edit" : "view"} key={props.itemId}>
+    <CardContainer
+      role="status"
+      mode={props.isEditMode ? "edit" : "view"}
+      key={props.itemId}
+    >
       <VisuallyHidden as="h2">{`${props.field.label} ${props.index + 1} ${
         props.isEditMode ? "edit" : "view"
       } mode`}</VisuallyHidden>
@@ -58,7 +62,9 @@ export function ItemCardContainer(props: ItemProps) {
           {props.value.displayOptions.cardFields.map((fieldPath) => {
             const field = props.foreignList.fields[fieldPath];
             const itemForField: Record<string, any> = {};
-            for (const graphqlField of getRootGraphQLFieldsFromFieldController(field.controller)) {
+            for (const graphqlField of getRootGraphQLFieldsFromFieldController(
+              field.controller
+            )) {
               const fieldGetter = props.itemGetter.get(graphqlField);
               if (fieldGetter.errors) {
                 const errorMessage = fieldGetter.errors[0].message;
@@ -80,21 +86,25 @@ export function ItemCardContainer(props: ItemProps) {
             );
           })}
           <Stack across gap="small">
-            {props.value.displayOptions.inlineEdit && props.onChange !== undefined && (
-              <Button
-                size="small"
-                disabled={props.onChange === undefined}
-                onClick={() => {
-                  props.onChange!({
-                    ...props.value,
-                    itemsBeingEdited: new Set([...props.value.itemsBeingEdited, props.itemId]),
-                  });
-                }}
-                tone="active"
-              >
-                Edit
-              </Button>
-            )}
+            {props.value.displayOptions.inlineEdit &&
+              props.onChange !== undefined && (
+                <Button
+                  size="small"
+                  disabled={props.onChange === undefined}
+                  onClick={() => {
+                    props.onChange!({
+                      ...props.value,
+                      itemsBeingEdited: new Set([
+                        ...props.value.itemsBeingEdited,
+                        props.itemId,
+                      ]),
+                    });
+                  }}
+                  tone="active"
+                >
+                  Edit
+                </Button>
+              )}
             {props.value.displayOptions.removeMode === "disconnect" &&
               props.onChange !== undefined && (
                 <Tooltip content="This item will not be deleted. It will only be removed from this field.">
@@ -137,7 +147,10 @@ export function ItemCardContainer(props: ItemProps) {
   );
 }
 
-export type ListWrapperFactory = (list: JSX.Element, props: ListCardContainerProps) => JSX.Element;
+export type ListWrapperFactory = (
+  list: JSX.Element,
+  props: ListCardContainerProps
+) => JSX.Element;
 export type ItemWrapperFactory = (
   item: JSX.Element,
   index: number,
@@ -156,20 +169,38 @@ type ListCardContainerProps = CardProps & {
 };
 export default function ListCardContainer(props: ListCardContainerProps) {
   const list = (
-    <Stack>
-      {props.currentIdsArrayWithFetchedItems.map(({ id, itemGetter }, index) => {
-        const item = (
-          <ItemCardContainer
-            {...props}
-            itemId={id}
-            index={index}
-            itemGetter={itemGetter}
-            isEditMode={!!(props.onChange !== undefined) && props.value.itemsBeingEdited.has(id)}
-          />
-        );
-        return props.itemWrapper ? props.itemWrapper(item, index, props, id, itemGetter) : item;
-      })}
+    <Stack
+      as="ol"
+      gap="medium"
+      ref={props.listRef}
+      css={{
+        padding: 0,
+        margin: 0,
+        li: {
+          listStyle: "none",
+        },
+      }}
+    >
+      {props.currentIdsArrayWithFetchedItems.map(
+        ({ id, itemGetter }, index) => {
+          const item = (
+            <ItemCardContainer
+              {...props}
+              itemId={id}
+              index={index}
+              itemGetter={itemGetter}
+              isEditMode={
+                !!(props.onChange !== undefined) &&
+                props.value.itemsBeingEdited.has(id)
+              }
+            />
+          );
+          return props.itemWrapper
+            ? props.itemWrapper(item, index, props, id, itemGetter)
+            : item;
+        }
+      )}
     </Stack>
   );
-  return props.listWrapper ? props.listWrapper(list, props) : list;
+  return props.listWrapper ? props.listWrapper(list, props) : list
 }
