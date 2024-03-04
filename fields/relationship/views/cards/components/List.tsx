@@ -170,16 +170,8 @@ type ListCardContainerProps = CardProps & {
 export default function ListCardContainer(props: ListCardContainerProps) {
   const list = (
     <Stack
-      as="ol"
       gap="medium"
       ref={props.listRef}
-      css={{
-        padding: 0,
-        margin: 0,
-        li: {
-          listStyle: "none",
-        },
-      }}
     >
       {props.currentIdsArrayWithFetchedItems
         .sort((a,b) => a.itemGetter.path.slice(-1)[0] - b.itemGetter.path.slice(-1)[0])
