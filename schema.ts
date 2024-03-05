@@ -163,7 +163,7 @@ export const lists: Lists = {
     },
   }),
 
-  DemandSidePlatform: list({
+  Publisher: list({
     access: allowAll,
     fields: {
       ...auditable,
@@ -173,12 +173,12 @@ export const lists: Lists = {
       }),
     },
   }),
-  DSPEntity: list({
+  PublisherEntity: list({
     access: allowAll,
     fields: {
       ...auditable,
       demandSidePlatform: relationship({
-        ref: "DemandSidePlatform",
+        ref: "Publisher",
         ui: {
           listView: { fieldMode: "hidden" },
           createView: { fieldMode: "hidden" },
