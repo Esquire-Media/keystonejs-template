@@ -415,6 +415,10 @@ const seed_data: { [listKey: string]: any } = {
           label: "Client",
           type: "text",
         },
+        date: {
+          label: "Transaction Date",
+          type: "datetime",
+        },
       }),
     },
     {
@@ -1069,9 +1073,7 @@ async function main() {
           console.warn(
             `Could not create ${listKey} record with unique fields: ${JSON.stringify(
               whereClause
-            )}`,
-            error,
-            data
+            )}`
           );
         }
       } else {
