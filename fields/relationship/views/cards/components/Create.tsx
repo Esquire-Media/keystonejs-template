@@ -27,6 +27,7 @@ type CreateRecordContainerProps = CardProps & {
   setItems: (items: Items) => void;
   selectedFields: string;
   foreignList: ListMeta;
+  onBeforeCreate?: DataHandler;
 };
 
 export function CreateRecordContainer(props: CreateRecordContainerProps) {
@@ -34,6 +35,7 @@ export function CreateRecordContainer(props: CreateRecordContainerProps) {
   return (
     <CardContainer mode="create">
       <InlineCreate
+        items={items}
         selectedFields={selectedFields}
         fields={value.displayOptions.inlineCreate!.fields}
         list={props.foreignList}
@@ -51,6 +53,7 @@ export function CreateRecordContainer(props: CreateRecordContainerProps) {
               : new Set([id]),
           });
         }}
+        onBeforeCreate={props.onBeforeCreate}
       />
     </CardContainer>
   );
@@ -75,8 +78,7 @@ export function CreateButtonsContainer(props: CreateButtonContainerProps) {
                 ...props.value,
                 itemBeingCreated: true,
               });
-            }}
-          >
+            }}>
             Create {props.foreignList.singular}
           </Button>
         )}
@@ -88,8 +90,7 @@ export function CreateButtonsContainer(props: CreateButtonContainerProps) {
             onClick={() => {
               props.setShowConnectItems(true);
               props.setHideConnectItemsLabel("Cancel");
-            }}
-          >
+            }}>
             Link existing {props.foreignList.singular}
           </Button>
         )}
@@ -109,22 +110,28 @@ export default function CreateCardContainer(
   ) : null;
 }
 
-export function InlineCreate({
-  list,
-  onCancel,
-  onCreate,
-  fields: fieldPaths,
-  selectedFields,
-}: {
+export type DataHandler = (data: Record<string, any>, props: InlineCreateProps) => void;
+type InlineCreateProps = {
+  items: Items;
   list: ListMeta;
   selectedFields: string;
   fields: readonly string[];
   onCancel: () => void;
   onCreate: (itemGetter: DataGetter<ItemData>) => void;
-}) {
+  onBeforeCreate?: DataHandler;
+}
+export function InlineCreate(props: InlineCreateProps) {
+  const {
+    items,
+    list,
+    onCancel,
+    onCreate,
+    fields: fieldPaths,
+    selectedFields,
+    onBeforeCreate,
+  } = props
   const toasts = useToasts();
   const fields = useFieldsObj(list, fieldPaths);
-
   const [createItem, { loading, error }] = useMutation(
     gql`mutation($data: ${list.gqlNames.createInputName}!) {
         item: ${list.gqlNames.createMutationName}(data: $data) {
@@ -132,7 +139,6 @@ export function InlineCreate({
       }
     }`
   );
-
   const [value, setValue] = useState(() => {
     const value: Value = {};
     Object.keys(fields).forEach((fieldPath) => {
@@ -152,7 +158,7 @@ export function InlineCreate({
     setForceValidation(newForceValidation);
 
     if (newForceValidation) return;
-    const data: Record<string, any> = {};
+    const data: Record<string, any> = {}
     const allSerializedValues = serializeValueToObjByFieldKey(fields, value);
     Object.keys(allSerializedValues).forEach((fieldPath) => {
       const { controller } = fields[fieldPath];
@@ -163,6 +169,10 @@ export function InlineCreate({
         Object.assign(data, serialized);
       }
     });
+
+    onBeforeCreate!(data, props)
+
+    console.log(data)
 
     createItem({
       variables: {
@@ -219,8 +229,7 @@ export function InlineCreate({
             isLoading={loading}
             size="small"
             tone="positive"
-            weight="bold"
-          >
+            weight="bold">
             Create {list.singular}
           </Button>
           <Button size="small" weight="none" onClick={onCancel}>
