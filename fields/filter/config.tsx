@@ -1,9 +1,8 @@
 import { mergeDeep } from "@apollo/client/utilities";
 import ListInputConfig from "./widgets/ListInput";
-import RelativePeriodConfig from "./widgets/RelativePeriod";
 import { BasicFuncs } from '@react-awesome-query-builder/ui';
 
-const Config = mergeDeep(ListInputConfig, RelativePeriodConfig, {
+const Config = mergeDeep(ListInputConfig, {
   funcs: {
     ...BasicFuncs,
   },
