@@ -17,9 +17,16 @@ import type {
 import "./styles.css";
 import { getGqlNames } from "@keystone-6/core/types";
 import { Items } from "../cards/useItemState";
-import { InsertOrderByFactory } from "../cards/components/Create";
+import { DataHandler } from "../cards/components/Create";
 
-export default function Sortable(props: WrapperProps) {
+export type SortableWrapperProps = WrapperProps & {
+  value: {
+    displayOptions: {
+      orderBy: string;
+    };
+  };
+};
+export default function Sortable(props: SortableWrapperProps) {
   const droppable: Ref<HTMLOListElement> = useRef(null);
   const keystone = useKeystone();
   const fetchGraphQL = fetchGraphQLClient(keystone.apiPath);
@@ -130,10 +137,10 @@ export default function Sortable(props: WrapperProps) {
       )}
     </Draggable>
   );
-  const insertOrderBy: InsertOrderByFactory = (items: Items) => {
-    return {
-      [props.value.displayOptions.orderBy as string]: Object.keys(items).length,
-    };
+  const insertOrderBy: DataHandler = (data, dhProps) => {
+    data[props.value.displayOptions.orderBy] = Object.keys(
+      dhProps.items
+    ).length;
   };
 
   return (
@@ -148,7 +155,9 @@ export default function Sortable(props: WrapperProps) {
         ref={droppable}
         listWrapper={listWrapper}
         itemWrapper={itemWrapper}
-        insertOrderBy={props.value.displayOptions.orderBy ? insertOrderBy : undefined}
+        onBeforeCreate={
+          props.value.displayOptions.orderBy ? insertOrderBy : undefined
+        }
       />
     </FieldContainer>
   );

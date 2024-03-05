@@ -10,7 +10,7 @@ import {
   CardValue,
 } from "@keystone-6/core/fields/types/relationship/views";
 import type { FieldProps } from "@keystone-6/core/types";
-import Sortable from "./views/sortable";
+import Sortable, { SortableWrapperProps } from "./views/sortable";
 import { Cards } from "./views/cards";
 
 export { Cell, CardValue };
@@ -22,7 +22,7 @@ export type WrapperProps = FieldProps<typeof controller> & {
 export const Field = (props: WrapperProps) => {
   if (props.value.kind == "cards-view") {
     if (props.value.displayOptions.orderBy) {
-      return <Sortable {...props} />;
+      return <Sortable {...props as SortableWrapperProps} />;
     }
     return <Cards { ...props } id={props.value.id} />;
   }

@@ -27,7 +27,7 @@ type CreateRecordContainerProps = CardProps & {
   setItems: (items: Items) => void;
   selectedFields: string;
   foreignList: ListMeta;
-  insertOrderBy?: InsertOrderByFactory;
+  onBeforeCreate?: DataHandler;
 };
 
 export function CreateRecordContainer(props: CreateRecordContainerProps) {
@@ -53,7 +53,7 @@ export function CreateRecordContainer(props: CreateRecordContainerProps) {
               : new Set([id]),
           });
         }}
-        insertOrderBy={props.insertOrderBy}
+        onBeforeCreate={props.onBeforeCreate}
       />
     </CardContainer>
   );
@@ -110,32 +110,32 @@ export default function CreateCardContainer(
   ) : null;
 }
 
-export type InsertOrderByFactory = (items: Items) => { [x: string]: number };
-export function InlineCreate({
-  items,
-  list,
-  onCancel,
-  onCreate,
-  fields: fieldPaths,
-  selectedFields,
-  insertOrderBy,
-}: {
+export type DataHandler = (data: Record<string, any>, props: InlineCreateProps) => void;
+type InlineCreateProps = {
   items: Items;
   list: ListMeta;
   selectedFields: string;
   fields: readonly string[];
   onCancel: () => void;
   onCreate: (itemGetter: DataGetter<ItemData>) => void;
-  insertOrderBy?: InsertOrderByFactory;
-}) {
-  const orderBy = insertOrderBy ? insertOrderBy(items) : undefined;
+  onBeforeCreate?: DataHandler;
+}
+export function InlineCreate(props: InlineCreateProps) {
+  const {
+    items,
+    list,
+    onCancel,
+    onCreate,
+    fields: fieldPaths,
+    selectedFields,
+    onBeforeCreate,
+  } = props
   const toasts = useToasts();
   const fields = useFieldsObj(list, fieldPaths);
   const [createItem, { loading, error }] = useMutation(
     gql`mutation($data: ${list.gqlNames.createInputName}!) {
         item: ${list.gqlNames.createMutationName}(data: $data) {
           ${selectedFields}
-          ${orderBy ? Object.keys(orderBy)[0] : ""}
       }
     }`
   );
@@ -147,7 +147,6 @@ export function InlineCreate({
         value: fields[fieldPath].controller.defaultValue,
       };
     });
-    console.log(value);
     return value;
   });
 
@@ -159,7 +158,7 @@ export function InlineCreate({
     setForceValidation(newForceValidation);
 
     if (newForceValidation) return;
-    const data: Record<string, any> = {};
+    const data: Record<string, any> = {}
     const allSerializedValues = serializeValueToObjByFieldKey(fields, value);
     Object.keys(allSerializedValues).forEach((fieldPath) => {
       const { controller } = fields[fieldPath];
@@ -171,9 +170,9 @@ export function InlineCreate({
       }
     });
 
-    if (orderBy) {
-      Object.assign(data, orderBy);
-    }
+    onBeforeCreate!(data, props)
+
+    console.log(data)
 
     createItem({
       variables: {
