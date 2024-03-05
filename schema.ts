@@ -208,6 +208,7 @@ export const lists: Lists = {
         type: "enum",
         options: [
           { label: "Day(s)", value: "days" },
+          { label: "Weeks(s)", value: "weeks" },
           { label: "Month(s)", value: "months" },
         ],
         defaultValue: "days",
@@ -217,6 +218,7 @@ export const lists: Lists = {
         type: "enum",
         options: [
           { label: "Day(s)", value: "days" },
+          { label: "Weeks(s)", value: "weeks" },
           { label: "Month(s)", value: "months" },
         ],
         defaultValue: "days",
