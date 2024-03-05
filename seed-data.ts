@@ -312,7 +312,7 @@ const seed_data: { [listKey: string]: any } = {
   DataSource: [
     {
       title: "Attom's Estated Data",
-      dataType: { title: "Addresses" },
+      dataType: { connect: { title: "Addresses" } },
       filtering: JSON.stringify({
         ID: {
           label: "ID",
@@ -331,7 +331,7 @@ const seed_data: { [listKey: string]: any } = {
     },
     {
       title: "DeepSync's Movers Data",
-      dataType: { title: "Addresses" },
+      dataType: { connect: { title: "Addresses" } },
       filtering: JSON.stringify({
         ...filters.address,
         date: {
@@ -380,7 +380,7 @@ const seed_data: { [listKey: string]: any } = {
     },
     {
       title: "Esquire's Audience Data",
-      dataType: { title: "Device IDs" },
+      dataType: { connect: { title: "Device IDs" } },
       filtering: JSON.stringify({
         id: {
           label: "ID",
@@ -394,7 +394,7 @@ const seed_data: { [listKey: string]: any } = {
     },
     {
       title: "Esquire's GeoFrame Data",
-      dataType: { title: "Polygons" },
+      dataType: { connect: { title: "Polygons" } },
       filtering: JSON.stringify({
         id: {
           label: "ID",
@@ -408,7 +408,7 @@ const seed_data: { [listKey: string]: any } = {
     },
     {
       title: "Esquire's Sales Data",
-      dataType: { title: "Addresses" },
+      dataType: { connect: { title: "Addresses" } },
       filtering: JSON.stringify({
         ...filters.address,
         client: {
@@ -419,14 +419,14 @@ const seed_data: { [listKey: string]: any } = {
     },
     {
       title: "FourSquare's POI Data",
-      dataType: { title: "Addresses" },
+      dataType: { connect: { title: "Addresses" } },
       filtering: JSON.stringify({
         ...filters.address,
       }),
     },
     {
       title: "OpenStreetMaps' Building Footprints",
-      dataType: { title: "Polygons" },
+      dataType: { connect: { title: "Polygons" } },
       filtering: JSON.stringify({
         ...filters.address,
       }),
@@ -437,7 +437,7 @@ const seed_data: { [listKey: string]: any } = {
       tags: "New Movers,California Closets,Atlanta",
       rebuildFrequency: 1,
       rebuildUnit: "weeks",
-      dataSource: { title: "DeepSync's Movers Data" },
+      dataSource: { connect: { title: "DeepSync's Movers Data" } },
       dataFilter: JSON.stringify({
         and: [
           { ">=": [{ var: "date" }, { date_add: [{ now: [] }, -9, "month"] }] },
@@ -519,7 +519,7 @@ const seed_data: { [listKey: string]: any } = {
       tags: "Venue Replay,California Closets,Atlanta",
       rebuildFrequency: 1,
       rebuildUnit: "weeks",
-      dataSource: { title: "Esquire's GeoFrame Data" },
+      dataSource: { connect: { title: "Esquire's GeoFrame Data" } },
       dataFilter: JSON.stringify({
         and: [
           {
@@ -655,7 +655,7 @@ const seed_data: { [listKey: string]: any } = {
       tags: "Friends & Family,AFW,Ashley,Arizona",
       rebuildFrequency: 1,
       rebuildUnit: "weeks",
-      dataSource: { title: "Esquire's Sales Data" },
+      dataSource: { connect: { title: "Esquire's Sales Data" } },
       dataFilter: JSON.stringify({
         and: [
           { "==": [{ var: "client" }, "AFW???"] },
@@ -693,7 +693,7 @@ const seed_data: { [listKey: string]: any } = {
       tags: "Past Customer,Skandinavia",
       rebuildFrequency: 1,
       rebuildUnit: "weeks",
-      dataSource: { title: "Esquire's Sales Data" },
+      dataSource: { connect: { title: "Esquire's Sales Data" } },
       dataFilter: JSON.stringify({
         and: [
           { "==": [{ var: "client" }, "Skandinavia???"] },
@@ -706,7 +706,7 @@ const seed_data: { [listKey: string]: any } = {
       tags: "Custom Demographic,Agren,NEAG",
       rebuildFrequency: 1,
       rebuildUnit: "months",
-      dataSource: { title: "Attom's Estated Data" },
+      dataSource: { connect: { title: "Attom's Estated Data" } },
       dataFilter: JSON.stringify({
         and: [
           {
@@ -1018,7 +1018,7 @@ const seed_data: { [listKey: string]: any } = {
       tags: "Digital Neighbor,RTB,KY,Louisville",
       rebuildFrequency: 1,
       rebuildUnit: "weeks",
-      dataSource: { title: "Esquire's Sales Data" },
+      dataSource: { connect: { title: "Esquire's Sales Data" } },
       dataFilter: JSON.stringify({
         and: [
           { "==": [{ var: "client" }, "RTB???"] },
@@ -1032,28 +1032,6 @@ const seed_data: { [listKey: string]: any } = {
 
 async function main() {
   const context = getContext(config, PrismaModule);
-
-  const format_query = async (list: GraphQLObjectType, data: any) => {
-    for (const key of Object.keys(data)) {
-      const field = list.getFields()[key];
-      if (
-        field.type instanceof GraphQLObjectType &&
-        !data[key].hasOwnProperty("create")
-      ) {
-        const relatedItem = await context.db[field.type.name].findOne({
-          where: data[key],
-        });
-        if (relatedItem) {
-          data[key] = { connect: { id: relatedItem.id } };
-        } else {
-          console.error(
-            `Related item not found for key: ${key} and title: ${data[key]}`
-          );
-        }
-      }
-    }
-    return data;
-  };
 
   console.log(`🌱 Inserting seed data`);
   for (const [listKey, items] of Object.entries(seed_data)) {
@@ -1080,7 +1058,7 @@ async function main() {
       if (!existingItem) {
         try {
           await context.db[listKey].createOne({
-            data: await format_query(gqlt, data),
+            data,
           });
           console.log(
             `Created ${listKey} record with unique fields: ${JSON.stringify(
@@ -1104,7 +1082,7 @@ async function main() {
         );
         await context.db[listKey].updateOne({
           where: { id: existingItem.id },
-          data: await format_query(gqlt, data),
+          data: data,
         });
       }
     }
