@@ -16,11 +16,13 @@ import CreateCardContainer from "./components/Create";
 import { WrapperProps } from "../../wrapper";
 import { useList } from "@keystone-6/core/admin-ui/context";
 import React from "react";
+import { InsertOrderByFactory } from "./components/Create";
 
 export type CardProps = {
   listRef?: Ref<any>;
   listWrapper?: ListWrapperFactory;
   itemWrapper?: ItemWrapperFactory;
+  insertOrderBy?: InsertOrderByFactory;
 } & WrapperProps;
 
 export const Cards = React.forwardRef((props: CardProps, ref) => {
@@ -136,6 +138,7 @@ export const Cards = React.forwardRef((props: CardProps, ref) => {
           selectedFields={selectedFields}
           setHideConnectItemsLabel={setHideConnectItemsLabel}
           setShowConnectItems={setShowConnectItems}
+          insertOrderBy={props.insertOrderBy}
         />
       )}
       {/* TODO: this may not be visible to the user when they invoke the save action. Maybe scroll to it? */}
