@@ -1,6 +1,10 @@
 import React, { Ref, useRef } from "react";
 import { WrapperProps } from "../../wrapper";
-import { FieldContainer, FieldDescription, FieldLegend } from "@keystone-ui/fields";
+import {
+  FieldContainer,
+  FieldDescription,
+  FieldLegend,
+} from "@keystone-ui/fields";
 import { useKeystone, useList } from "@keystone-6/core/admin-ui/context";
 import { fetchGraphQLClient } from "../../../../admin/utils";
 import { Droppable, Draggable, DragDropContext } from "react-beautiful-dnd";
@@ -12,6 +16,8 @@ import type {
 } from "../cards/components/List";
 import "./styles.css";
 import { getGqlNames } from "@keystone-6/core/types";
+import { Items } from "../cards/useItemState";
+import { InsertOrderByFactory } from "../cards/components/Create";
 
 export default function Sortable(props: WrapperProps) {
   const droppable: Ref<HTMLOListElement> = useRef(null);
@@ -26,7 +32,10 @@ export default function Sortable(props: WrapperProps) {
         refListKey: props.field.refListKey,
         sortField: props.value.displayOptions.orderBy as string,
         originalItemOrder: listProps.currentIdsArrayWithFetchedItems
-          .sort((a, b) => a.itemGetter.path.slice(-1)[0] - b.itemGetter.path.slice(-1)[0])
+          .sort(
+            (a, b) =>
+              a.itemGetter.path.slice(-1)[0] - b.itemGetter.path.slice(-1)[0]
+          )
           .map((item) => item.id),
       };
       console.log(context, result);
@@ -55,7 +64,9 @@ export default function Sortable(props: WrapperProps) {
       // Mutate Query
       const gqlNames = getGqlNames({
         listKey: props.field.refListKey,
-        pluralGraphQLName: keystone.adminMeta.lists[props.field.refListKey].plural.replace(" ", ""),
+        pluralGraphQLName: keystone.adminMeta.lists[
+          props.field.refListKey
+        ].plural.replace(" ", ""),
       });
       if (mutateData.length > 0) {
         fetchGraphQL(
@@ -73,14 +84,16 @@ export default function Sortable(props: WrapperProps) {
 
         // Update Items
         let newItems = {};
-        Object.entries(listProps.items).forEach((pair: [string, any], index: number) => {
-          let newPath = [...pair[1].path];
-          newPath.pop();
-          newItems[pair[0]] = {
-            ...pair[1],
-            path: [...newPath, reorderedItems.indexOf(pair[0])],
-          };
-        });
+        Object.entries(listProps.items).forEach(
+          (pair: [string, any], index: number) => {
+            let newPath = [...pair[1].path];
+            newPath.pop();
+            newItems[pair[0]] = {
+              ...pair[1],
+              path: [...newPath, reorderedItems.indexOf(pair[0])],
+            };
+          }
+        );
         listProps.setItems(newItems);
       }
     }
@@ -97,7 +110,13 @@ export default function Sortable(props: WrapperProps) {
       </Droppable>
     </DragDropContext>
   );
-  const itemWrapper: ItemWrapperFactory = (item, index, props, id, itemGetter) => (
+  const itemWrapper: ItemWrapperFactory = (
+    item,
+    index,
+    props,
+    id,
+    itemGetter
+  ) => (
     <Draggable key={`draggable-${id}`} draggableId={id} index={index}>
       {(provided) => (
         <div
@@ -105,13 +124,18 @@ export default function Sortable(props: WrapperProps) {
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           data-refid={id}
-          data-index={index}
-        >
+          data-index={index}>
           {item}
         </div>
       )}
     </Draggable>
   );
+  const insertOrderBy: InsertOrderByFactory = (items: Items) => {
+    return {
+      [props.value.displayOptions.orderBy as string]: Object.keys(items).length,
+    };
+  };
+
   return (
     <FieldContainer as="fieldset">
       <FieldLegend>{props.field.label}</FieldLegend>
@@ -124,6 +148,7 @@ export default function Sortable(props: WrapperProps) {
         ref={droppable}
         listWrapper={listWrapper}
         itemWrapper={itemWrapper}
+        insertOrderBy={props.value.displayOptions.orderBy ? insertOrderBy : undefined}
       />
     </FieldContainer>
   );

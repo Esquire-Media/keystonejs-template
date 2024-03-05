@@ -27,6 +27,7 @@ type CreateRecordContainerProps = CardProps & {
   setItems: (items: Items) => void;
   selectedFields: string;
   foreignList: ListMeta;
+  insertOrderBy?: InsertOrderByFactory;
 };
 
 export function CreateRecordContainer(props: CreateRecordContainerProps) {
@@ -34,6 +35,7 @@ export function CreateRecordContainer(props: CreateRecordContainerProps) {
   return (
     <CardContainer mode="create">
       <InlineCreate
+        items={items}
         selectedFields={selectedFields}
         fields={value.displayOptions.inlineCreate!.fields}
         list={props.foreignList}
@@ -51,6 +53,7 @@ export function CreateRecordContainer(props: CreateRecordContainerProps) {
               : new Set([id]),
           });
         }}
+        insertOrderBy={props.insertOrderBy}
       />
     </CardContainer>
   );
@@ -75,8 +78,7 @@ export function CreateButtonsContainer(props: CreateButtonContainerProps) {
                 ...props.value,
                 itemBeingCreated: true,
               });
-            }}
-          >
+            }}>
             Create {props.foreignList.singular}
           </Button>
         )}
@@ -88,8 +90,7 @@ export function CreateButtonsContainer(props: CreateButtonContainerProps) {
             onClick={() => {
               props.setShowConnectItems(true);
               props.setHideConnectItemsLabel("Cancel");
-            }}
-          >
+            }}>
             Link existing {props.foreignList.singular}
           </Button>
         )}
@@ -109,30 +110,35 @@ export default function CreateCardContainer(
   ) : null;
 }
 
+export type InsertOrderByFactory = (items: Items) => { [x: string]: number };
 export function InlineCreate({
+  items,
   list,
   onCancel,
   onCreate,
   fields: fieldPaths,
   selectedFields,
+  insertOrderBy,
 }: {
+  items: Items;
   list: ListMeta;
   selectedFields: string;
   fields: readonly string[];
   onCancel: () => void;
   onCreate: (itemGetter: DataGetter<ItemData>) => void;
+  insertOrderBy?: InsertOrderByFactory;
 }) {
+  const orderBy = insertOrderBy ? insertOrderBy(items) : undefined;
   const toasts = useToasts();
   const fields = useFieldsObj(list, fieldPaths);
-
   const [createItem, { loading, error }] = useMutation(
     gql`mutation($data: ${list.gqlNames.createInputName}!) {
         item: ${list.gqlNames.createMutationName}(data: $data) {
           ${selectedFields}
+          ${orderBy ? Object.keys(orderBy)[0] : ""}
       }
     }`
   );
-
   const [value, setValue] = useState(() => {
     const value: Value = {};
     Object.keys(fields).forEach((fieldPath) => {
@@ -141,6 +147,7 @@ export function InlineCreate({
         value: fields[fieldPath].controller.defaultValue,
       };
     });
+    console.log(value);
     return value;
   });
 
@@ -163,6 +170,10 @@ export function InlineCreate({
         Object.assign(data, serialized);
       }
     });
+
+    if (orderBy) {
+      Object.assign(data, orderBy);
+    }
 
     createItem({
       variables: {
@@ -219,8 +230,7 @@ export function InlineCreate({
             isLoading={loading}
             size="small"
             tone="positive"
-            weight="bold"
-          >
+            weight="bold">
             Create {list.singular}
           </Button>
           <Button size="small" weight="none" onClick={onCancel}>
