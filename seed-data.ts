@@ -3,6 +3,8 @@ import config from "./keystone";
 import * as PrismaModule from "@prisma/client";
 import { GraphQLInputObjectType, GraphQLObjectType } from "graphql";
 
+const JSONify = (data: any) => JSON.stringify(data, undefined, 4)
+
 const common = {
   listValues: {
     cardinalDirections: [
@@ -313,7 +315,7 @@ const seed_data: { [listKey: string]: any } = {
     {
       title: "Attom's Estated Data",
       dataType: { connect: { title: "Addresses" } },
-      filtering: JSON.stringify({
+      filtering: JSONify({
         ID: {
           label: "ID",
           type: "text",
@@ -332,7 +334,7 @@ const seed_data: { [listKey: string]: any } = {
     {
       title: "DeepSync's Movers Data",
       dataType: { connect: { title: "Addresses" } },
-      filtering: JSON.stringify({
+      filtering: JSONify({
         ...filters.address,
         date: {
           label: "Meta: Date Published",
@@ -381,7 +383,7 @@ const seed_data: { [listKey: string]: any } = {
     {
       title: "Esquire's Audience Data",
       dataType: { connect: { title: "Device IDs" } },
-      filtering: JSON.stringify({
+      filtering: JSONify({
         id: {
           label: "ID",
           type: "text",
@@ -395,7 +397,7 @@ const seed_data: { [listKey: string]: any } = {
     {
       title: "Esquire's GeoFrame Data",
       dataType: { connect: { title: "Polygons" } },
-      filtering: JSON.stringify({
+      filtering: JSONify({
         id: {
           label: "ID",
           type: "text",
@@ -409,7 +411,7 @@ const seed_data: { [listKey: string]: any } = {
     {
       title: "Esquire's Sales Data",
       dataType: { connect: { title: "Addresses" } },
-      filtering: JSON.stringify({
+      filtering: JSONify({
         ...filters.address,
         client: {
           label: "Client",
@@ -424,14 +426,14 @@ const seed_data: { [listKey: string]: any } = {
     {
       title: "FourSquare's POI Data",
       dataType: { connect: { title: "Addresses" } },
-      filtering: JSON.stringify({
+      filtering: JSONify({
         ...filters.address,
       }),
     },
     {
       title: "OpenStreetMaps' Building Footprints",
       dataType: { connect: { title: "Polygons" } },
-      filtering: JSON.stringify({
+      filtering: JSONify({
         ...filters.address,
       }),
     },
@@ -442,7 +444,7 @@ const seed_data: { [listKey: string]: any } = {
       rebuildFrequency: 1,
       rebuildUnit: "weeks",
       dataSource: { connect: { title: "DeepSync's Movers Data" } },
-      dataFilter: JSON.stringify({
+      dataFilter: JSONify({
         and: [
           { ">=": [{ var: "date" }, { date_add: [{ now: [] }, -9, "month"] }] },
           {
@@ -524,7 +526,7 @@ const seed_data: { [listKey: string]: any } = {
       rebuildFrequency: 1,
       rebuildUnit: "weeks",
       dataSource: { connect: { title: "Esquire's GeoFrame Data" } },
-      dataFilter: JSON.stringify({
+      dataFilter: JSONify({
         and: [
           {
             in: [
@@ -554,7 +556,7 @@ const seed_data: { [listKey: string]: any } = {
           {
             outputType: { connect: { title: "Device IDs" } },
             sort: 0,
-            customCoding: JSON.stringify({
+            customCoding: JSONify({
               request: {
                 dateStart: { date_add: [{ now: [] }, -6, "month"] },
                 dateEnd: { date_add: [{ now: [] }, -2, "days"] },
@@ -564,7 +566,7 @@ const seed_data: { [listKey: string]: any } = {
           {
             outputType: { connect: { title: "Addresses" } },
             sort: 1,
-            customCoding: JSON.stringify({
+            customCoding: JSONify({
               filter: {
                 and: [
                   {
@@ -644,7 +646,7 @@ const seed_data: { [listKey: string]: any } = {
           {
             outputType: { connect: { title: "Device IDs" } },
             sort: 2,
-            customCoding: JSON.stringify({
+            customCoding: JSONify({
               demographics: {
                 filter: {
                   and: [{ ">=": [{ var: "estimatedHomeValue" }, 600000] }],
@@ -660,7 +662,7 @@ const seed_data: { [listKey: string]: any } = {
       rebuildFrequency: 1,
       rebuildUnit: "weeks",
       dataSource: { connect: { title: "Esquire's Sales Data" } },
-      dataFilter: JSON.stringify({
+      dataFilter: JSONify({
         and: [
           { "==": [{ var: "client" }, "AFW???"] },
           { ">=": [{ var: "date" }, { date_add: [{ now: [] }, -45, "days"] }] },
@@ -672,7 +674,7 @@ const seed_data: { [listKey: string]: any } = {
           {
             outputType: { connect: { title: "Polygons" } },
             sort: 0,
-            customCoding: JSON.stringify({
+            customCoding: JSONify({
               request: {
                 dateStart: { date_add: [{ now: [] }, -6, "month"] },
                 dateEnd: { date_add: [{ now: [] }, -2, "days"] },
@@ -682,7 +684,7 @@ const seed_data: { [listKey: string]: any } = {
           {
             outputType: { connect: { title: "Device IDs" } },
             sort: 1,
-            customCoding: JSON.stringify({
+            customCoding: JSONify({
               observation: {
                 filter: {
                   and: [{ "<": [{ reduce: { filter: [] } }, 20] }],
@@ -698,7 +700,7 @@ const seed_data: { [listKey: string]: any } = {
       rebuildFrequency: 1,
       rebuildUnit: "weeks",
       dataSource: { connect: { title: "Esquire's Sales Data" } },
-      dataFilter: JSON.stringify({
+      dataFilter: JSONify({
         and: [
           { "==": [{ var: "client" }, "Skandinavia???"] },
           { ">=": [{ var: "date" }, { date_add: [{ now: [] }, -90, "days"] }] },
@@ -711,7 +713,7 @@ const seed_data: { [listKey: string]: any } = {
       rebuildFrequency: 1,
       rebuildUnit: "months",
       dataSource: { connect: { title: "Attom's Estated Data" } },
-      dataFilter: JSON.stringify({
+      dataFilter: JSONify({
         and: [
           {
             in: [
@@ -996,7 +998,7 @@ const seed_data: { [listKey: string]: any } = {
           {
             outputType: { connect: { title: "Device IDs" } },
             sort: 0,
-            customCoding: JSON.stringify({
+            customCoding: JSONify({
               request: {
                 dateStart: { date_add: [{ now: [] }, -6, "month"] },
                 dateEnd: { date_add: [{ now: [] }, -2, "days"] },
@@ -1023,7 +1025,7 @@ const seed_data: { [listKey: string]: any } = {
       rebuildFrequency: 1,
       rebuildUnit: "weeks",
       dataSource: { connect: { title: "Esquire's Sales Data" } },
-      dataFilter: JSON.stringify({
+      dataFilter: JSONify({
         and: [
           { "==": [{ var: "client" }, "RTB???"] },
           { ">=": [{ var: "date" }, { date_add: [{ now: [] }, -45, "days"] }] },
@@ -1065,20 +1067,20 @@ async function main() {
             data,
           });
           console.log(
-            `Created ${listKey} record with unique fields: ${JSON.stringify(
+            `Created ${listKey} record with unique fields: ${JSONify(
               whereClause
             )}`
           );
         } catch (error) {
           console.warn(
-            `Could not create ${listKey} record with unique fields: ${JSON.stringify(
+            `Could not create ${listKey} record with unique fields: ${JSONify(
               whereClause
             )}`
           );
         }
       } else {
         console.log(
-          `Updating existing ${listKey} record with unique fields: ${JSON.stringify(
+          `Updating existing ${listKey} record with unique fields: ${JSONify(
             whereClause
           )}`
         );
