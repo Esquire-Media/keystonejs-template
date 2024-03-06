@@ -299,7 +299,7 @@ const filters = {
 };
 
 const seed_data: { [listKey: string]: any } = {
-  DemandSidePlatform: [
+  Publisher: [
     { title: "Meta" },
     { title: "OneView" },
     { title: "Xandr" },
