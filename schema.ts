@@ -18,6 +18,7 @@ import {
   // virtual,
   // calendarDay,
   // multiselect,
+  codeblock,
   filter,
   relationship,
   // rating,
@@ -135,7 +136,18 @@ export const lists: Lists = {
         validation: { isRequired: true },
         isIndexed: "unique",
       }),
-      filtering: json({ defaultValue: {} }),
+      filtering: codeblock({
+        ui: {
+          language: "json",
+          options: {
+            autoClosingBrackets: "always",
+            autoClosingQuotes: "always",
+            formatOnPaste: true,
+            formatOnType: true,
+            scrollBeyondLastLine: false,
+          },
+        },
+      }),
     },
   }),
   ProcessingStep: list({
@@ -149,17 +161,19 @@ export const lists: Lists = {
           hideCreate: true,
         },
       }),
-      // audience: relationship({
-      //   ref: "Audience",
-      //   ui: {
-      //     listView: { fieldMode: "hidden" },
-      //     createView: { fieldMode: "hidden" },
-      //     itemView: { fieldMode: "read" },
-      //   },
-      //   many: false,
-      // }),
       sort: integer({ ui: { createView: { fieldMode: "hidden" } } }),
-      customCoding: json(),
+      customCoding: codeblock({
+        ui: {
+          language: "json",
+          options: {
+            autoClosingBrackets: "always",
+            autoClosingQuotes: "always",
+            formatOnPaste: true,
+            formatOnType: true,
+            scrollBeyondLastLine: false,
+          },
+        },
+      }),
     },
   }),
 
