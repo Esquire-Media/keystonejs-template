@@ -16,6 +16,7 @@ import {
   multiselect,
 } from "@keystone-6/core/fields";
 
+import codeblock from "./codeblock";
 import filter from "./filter";
 import relationship from "./relationship";
 import rating from "./rating";
@@ -36,6 +37,8 @@ export {
   virtual,
   calendarDay,
   multiselect,
+
+  codeblock,
   filter,
   relationship,
   rating,
