@@ -138,9 +138,21 @@ export default function Sortable(props: SortableWrapperProps) {
     </Draggable>
   );
   const insertOrderBy: DataHandler = (data, dhProps) => {
-    data[props.value.displayOptions.orderBy] = Object.keys(
-      dhProps.items
-    ).length;
+    let value = 0;
+    Object.entries(dhProps.items).forEach((pair: [string, any]) => {
+      const path = pair[1].path.slice(-1)[0];
+      if (typeof path === "number" && path >= value) {
+        value = path + 1;
+      }
+    });
+
+    // Handle when multiple processes get created before clicking "save changes"
+    // Newly created entries only have "path" equal to ["item"] (they dont have an orderBy value)
+    if (value < Object.keys(dhProps.items).length) {
+      value = Object.keys(dhProps.items).length
+    }
+
+    data[props.value.displayOptions.orderBy] = value;
   };
 
   return (
