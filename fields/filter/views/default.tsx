@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { WrapperProps } from "../wrapper";
 import { mergeDeep } from "@apollo/client/utilities";
-import { Config as InitConfig } from "../config";
+import InitConfig from "../config";
 
 import type {
   Config,
