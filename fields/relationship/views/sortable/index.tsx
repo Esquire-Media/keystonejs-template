@@ -1,12 +1,11 @@
-import React, { Ref, useRef } from "react";
+import React, { Ref, useEffect, useRef, useState } from "react";
 import { WrapperProps } from "../../wrapper";
 import {
   FieldContainer,
   FieldDescription,
   FieldLegend,
 } from "@keystone-ui/fields";
-import { useKeystone, useList } from "@keystone-6/core/admin-ui/context";
-import { fetchGraphQLClient } from "../../../../admin/utils";
+import { useKeystone } from "@keystone-6/core/admin-ui/context";
 import { Droppable, Draggable, DragDropContext } from "react-beautiful-dnd";
 import { Cards } from "../cards";
 import type {
@@ -18,6 +17,10 @@ import "./styles.css";
 import { getGqlNames } from "@keystone-6/core/types";
 import { Items } from "../cards/useItemState";
 import { DataHandler } from "../cards/components/Create";
+import {
+  gql,
+  useMutation,
+} from "@keystone-6/core/admin-ui/apollo";
 
 export type SortableWrapperProps = WrapperProps & {
   value: {
@@ -29,7 +32,31 @@ export type SortableWrapperProps = WrapperProps & {
 export default function Sortable(props: SortableWrapperProps) {
   const droppable: Ref<HTMLOListElement> = useRef(null);
   const keystone = useKeystone();
-  const fetchGraphQL = fetchGraphQLClient(keystone.apiPath);
+  const gqlNames = getGqlNames({
+    listKey: props.field.refListKey,
+    pluralGraphQLName: keystone.adminMeta.lists[
+      props.field.refListKey
+    ].plural.replace(" ", ""),
+  });
+
+  const [previousItems, setPreviousItems] = useState<{
+    data: Items;
+    setItems: (val: Items) => void;
+  }>();
+  const [updateOrderBy, { data, loading, error }] = useMutation(
+    gql`mutation($data: [${gqlNames.updateManyInputName}!]!) {
+        ${gqlNames.updateManyMutationName}(data: $data) {
+          ${props.value.displayOptions.orderBy as string}
+        }
+      }
+    `
+  );
+
+  useEffect(() => {
+    if (error && !loading) {
+      previousItems?.setItems(previousItems.data);
+    }
+  }, [data, loading, error]);
 
   const onDragEnd = (result, listProps: ListCardContainerProps) => {
     if (result.destination) {
@@ -43,17 +70,27 @@ export default function Sortable(props: SortableWrapperProps) {
             (a, b) =>
               a.itemGetter.path.slice(-1)[0] - b.itemGetter.path.slice(-1)[0]
           )
-          .map((item) => item.id),
+          .map((item) => item),
       };
-      console.log(context, result);
+
+      // Set Previous Items in case of error
+      let previousItems = {};
+      context.originalItemOrder.forEach(
+        (value) => (previousItems[value.id] = value)
+      );
+      setPreviousItems({
+        data: previousItems,
+        setItems: listProps.setItems,
+      });
 
       // Reorder items
-      let reorderedItems = [...context.originalItemOrder];
+      const originalItemIds = context.originalItemOrder.map((v) => v.id);
+      let reorderedItems = [...originalItemIds];
       const [movedItemId] = reorderedItems.splice(result.source.index, 1);
       reorderedItems.splice(result.destination.index, 0, movedItemId);
       const mutateData = reorderedItems
         .map((value: string, index: number) => {
-          if (index !== context.originalItemOrder.indexOf(value)) {
+          if (index !== originalItemIds.indexOf(value)) {
             return {
               where: {
                 id: value,
@@ -69,27 +106,8 @@ export default function Sortable(props: SortableWrapperProps) {
         .filter((v) => v);
 
       // Mutate Query
-      const gqlNames = getGqlNames({
-        listKey: props.field.refListKey,
-        pluralGraphQLName: keystone.adminMeta.lists[
-          props.field.refListKey
-        ].plural.replace(" ", ""),
-      });
       if (mutateData.length > 0) {
-        fetchGraphQL(
-          `
-          mutation($data: [${gqlNames.updateManyInputName}!]!) {
-            ${gqlNames.updateManyMutationName}(data: $data) {
-              ${context.sortField}
-            }
-          }
-        `,
-          {
-            data: mutateData,
-          }
-        );
-
-        // Update Items
+        updateOrderBy({ variables: { data: mutateData } });
         let newItems = {};
         Object.entries(listProps.items).forEach(
           (pair: [string, any], index: number) => {
@@ -149,7 +167,7 @@ export default function Sortable(props: SortableWrapperProps) {
     // Handle when multiple processes get created before clicking "save changes"
     // Newly created entries only have "path" equal to ["item"] (they dont have an orderBy value)
     if (value < Object.keys(dhProps.items).length) {
-      value = Object.keys(dhProps.items).length
+      value = Object.keys(dhProps.items).length;
     }
 
     data[props.value.displayOptions.orderBy] = value;
