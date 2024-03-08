@@ -43,6 +43,7 @@ export function useItemState({
     }`,
     {
       variables: { id, orderBy: field.refOrderBy },
+      fetchPolicy: "no-cache",
       errorPolicy: "all",
       skip: id === null,
     }
