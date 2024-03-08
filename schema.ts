@@ -10,7 +10,7 @@ import {
   integer,
   // bigInt,
   // image,
-  json,
+  // json,
   password,
   select,
   text,
@@ -23,6 +23,7 @@ import {
   relationship,
   // rating,
 } from "./fields";
+import { KeystoneContext } from "@keystone-6/core/types";
 
 const auditable: BaseFields<any> = {
   createdBy: relationship({
@@ -99,14 +100,50 @@ export const lists: Lists = {
   User: list({
     access: allowAll,
     fields: {
+      ...auditable,
       name: text({ validation: { isRequired: true } }),
       email: text({
         validation: { isRequired: true },
         isIndexed: "unique",
       }),
       password: password({ validation: { isRequired: true } }),
-      createdAt: timestamp({
-        defaultValue: { kind: "now" },
+      advertisers: relationship({
+        ref: "Advertiser.users",
+        many: true,
+        ui: {
+          displayMode: "cards",
+          cardFields: ["title"],
+          linkToItem: true,
+        },
+      }),
+    },
+  }),
+
+  Advertiser: list({
+    access: allowAll,
+    fields: {
+      ...auditable,
+      title: text({
+        validation: { isRequired: true },
+        isIndexed: "unique",
+      }),
+      users: relationship({
+        ref: "User.advertisers",
+        many: true,
+        ui: {
+          displayMode: "cards",
+          cardFields: ["name", "email"],
+          linkToItem: true,
+        },
+      }),
+      audiences: relationship({
+        ref: "Audience.advertisers",
+        many: true,
+        ui: {
+          displayMode: "cards",
+          cardFields: ["tags"],
+          linkToItem: true,
+        },
       }),
     },
   }),
@@ -138,7 +175,7 @@ export const lists: Lists = {
       }),
       filtering: codeblock({
         ui: {
-          language: "json",
+          // language: "json",
           options: {
             autoClosingBrackets: "always",
             autoClosingQuotes: "always",
@@ -154,6 +191,10 @@ export const lists: Lists = {
     access: allowAll,
     fields: {
       ...auditable,
+      audience: relationship({
+        ref: "Audience.processes",
+        many: true,
+      }),
       outputType: relationship({
         ref: "DataType",
         ui: {
@@ -211,11 +252,39 @@ export const lists: Lists = {
     },
   }),
 
+  Tag: list({
+    access: allowAll,
+    fields: {
+      title: text({
+        validation: { isRequired: true },
+        isIndexed: "unique",
+      }),
+    },
+  }),
+
   Audience: list({
     access: allowAll,
     fields: {
       ...auditable,
-      tags: text(),
+      advertisers: relationship({
+        ref: "Advertiser.audiences",
+        many: true,
+        ui: {
+          displayMode: "cards",
+          cardFields: ["title"],
+          inlineConnect: true,
+        },
+      }),
+      tags: relationship({
+        ref: "Tag",
+        many: true,
+        ui: {
+          displayMode: "cards",
+          cardFields: ["title"],
+          inlineConnect: true,
+          inlineCreate: { fields: ["title"] },
+        },
+      }),
       status: checkbox({ defaultValue: true }),
       rebuildFrequency: integer({ defaultValue: 1 }),
       rebuildUnit: select({
@@ -255,7 +324,7 @@ export const lists: Lists = {
         },
       }),
       processes: relationship({
-        ref: "ProcessingStep",
+        ref: "ProcessingStep.audience",
         many: true,
         refOrderBy: [{ sort: "asc" }],
         ui: {
@@ -267,13 +336,67 @@ export const lists: Lists = {
         },
       }),
     },
-    db: {
-      extendPrismaSchema: (schema) => {
-        return schema.replace(
-          /(model [^}]+)}/g,
-          "$1@@unique([tags, dataSourceId, dataFilter])\n}"
-        );
-      },
-    },
+    // hooks: {
+    //   validateInput: async ({
+    //     operation,
+    //     resolvedData,
+    //     addValidationError,
+    //     context,
+    //   }) => {
+    //     if (operation === "create" || operation === "update") {
+    //       function where_equal(obj) {
+    //         return Object.entries(obj).reduce(
+    //           (acc, [key, value]) => {
+    //             acc[key] = { equals: value };
+    //             return acc;
+    //           },
+    //           {} as Record<string, any>
+    //         )
+    //       }
+    //       const where = { AND: [] as Array<any> };
+    //       const advertisers: Array<any> = [];
+    //       if (resolvedData.advertisers?.connect instanceof Array)
+    //         advertisers.push(...resolvedData.advertisers.connect);
+    //       if (resolvedData.advertisers?.create instanceof Array)
+    //         advertisers.push(...resolvedData.advertisers.create);
+    //       if (advertisers.length)
+    //         where.AND.push({
+    //           advertisers: { some: { id: { in: advertisers } } },
+    //         });
+    //       const tags: Array<any> = [];
+    //       if (resolvedData.tags?.connect instanceof Array)
+    //         tags.push(...resolvedData.tags.connect);
+    //       if (resolvedData.tags?.create instanceof Array)
+    //         tags.push(...resolvedData.tags.create);
+    //       if (tags.length)
+    //         where.AND.push({
+    //           tags: { some: { id: { in: tags } } },
+    //         });
+    //       const dataSource =
+    //         resolvedData.dataSource?.connect || resolvedData.dataSource?.create;
+    //       if (dataSource)
+    //         where.AND.push({
+    //           dataSource: Object.entries(dataSource).reduce(
+    //             (acc, [key, value]) => {
+    //               acc[key] = { equals: value };
+    //               return acc;
+    //             },
+    //             {} as Record<string, any>
+    //           ),
+    //         });
+          
+    //       console.log(JSON.stringify({where}))
+    //       // Adjust this query based on the actual data structure and necessary comparisons
+    //       const existingRecords = await context.db.Audience.findMany({ where });
+    //       console.log(existingRecords)
+
+    //       if (existingRecords.length > 0) {
+    //         addValidationError(
+    //           "A record with the same combination of advertisers, tags, dataSource, and dataFilter already exists."
+    //         );
+    //       }
+    //     }
+    //   },
+    // },
   }),
 };
