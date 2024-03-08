@@ -148,16 +148,16 @@ export function ItemCardContainer(props: ItemProps) {
 }
 
 export type ListWrapperFactory = (
-  list: JSX.Element,
+  list: React.JSX.Element,
   props: ListCardContainerProps
-) => JSX.Element;
+) => React.JSX.Element;
 export type ItemWrapperFactory = (
-  item: JSX.Element,
+  item: React.JSX.Element,
   index: number,
   props: ListCardContainerProps,
   id: string,
   itemGetter: DataGetter<ItemData>
-) => JSX.Element;
+) => React.JSX.Element;
 export type ListCardContainerProps = CardProps & {
   items: Items;
   selectedFields: string;
@@ -167,7 +167,7 @@ export type ListCardContainerProps = CardProps & {
   listWrapper?: ListWrapperFactory;
   itemWrapper?: ItemWrapperFactory;
 };
-export default function ListCardContainer(props: ListCardContainerProps) {
+export default function ListCardContainer(props: ListCardContainerProps): React.JSX.Element {
   const list = (
     <Stack
       gap="medium"

@@ -16,6 +16,7 @@ import CreateCardContainer, { DataHandler } from "./components/Create";
 import { WrapperProps } from "../../wrapper";
 import { useList } from "@keystone-6/core/admin-ui/context";
 import React from "react";
+import { FieldContainer, FieldLabel } from "@keystone-ui/fields";
 
 export type CardProps = {
   listRef?: Ref<any>;
@@ -101,52 +102,56 @@ export const Cards = React.forwardRef((props: CardProps, ref) => {
     .filter((x) => x.itemGetter);
 
   return (
-    <Stack gap="medium">
-      {currentIdsArrayWithFetchedItems.length !== 0 && (
-        <ListCardContainer
-          {...props}
-          listRef={ref}
-          foreignList={foreignList}
-          items={items}
-          setItems={setItems}
-          selectedFields={selectedFields}
-          currentIdsArrayWithFetchedItems={currentIdsArrayWithFetchedItems}
-        />
-      )}
-      {props.onChange === undefined ? null : displayOptions.inlineConnect &&
-        showConnectItems ? (
-        <EditCardContainer
-          {...props}
-          items={items}
-          setItems={setItems}
-          selectedFields={selectedFields}
-          client={client}
-          isLoadingLazyItems={isLoadingLazyItems}
-          hideConnectItemsLabel={hideConnectItemsLabel}
-          isMountedRef={isMountedRef}
-          setHideConnectItemsLabel={setHideConnectItemsLabel}
-          setIsLoadingLazyItems={setIsLoadingLazyItems}
-          setShowConnectItems={setShowConnectItems}
-        />
-      ) : (
-        <CreateCardContainer
-          {...props}
-          foreignList={foreignList}
-          items={items}
-          setItems={setItems}
-          selectedFields={selectedFields}
-          setHideConnectItemsLabel={setHideConnectItemsLabel}
-          setShowConnectItems={setShowConnectItems}
-        />
-      )}
-      {/* TODO: this may not be visible to the user when they invoke the save action. Maybe scroll to it? */}
-      {props.forceValidation && (
-        <Text color="red600" size="small">
-          You must finish creating and editing any related{" "}
-          {foreignList.label.toLowerCase()} before saving the{" "}
-          {localList.singular.toLowerCase()}
-        </Text>
-      )}
-    </Stack>
+    <FieldContainer key={props.id}>
+      <FieldLabel>{props.field.label}</FieldLabel>
+      <Stack gap="medium">
+        {currentIdsArrayWithFetchedItems.length !== 0 && (
+          <ListCardContainer
+            {...props}
+            listRef={ref}
+            foreignList={foreignList}
+            items={items}
+            setItems={setItems}
+            selectedFields={selectedFields}
+            currentIdsArrayWithFetchedItems={currentIdsArrayWithFetchedItems}
+          />
+        )}
+        {props.onChange === undefined ? null : displayOptions.inlineConnect &&
+          showConnectItems ? (
+          <EditCardContainer
+            {...props}
+            foreignList={foreignList}
+            items={items}
+            setItems={setItems}
+            selectedFields={selectedFields}
+            client={client}
+            isLoadingLazyItems={isLoadingLazyItems}
+            hideConnectItemsLabel={hideConnectItemsLabel}
+            isMountedRef={isMountedRef}
+            setHideConnectItemsLabel={setHideConnectItemsLabel}
+            setIsLoadingLazyItems={setIsLoadingLazyItems}
+            setShowConnectItems={setShowConnectItems}
+          />
+        ) : (
+          <CreateCardContainer
+            {...props}
+            foreignList={foreignList}
+            items={items}
+            setItems={setItems}
+            selectedFields={selectedFields}
+            setHideConnectItemsLabel={setHideConnectItemsLabel}
+            setShowConnectItems={setShowConnectItems}
+          />
+        )}
+        {/* TODO: this may not be visible to the user when they invoke the save action. Maybe scroll to it? */}
+        {props.forceValidation && (
+          <Text color="red600" size="small">
+            You must finish creating and editing any related{" "}
+            {foreignList.label.toLowerCase()} before saving the{" "}
+            {localList.singular.toLowerCase()}
+          </Text>
+        )}
+      </Stack>
+    </FieldContainer>
   );
 });

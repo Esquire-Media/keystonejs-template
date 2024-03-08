@@ -105,7 +105,7 @@ export default function Sortable(props: SortableWrapperProps) {
       }
     }
   };
-  const listWrapper: ListWrapperFactory = (list, props) => (
+  const listWrapper: ListWrapperFactory = (list, props): React.JSX.Element => (
     <DragDropContext onDragEnd={(results) => onDragEnd(results, props)}>
       <Droppable droppableId={props.field.path}>
         {(provided, snapshot) => (
