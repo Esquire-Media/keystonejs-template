@@ -3,7 +3,7 @@ import config from "./keystone";
 import * as PrismaModule from "@prisma/client";
 import { GraphQLInputObjectType, GraphQLObjectType } from "graphql";
 
-const JSONify = (data: any) => JSON.stringify(data, undefined, 4)
+const JSONify = (data: any) => JSON.stringify(data, undefined, 4);
 
 const common = {
   listValues: {
@@ -301,11 +301,42 @@ const filters = {
 };
 
 const seed_data: { [listKey: string]: any } = {
-  Publisher: [
-    { title: "Meta" },
-    { title: "OneView" },
-    { title: "Xandr" },
+  User: [
+    { name: "Admin", email: "admin@site.com", password: "password" },
+    { name: "Test User 1", email: "test1@site.com", password: "password" },
+    { name: "Test User 2", email: "test2@site.com", password: "password" },
   ],
+  Tag: [
+    { title: "New Movers" },
+    { title: "Past Customer" },
+    { title: "Venue Replay" },
+    { title: "Friends & Family" },
+    { title: "Custom Demographic" },
+    { title: "Digital Neighbor" },
+    { title: "Atlanta" },
+    { title: "Arizona" },
+    { title: "Kentuky" },
+    { title: "Louisville" },
+  ],
+  Advertiser: [
+    {
+      title: "California Closets",
+      users: { connect: [{ email: "test1@site.com" }] },
+    },
+    {
+      title: "American Furniture Warehouse",
+      users: { connect: [{ email: "test1@site.com" }] },
+    },
+    { title: "Skandinavia", users: { connect: [{ email: "test1@site.com" }] } },
+    { title: "Agren", users: { connect: [{ email: "test2@site.com" }] } },
+    { title: "Ashley", users: { connect: [{ email: "test1@site.com" }] } },
+    { title: "NEAG", users: { connect: [{ email: "test2@site.com" }] } },
+    {
+      title: "Relax the Back",
+      users: { connect: [{ email: "test2@site.com" }] },
+    },
+  ],
+  Publisher: [{ title: "Meta" }, { title: "OneView" }, { title: "Xandr" }],
   DataType: [
     { title: "Addresses" },
     { title: "Device IDs" },
@@ -440,7 +471,8 @@ const seed_data: { [listKey: string]: any } = {
   ],
   Audience: [
     {
-      tags: "New Movers,California Closets,Atlanta",
+      advertisers: { connect: [{ title: "California Closets" }] },
+      tags: { connect: [{ title: "New Movers" }, { title: "Atlanta" }] },
       rebuildFrequency: 1,
       rebuildUnit: "weeks",
       dataSource: { connect: { title: "DeepSync's Movers Data" } },
@@ -522,7 +554,8 @@ const seed_data: { [listKey: string]: any } = {
       }),
     },
     {
-      tags: "Venue Replay,California Closets,Atlanta",
+      advertisers: { connect: [{ title: "California Closets" }] },
+      tags: { connect: [{ title: "Venue Replay" }, { title: "Atlanta" }] },
       rebuildFrequency: 1,
       rebuildUnit: "weeks",
       dataSource: { connect: { title: "Esquire's GeoFrame Data" } },
@@ -658,7 +691,13 @@ const seed_data: { [listKey: string]: any } = {
       },
     },
     {
-      tags: "Friends & Family,AFW,Ashley,Arizona",
+      advertisers: {
+        connect: [
+          { title: "American Furniture Warehouse" },
+          { title: "Ashley" },
+        ],
+      },
+      tags: { connect: [{ title: "Friends & Family" }, { title: "Arizona" }] },
       rebuildFrequency: 1,
       rebuildUnit: "weeks",
       dataSource: { connect: { title: "Esquire's Sales Data" } },
@@ -696,7 +735,8 @@ const seed_data: { [listKey: string]: any } = {
       },
     },
     {
-      tags: "Past Customer,Skandinavia",
+      advertisers: { connect: { title: "Skandinavia" } },
+      tags: { connect: [{ title: "Past Customer" }] },
       rebuildFrequency: 1,
       rebuildUnit: "weeks",
       dataSource: { connect: { title: "Esquire's Sales Data" } },
@@ -709,7 +749,8 @@ const seed_data: { [listKey: string]: any } = {
       }),
     },
     {
-      tags: "Custom Demographic,Agren,NEAG",
+      advertisers: { connect: [{ title: "Agren" }, { title: "NEAG" }] },
+      tags: { connect: [{ title: "Custom Demographic" }] },
       rebuildFrequency: 1,
       rebuildUnit: "months",
       dataSource: { connect: { title: "Attom's Estated Data" } },
@@ -1021,7 +1062,14 @@ const seed_data: { [listKey: string]: any } = {
       },
     },
     {
-      tags: "Digital Neighbor,RTB,KY,Louisville",
+      advertisers: { connect: [{ title: "Relax the Back" }] },
+      tags: {
+        connect: [
+          { title: "Digital Neighbor" },
+          { title: "Kentuky" },
+          { title: "Louisville" },
+        ],
+      },
       rebuildFrequency: 1,
       rebuildUnit: "weeks",
       dataSource: { connect: { title: "Esquire's Sales Data" } },
@@ -1041,15 +1089,13 @@ async function main() {
 
   console.log(`🌱 Inserting seed data`);
   for (const [listKey, items] of Object.entries(seed_data)) {
-    const gqlt = context.graphql.schema.getTypeMap()[
-      listKey
-    ] as GraphQLObjectType;
+
     const uniqueFields = Object.keys(
       (
         context.graphql.schema.getTypeMap()[
           listKey + "WhereUniqueInput"
         ] as GraphQLInputObjectType
-      ).getFields()
+      )?.getFields() || {}
     ).filter((key) => key !== "id");
     for (const data of items) {
       const whereClause: { [key: string]: any } = {};
@@ -1072,11 +1118,7 @@ async function main() {
             )}`
           );
         } catch (error) {
-          console.warn(
-            `Could not create ${listKey} record with unique fields: ${JSONify(
-              whereClause
-            )}`
-          );
+          console.warn(error);
         }
       } else {
         console.log(
