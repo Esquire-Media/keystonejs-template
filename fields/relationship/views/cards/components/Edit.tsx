@@ -15,6 +15,7 @@ import { useToasts } from "@keystone-ui/toast";
 import { ListMeta } from "@keystone-6/core/types";
 
 type EditCardContainerProps = CardProps & {
+  foreignList: ListMeta;
   items: Items;
   setItems: (items: Items) => void;
   selectedFields: string;
