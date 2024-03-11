@@ -336,67 +336,69 @@ export const lists: Lists = {
         },
       }),
     },
-    // hooks: {
-    //   validateInput: async ({
-    //     operation,
-    //     resolvedData,
-    //     addValidationError,
-    //     context,
-    //   }) => {
-    //     if (operation === "create" || operation === "update") {
-    //       function where_equal(obj) {
-    //         return Object.entries(obj).reduce(
-    //           (acc, [key, value]) => {
-    //             acc[key] = { equals: value };
-    //             return acc;
-    //           },
-    //           {} as Record<string, any>
-    //         )
-    //       }
-    //       const where = { AND: [] as Array<any> };
-    //       const advertisers: Array<any> = [];
-    //       if (resolvedData.advertisers?.connect instanceof Array)
-    //         advertisers.push(...resolvedData.advertisers.connect);
-    //       if (resolvedData.advertisers?.create instanceof Array)
-    //         advertisers.push(...resolvedData.advertisers.create);
-    //       if (advertisers.length)
-    //         where.AND.push({
-    //           advertisers: { some: { id: { in: advertisers } } },
-    //         });
-    //       const tags: Array<any> = [];
-    //       if (resolvedData.tags?.connect instanceof Array)
-    //         tags.push(...resolvedData.tags.connect);
-    //       if (resolvedData.tags?.create instanceof Array)
-    //         tags.push(...resolvedData.tags.create);
-    //       if (tags.length)
-    //         where.AND.push({
-    //           tags: { some: { id: { in: tags } } },
-    //         });
-    //       const dataSource =
-    //         resolvedData.dataSource?.connect || resolvedData.dataSource?.create;
-    //       if (dataSource)
-    //         where.AND.push({
-    //           dataSource: Object.entries(dataSource).reduce(
-    //             (acc, [key, value]) => {
-    //               acc[key] = { equals: value };
-    //               return acc;
-    //             },
-    //             {} as Record<string, any>
-    //           ),
-    //         });
-          
-    //       console.log(JSON.stringify({where}))
-    //       // Adjust this query based on the actual data structure and necessary comparisons
-    //       const existingRecords = await context.db.Audience.findMany({ where });
-    //       console.log(existingRecords)
+    hooks: {
+      validateInput: async ({
+        operation,
+        resolvedData,
+        addValidationError,
+        context,
+      }) => {
+        if (operation === "create" || operation === "update") {
+          function where_equal(obj: any) {
+            return Object.entries(obj).reduce((acc, [key, value]) => {
+              acc[key] = { equals: value };
+              return acc;
+            }, {} as Record<string, any>);
+          }
+          const where = { AND: [] as Array<any> };
+          if (resolvedData.advertisers?.connect instanceof Array)
+            where.AND.push(
+              ...resolvedData.advertisers.connect.map((value) => ({
+                advertisers: { some: where_equal(value) },
+              }))
+            );
+          if (resolvedData.advertisers?.create instanceof Array)
+            where.AND.push(
+              ...resolvedData.advertisers.create.map((value) => ({
+                advertisers: { some: where_equal(value) },
+              }))
+            );
+          if (resolvedData.tags?.connect instanceof Array)
+            where.AND.push(
+              ...resolvedData.tags.connect.map((value) => ({
+                tags: { some: where_equal(value) },
+              }))
+            );
+          if (resolvedData.tags?.create instanceof Array)
+            where.AND.push(
+              ...resolvedData.tags.create.map((value) => ({
+                tags: { some: where_equal(value) },
+              }))
+            );
+          const dataSource =
+            resolvedData.dataSource?.connect || resolvedData.dataSource?.create;
+          if (dataSource)
+            where.AND.push({
+              dataSource: Object.entries(dataSource).reduce(
+                (acc, [key, value]) => {
+                  acc[key] = { equals: value };
+                  return acc;
+                },
+                {} as Record<string, any>
+              ),
+            });
 
-    //       if (existingRecords.length > 0) {
-    //         addValidationError(
-    //           "A record with the same combination of advertisers, tags, dataSource, and dataFilter already exists."
-    //         );
-    //       }
-    //     }
-    //   },
-    // },
+          // Adjust this query based on the actual data structure and necessary comparisons
+          const existingRecords = await context.db.Audience.findMany({ where });
+
+          if (existingRecords.length > 0) {
+            console.log(JSON.stringify({ where }));
+            addValidationError(
+              "A record with the same combination of advertisers, tags, dataSource, and dataFilter already exists."
+            );
+          }
+        }
+      },
+    },
   }),
 };
