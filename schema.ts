@@ -392,7 +392,6 @@ export const lists: Lists = {
           const existingRecords = await context.db.Audience.findMany({ where });
 
           if (existingRecords.length > 0) {
-            console.log(JSON.stringify({ where }));
             addValidationError(
               "A record with the same combination of advertisers, tags, dataSource, and dataFilter already exists."
             );
