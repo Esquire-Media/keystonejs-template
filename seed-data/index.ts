@@ -3,7 +3,7 @@ import config from "../keystone";
 import * as PrismaModule from "@prisma/client";
 import { GraphQLError, GraphQLInputObjectType } from "graphql";
 import { KeystoneContext } from "@keystone-6/core/types";
-import seed_data from "./data";
+import { sudo_seed_data, seed_data } from "./data";
 
 function getUniqueInput(context: KeystoneContext<any>, listKey: string) {
   return Object.keys(
@@ -15,16 +15,16 @@ function getUniqueInput(context: KeystoneContext<any>, listKey: string) {
   ).filter((key) => key !== "id");
 }
 
-async function main() {
-  const context = getContext(config, PrismaModule);
-
-  console.log(`🌱 Inserting seed data`);
-  listLoop: for (const [listKey, items] of Object.entries(seed_data)) {
+async function SeedData(
+  context: KeystoneContext<any>,
+  seed: typeof sudo_seed_data | typeof seed_data
+) {
+  for (const [listKey, items] of Object.entries(seed)) {
     itemLoop: for (const data of items) {
       for (const [key, value] of Object.entries(data)) {
         if (typeof value === "function") {
           // Call the factory function to get the resolved value
-          data[key] = value(seed_data);
+          data[key] = value();
           if (!data[key]) {
             continue itemLoop;
           }
@@ -60,6 +60,28 @@ async function main() {
       }
     }
   }
+}
+
+async function main() {
+  console.log(`🌱 Inserting seed data`);
+  const sudo = getContext(config, PrismaModule).sudo();
+  await SeedData(sudo, sudo_seed_data);
+  if (!process.env.DB_SEED || process.env.DB_SEED !== "false")
+    await SeedData(
+      getContext(config, PrismaModule).withSession({
+        itemId: (
+          await sudo.db.User.findOne({
+            where: { email: sudo_seed_data.User[0].email },
+          })
+        ).id,
+        data: {
+          name: sudo_seed_data.User[0].name,
+          email: sudo_seed_data.User[0].email,
+          role: { title: sudo_seed_data.Role[0].title },
+        },
+      }),
+      seed_data
+    );
   console.log(`✅ Seed data inserted`);
 }
 
