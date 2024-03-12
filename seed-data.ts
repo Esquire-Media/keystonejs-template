@@ -1,7 +1,12 @@
 import { getContext } from "@keystone-6/core/context";
 import config from "./keystone";
 import * as PrismaModule from "@prisma/client";
-import { GraphQLInputObjectType, GraphQLObjectType } from "graphql";
+import {
+  GraphQLError,
+  GraphQLInputObjectType,
+  GraphQLObjectType,
+} from "graphql";
+import { KeystoneContext } from "@keystone-6/core/types";
 
 const JSONify = (data: any) => JSON.stringify(data, undefined, 4);
 
@@ -301,8 +306,14 @@ const filters = {
 };
 
 const seed_data: { [listKey: string]: any } = {
+  Role: [{ title: "Administrator" }],
   User: [
-    { name: "Admin", email: "admin@site.com", password: "password" },
+    {
+      name: "Admin",
+      email: "admin@site.com",
+      password: "password",
+      role: { connect: { title: "Administrator" } },
+    },
     { name: "Test User 1", email: "test1@site.com", password: "password" },
     { name: "Test User 2", email: "test2@site.com", password: "password" },
   ],
@@ -321,19 +332,31 @@ const seed_data: { [listKey: string]: any } = {
   Advertiser: [
     {
       title: "California Closets",
-      users: { connect: [{ email: "test1@site.com" }] },
+      users: () => ({ connect: [{ id: seed_data.User[1].id }] }),
     },
     {
       title: "American Furniture Warehouse",
-      users: { connect: [{ email: "test1@site.com" }] },
+      users: () => ({ connect: [{ id: seed_data.User[1].id }] }),
     },
-    { title: "Skandinavia", users: { connect: [{ email: "test1@site.com" }] } },
-    { title: "Agren", users: { connect: [{ email: "test2@site.com" }] } },
-    { title: "Ashley", users: { connect: [{ email: "test1@site.com" }] } },
-    { title: "NEAG", users: { connect: [{ email: "test2@site.com" }] } },
+    {
+      title: "Skandinavia",
+      users: () => ({ connect: [{ id: seed_data.User[1].id }] }),
+    },
+    {
+      title: "Agren",
+      users: () => ({ connect: [{ id: seed_data.User[2].id }] }),
+    },
+    {
+      title: "Ashley",
+      users: () => ({ connect: [{ id: seed_data.User[1].id }] }),
+    },
+    {
+      title: "NEAG",
+      users: () => ({ connect: [{ id: seed_data.User[2].id }] }),
+    },
     {
       title: "Relax the Back",
-      users: { connect: [{ email: "test2@site.com" }] },
+      users: () => ({ connect: [{ id: seed_data.User[2].id }] }),
     },
   ],
   Publisher: [{ title: "Meta" }, { title: "OneView" }, { title: "Xandr" }],
@@ -345,7 +368,7 @@ const seed_data: { [listKey: string]: any } = {
   DataSource: [
     {
       title: "Attom's Estated Data",
-      dataType: { connect: { title: "Addresses" } },
+      dataType: () => ({ connect: { id: seed_data.DataType[0].id } }),
       filtering: JSONify({
         ID: {
           label: "ID",
@@ -364,7 +387,7 @@ const seed_data: { [listKey: string]: any } = {
     },
     {
       title: "DeepSync's Movers Data",
-      dataType: { connect: { title: "Addresses" } },
+      dataType: () => ({ connect: { id: seed_data.DataType[0].id } }),
       filtering: JSONify({
         ...filters.address,
         date: {
@@ -413,7 +436,7 @@ const seed_data: { [listKey: string]: any } = {
     },
     {
       title: "Esquire's Audience Data",
-      dataType: { connect: { title: "Device IDs" } },
+      dataType: () => ({ connect: { id: seed_data.DataType[1].id } }),
       filtering: JSONify({
         id: {
           label: "ID",
@@ -427,7 +450,7 @@ const seed_data: { [listKey: string]: any } = {
     },
     {
       title: "Esquire's GeoFrame Data",
-      dataType: { connect: { title: "Polygons" } },
+      dataType: () => ({ connect: { id: seed_data.DataType[2].id } }),
       filtering: JSONify({
         id: {
           label: "ID",
@@ -441,7 +464,7 @@ const seed_data: { [listKey: string]: any } = {
     },
     {
       title: "Esquire's Sales Data",
-      dataType: { connect: { title: "Addresses" } },
+      dataType: () => ({ connect: { id: seed_data.DataType[0].id } }),
       filtering: JSONify({
         ...filters.address,
         client: {
@@ -456,14 +479,14 @@ const seed_data: { [listKey: string]: any } = {
     },
     {
       title: "FourSquare's POI Data",
-      dataType: { connect: { title: "Addresses" } },
+      dataType: () => ({ connect: { id: seed_data.DataType[0].id } }),
       filtering: JSONify({
         ...filters.address,
       }),
     },
     {
       title: "OpenStreetMaps' Building Footprints",
-      dataType: { connect: { title: "Polygons" } },
+      dataType: () => ({ connect: { id: seed_data.DataType[2].id } }),
       filtering: JSONify({
         ...filters.address,
       }),
@@ -471,11 +494,13 @@ const seed_data: { [listKey: string]: any } = {
   ],
   Audience: [
     {
-      advertisers: { connect: [{ title: "California Closets" }] },
-      tags: { connect: [{ title: "New Movers" }, { title: "Atlanta" }] },
+      advertisers: () => ({ connect: [{ id: seed_data.Advertiser[0].id }] }),
+      tags: () => ({
+        connect: [{ id: seed_data.Tag[0].id }, { id: seed_data.Tag[6].id }],
+      }),
       rebuildFrequency: 1,
       rebuildUnit: "weeks",
-      dataSource: { connect: { title: "DeepSync's Movers Data" } },
+      dataSource: () => ({ connect: { id: seed_data.DataSource[1].id } }),
       dataFilter: JSONify({
         and: [
           { ">=": [{ var: "date" }, { date_add: [{ now: [] }, -9, "month"] }] },
@@ -554,11 +579,49 @@ const seed_data: { [listKey: string]: any } = {
       }),
     },
     {
-      advertisers: { connect: [{ title: "California Closets" }] },
-      tags: { connect: [{ title: "Venue Replay" }, { title: "Atlanta" }] },
+      advertisers: () => ({ connect: [{ id: seed_data.Advertiser[2].id }] }),
+      tags: () => ({
+        connect: [{ id: seed_data.Tag[1].id }],
+      }),
       rebuildFrequency: 1,
       rebuildUnit: "weeks",
-      dataSource: { connect: { title: "Esquire's GeoFrame Data" } },
+      dataSource: () => ({ connect: { id: seed_data.DataSource[4].id } }),
+      dataFilter: JSONify({
+        and: [
+          { "==": [{ var: "client" }, "Skandinavia???"] },
+          { ">=": [{ var: "date" }, { date_add: [{ now: [] }, -90, "days"] }] },
+          { "==": [{ var: "state" }, "TX"] },
+        ],
+      }),
+    },
+    {
+      advertisers: () => ({ connect: [{ id: seed_data.Advertiser[6].id }] }),
+      tags: () => ({
+        connect: [
+          { id: seed_data.Tag[5].id },
+          { id: seed_data.Tag[8].id },
+          { id: seed_data.Tag[9].id },
+        ],
+      }),
+      rebuildFrequency: 1,
+      rebuildUnit: "weeks",
+      dataSource: () => ({ connect: { id: seed_data.DataSource[4].id } }),
+      dataFilter: JSONify({
+        and: [
+          { "==": [{ var: "client" }, "RTB???"] },
+          { ">=": [{ var: "date" }, { date_add: [{ now: [] }, -45, "days"] }] },
+          { "==": [{ var: "state" }, "KY"] },
+        ],
+      }),
+    },
+    {
+      advertisers: () => ({ connect: [{ id: seed_data.Advertiser[0].id }] }),
+      tags: () => ({
+        connect: [{ id: seed_data.Tag[2].id }, { id: seed_data.Tag[6].id }],
+      }),
+      rebuildFrequency: 1,
+      rebuildUnit: "weeks",
+      dataSource: () => ({ connect: { id: seed_data.DataSource[3].id } }),
       dataFilter: JSONify({
         and: [
           {
@@ -584,123 +647,20 @@ const seed_data: { [listKey: string]: any } = {
           },
         ],
       }),
-      processes: {
-        create: [
-          {
-            outputType: { connect: { title: "Device IDs" } },
-            sort: 0,
-            customCoding: JSONify({
-              request: {
-                dateStart: { date_add: [{ now: [] }, -6, "month"] },
-                dateEnd: { date_add: [{ now: [] }, -2, "days"] },
-              },
-            }),
-          },
-          {
-            outputType: { connect: { title: "Addresses" } },
-            sort: 1,
-            customCoding: JSONify({
-              filter: {
-                and: [
-                  {
-                    in: [
-                      { var: "zipCode" },
-                      [
-                        "30004",
-                        "30005",
-                        "30009",
-                        "30022",
-                        "30024",
-                        "30030",
-                        "30040",
-                        "30041",
-                        "30062",
-                        "30066",
-                        "30067",
-                        "30068",
-                        "30075",
-                        "30076",
-                        "30092",
-                        "30097",
-                        "30269",
-                        "30305",
-                        "30306",
-                        "30307",
-                        "30308",
-                        "30309",
-                        "30319",
-                        "30327",
-                        "30328",
-                        "30338",
-                        "30339",
-                        "30342",
-                        "30345",
-                        "30350",
-                        "30363",
-                        "35213",
-                        "35223",
-                        "35242",
-                        "35243",
-                        "35244",
-                        "35406",
-                        "28801",
-                        "28803",
-                        "28804",
-                        "28805",
-                        "28806",
-                        "29607",
-                        "29609",
-                        "29642",
-                        "29644",
-                        "29650",
-                        "29651",
-                        "29687",
-                        "29690",
-                        "31901",
-                        "31902",
-                        "31903",
-                        "31904",
-                        "31906",
-                        "31907",
-                        "31908",
-                        "31909",
-                        "31914",
-                        "31917",
-                        "31993",
-                        "31997",
-                        "31998",
-                      ],
-                    ],
-                  },
-                ],
-              },
-            }),
-          },
-          {
-            outputType: { connect: { title: "Device IDs" } },
-            sort: 2,
-            customCoding: JSONify({
-              demographics: {
-                filter: {
-                  and: [{ ">=": [{ var: "estimatedHomeValue" }, 600000] }],
-                },
-              },
-            }),
-          },
-        ],
-      },
     },
     {
-      advertisers: {
+      advertisers: () => ({
         connect: [
-          { title: "American Furniture Warehouse" },
-          { title: "Ashley" },
+          { id: seed_data.Advertiser[1].id },
+          { id: seed_data.Advertiser[4].id },
         ],
-      },
-      tags: { connect: [{ title: "Friends & Family" }, { title: "Arizona" }] },
+      }),
+      tags: () => ({
+        connect: [{ id: seed_data.Tag[3].id }, { id: seed_data.Tag[7].id }],
+      }),
       rebuildFrequency: 1,
       rebuildUnit: "weeks",
-      dataSource: { connect: { title: "Esquire's Sales Data" } },
+      dataSource: () => ({ connect: { id: seed_data.DataSource[4].id } }),
       dataFilter: JSONify({
         and: [
           { "==": [{ var: "client" }, "AFW???"] },
@@ -708,52 +668,20 @@ const seed_data: { [listKey: string]: any } = {
           { "==": [{ var: "state" }, "AZ"] },
         ],
       }),
-      processes: {
-        create: [
-          {
-            outputType: { connect: { title: "Polygons" } },
-            sort: 0,
-            customCoding: JSONify({
-              request: {
-                dateStart: { date_add: [{ now: [] }, -6, "month"] },
-                dateEnd: { date_add: [{ now: [] }, -2, "days"] },
-              },
-            }),
-          },
-          {
-            outputType: { connect: { title: "Device IDs" } },
-            sort: 1,
-            customCoding: JSONify({
-              observation: {
-                filter: {
-                  and: [{ "<": [{ reduce: { filter: [] } }, 20] }],
-                },
-              },
-            }),
-          },
-        ],
-      },
     },
     {
-      advertisers: { connect: { title: "Skandinavia" } },
-      tags: { connect: [{ title: "Past Customer" }] },
-      rebuildFrequency: 1,
-      rebuildUnit: "weeks",
-      dataSource: { connect: { title: "Esquire's Sales Data" } },
-      dataFilter: JSONify({
-        and: [
-          { "==": [{ var: "client" }, "Skandinavia???"] },
-          { ">=": [{ var: "date" }, { date_add: [{ now: [] }, -90, "days"] }] },
-          { "==": [{ var: "state" }, "TX"] },
+      advertisers: () => ({
+        connect: [
+          { id: seed_data.Advertiser[3].id },
+          { id: seed_data.Advertiser[5].id },
         ],
       }),
-    },
-    {
-      advertisers: { connect: [{ title: "Agren" }, { title: "NEAG" }] },
-      tags: { connect: [{ title: "Custom Demographic" }] },
+      tags: () => ({
+        connect: [{ id: seed_data.Tag[4].id }],
+      }),
       rebuildFrequency: 1,
       rebuildUnit: "months",
-      dataSource: { connect: { title: "Attom's Estated Data" } },
+      dataSource: () => ({ connect: { id: seed_data.DataSource[0].id } }),
       dataFilter: JSONify({
         and: [
           {
@@ -1034,72 +962,190 @@ const seed_data: { [listKey: string]: any } = {
           },
         ],
       }),
-      processes: {
-        create: [
-          {
-            outputType: { connect: { title: "Device IDs" } },
-            sort: 0,
-            customCoding: JSONify({
-              request: {
-                dateStart: { date_add: [{ now: [] }, -6, "month"] },
-                dateEnd: { date_add: [{ now: [] }, -2, "days"] },
-              },
-              demographics: {
-                filter: {
-                  and: [
-                    { "==": [{ var: "Home Owner" }, true] },
-                    { "==": [{ var: "Gourmet Cooking" }, true] },
-                    { "==": [{ var: "Home Furnishings" }, true] },
-                    { "==": [{ var: "Home Gardening" }, true] },
-                    { "==": [{ var: "Home Improvement" }, true] },
-                    { ">": [{ var: "Financial" }, 100000] },
-                  ],
-                },
-              },
-            }),
-          },
-        ],
-      },
+    },
+  ],
+  ProcessingStep: [
+    {
+      audience: () => ({ connect: { id: seed_data["Audience"][3]["id"] } }),
+      outputType: () => ({ connect: { id: seed_data.DataType[1].id } }),
+      sort: 0,
+      customCoding: JSONify({
+        request: {
+          dateStart: { date_add: [{ now: [] }, -6, "month"] },
+          dateEnd: { date_add: [{ now: [] }, -2, "days"] },
+        },
+      }),
     },
     {
-      advertisers: { connect: [{ title: "Relax the Back" }] },
-      tags: {
-        connect: [
-          { title: "Digital Neighbor" },
-          { title: "Kentuky" },
-          { title: "Louisville" },
-        ],
-      },
-      rebuildFrequency: 1,
-      rebuildUnit: "weeks",
-      dataSource: { connect: { title: "Esquire's Sales Data" } },
-      dataFilter: JSONify({
-        and: [
-          { "==": [{ var: "client" }, "RTB???"] },
-          { ">=": [{ var: "date" }, { date_add: [{ now: [] }, -45, "days"] }] },
-          { "==": [{ var: "state" }, "KY"] },
-        ],
+      audience: () => ({ connect: { id: seed_data["Audience"][3]["id"] } }),
+      outputType: () => ({ connect: { id: seed_data.DataType[0].id } }),
+      sort: 1,
+      customCoding: JSONify({
+        filter: {
+          and: [
+            {
+              in: [
+                { var: "zipCode" },
+                [
+                  "30004",
+                  "30005",
+                  "30009",
+                  "30022",
+                  "30024",
+                  "30030",
+                  "30040",
+                  "30041",
+                  "30062",
+                  "30066",
+                  "30067",
+                  "30068",
+                  "30075",
+                  "30076",
+                  "30092",
+                  "30097",
+                  "30269",
+                  "30305",
+                  "30306",
+                  "30307",
+                  "30308",
+                  "30309",
+                  "30319",
+                  "30327",
+                  "30328",
+                  "30338",
+                  "30339",
+                  "30342",
+                  "30345",
+                  "30350",
+                  "30363",
+                  "35213",
+                  "35223",
+                  "35242",
+                  "35243",
+                  "35244",
+                  "35406",
+                  "28801",
+                  "28803",
+                  "28804",
+                  "28805",
+                  "28806",
+                  "29607",
+                  "29609",
+                  "29642",
+                  "29644",
+                  "29650",
+                  "29651",
+                  "29687",
+                  "29690",
+                  "31901",
+                  "31902",
+                  "31903",
+                  "31904",
+                  "31906",
+                  "31907",
+                  "31908",
+                  "31909",
+                  "31914",
+                  "31917",
+                  "31993",
+                  "31997",
+                  "31998",
+                ],
+              ],
+            },
+          ],
+        },
+      }),
+    },
+    {
+      audience: () => ({ connect: { id: seed_data["Audience"][3]["id"] } }),
+      outputType: () => ({ connect: { id: seed_data.DataType[1].id } }),
+      sort: 2,
+      customCoding: JSONify({
+        demographics: {
+          filter: {
+            and: [{ ">=": [{ var: "estimatedHomeValue" }, 600000] }],
+          },
+        },
+      }),
+    },
+    {
+      audience: () => ({ connect: { id: seed_data["Audience"][4]["id"] } }),
+      outputType: () => ({ connect: { id: seed_data.DataType[2].id } }),
+      sort: 0,
+      customCoding: JSONify({
+        request: {
+          dateStart: { date_add: [{ now: [] }, -6, "month"] },
+          dateEnd: { date_add: [{ now: [] }, -2, "days"] },
+        },
+      }),
+    },
+    {
+      audience: () => ({ connect: { id: seed_data["Audience"][4]["id"] } }),
+      outputType: () => ({ connect: { id: seed_data.DataType[1].id } }),
+      sort: 1,
+      customCoding: JSONify({
+        observation: {
+          filter: {
+            and: [{ "<": [{ reduce: { filter: [] } }, 20] }],
+          },
+        },
+      }),
+    },
+    {
+      audience: () => ({ connect: { id: seed_data["Audience"][5]["id"] } }),
+      outputType: () => ({ connect: { id: seed_data.DataType[1].id } }),
+      sort: 0,
+      customCoding: JSONify({
+        request: {
+          dateStart: { date_add: [{ now: [] }, -6, "month"] },
+          dateEnd: { date_add: [{ now: [] }, -2, "days"] },
+        },
+        demographics: {
+          filter: {
+            and: [
+              { "==": [{ var: "Home Owner" }, true] },
+              { "==": [{ var: "Gourmet Cooking" }, true] },
+              { "==": [{ var: "Home Furnishings" }, true] },
+              { "==": [{ var: "Home Gardening" }, true] },
+              { "==": [{ var: "Home Improvement" }, true] },
+              { ">": [{ var: "Financial" }, 100000] },
+            ],
+          },
+        },
       }),
     },
   ],
 };
 
+function getUniqueInput(context: KeystoneContext<any>, listKey: string) {
+  return Object.keys(
+    (
+      context.graphql.schema.getTypeMap()[
+        listKey + "WhereUniqueInput"
+      ] as GraphQLInputObjectType
+    )?.getFields() || {}
+  ).filter((key) => key !== "id");
+}
+
 async function main() {
   const context = getContext(config, PrismaModule);
 
   console.log(`🌱 Inserting seed data`);
-  for (const [listKey, items] of Object.entries(seed_data)) {
+  listLoop: for (const [listKey, items] of Object.entries(seed_data)) {
+    itemLoop: for (const data of items) {
+      for (const [key, value] of Object.entries(data)) {
+        if (typeof value === "function") {
+          // Call the factory function to get the resolved value
+          data[key] = value(seed_data);
+          if (!data[key]) {
+            continue itemLoop;
+          }
+        }
+      }
 
-    const uniqueFields = Object.keys(
-      (
-        context.graphql.schema.getTypeMap()[
-          listKey + "WhereUniqueInput"
-        ] as GraphQLInputObjectType
-      )?.getFields() || {}
-    ).filter((key) => key !== "id");
-    for (const data of items) {
       const whereClause: { [key: string]: any } = {};
-      uniqueFields.forEach((fieldName: string) => {
+      getUniqueInput(context, listKey).forEach((fieldName: string) => {
         if (data.hasOwnProperty(fieldName)) {
           whereClause[fieldName] = (data as any)[fieldName];
         }
@@ -1109,27 +1155,21 @@ async function main() {
       });
       if (!existingItem) {
         try {
-          await context.db[listKey].createOne({
+          const item = await context.db[listKey].createOne({
             data,
           });
-          console.log(
-            `Created ${listKey} record with unique fields: ${JSONify(
-              whereClause
-            )}`
-          );
+          console.log(`Created ${listKey} record.`);
+          data["id"] = item.id;
         } catch (error) {
-          console.warn(error);
+          console.warn((error as GraphQLError).message);
         }
       } else {
-        console.log(
-          `Updating existing ${listKey} record with unique fields: ${JSONify(
-            whereClause
-          )}`
-        );
+        console.log(`Updating existing ${listKey} record.`);
         await context.db[listKey].updateOne({
           where: { id: existingItem.id },
           data: data,
         });
+        data["id"] = existingItem.id;
       }
     }
   }
