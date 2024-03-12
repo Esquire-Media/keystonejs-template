@@ -1,18 +1,31 @@
+import { adminRoleTitle } from "../schema/auth";
 import filters from "./filters";
 
 const JSONify = (data: any) => JSON.stringify(data, undefined, 4);
 
-const seed_data: { [listKey: string]: any } = {
-  Role: [{ title: "Administrator" }],
+export const sudo_seed_data: { [listKey: string]: any } = {
+  Role: [{ title: adminRoleTitle }],
   User: [
     {
-      name: "Admin",
-      email: "admin@site.com",
-      password: "password",
-      role: () => ({ connect: { id: seed_data.Role[0].id } }),
+      name: process.env.ADMIN_NAME || "Admin",
+      email: process.env.ADMIN_EMAIL || "admin@site.com",
+      password: process.env.ADMIN_PASSWORD || "password",
+      role: () => ({ connect: { id: sudo_seed_data.Role[0].id } }),
     },
-    { name: "Test User 1", email: "test1@site.com", password: "password" },
-    { name: "Test User 2", email: "test2@site.com", password: "password" },
+  ],
+};
+export const seed_data: { [listKey: string]: any } = {
+  User: [
+    {
+      name: "Test User 1",
+      email: "test1@site.com",
+      password: "password",
+    },
+    {
+      name: "Test User 2",
+      email: "test2@site.com",
+      password: "password",
+    },
   ],
   Tag: [
     { title: "New Movers" },
@@ -29,31 +42,31 @@ const seed_data: { [listKey: string]: any } = {
   Advertiser: [
     {
       title: "California Closets",
-      users: () => ({ connect: [{ id: seed_data.User[1].id }] }),
+      users: () => ({ connect: [{ id: seed_data.User[0].id }] }),
     },
     {
       title: "American Furniture Warehouse",
-      users: () => ({ connect: [{ id: seed_data.User[1].id }] }),
+      users: () => ({ connect: [{ id: seed_data.User[0].id }] }),
     },
     {
       title: "Skandinavia",
-      users: () => ({ connect: [{ id: seed_data.User[1].id }] }),
+      users: () => ({ connect: [{ id: seed_data.User[0].id }] }),
     },
     {
       title: "Agren",
-      users: () => ({ connect: [{ id: seed_data.User[2].id }] }),
-    },
-    {
-      title: "Ashley",
       users: () => ({ connect: [{ id: seed_data.User[1].id }] }),
     },
     {
+      title: "Ashley",
+      users: () => ({ connect: [{ id: seed_data.User[0].id }] }),
+    },
+    {
       title: "NEAG",
-      users: () => ({ connect: [{ id: seed_data.User[2].id }] }),
+      users: () => ({ connect: [{ id: seed_data.User[1].id }] }),
     },
     {
       title: "Relax the Back",
-      users: () => ({ connect: [{ id: seed_data.User[2].id }] }),
+      users: () => ({ connect: [{ id: seed_data.User[1].id }] }),
     },
   ],
   Publisher: [{ title: "Meta" }, { title: "OneView" }, { title: "Xandr" }],
@@ -814,5 +827,3 @@ const seed_data: { [listKey: string]: any } = {
     },
   ],
 };
-
-export default seed_data
