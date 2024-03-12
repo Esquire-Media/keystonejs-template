@@ -1,19 +1,36 @@
 import { BaseFields } from "@keystone-6/core";
 import { timestamp, relationship } from "../fields";
-import { KeystoneContext } from "@keystone-6/core/types";
+import { BaseItem } from "@keystone-6/core/types";
+import type { Lists } from ".keystone/types";
 
-const hasAdministratorRole = async (
-  session: any,
-  context: KeystoneContext<any>
-) => {
-  if (!session) return false; // Ensure the user is logged in
-  // Check if the user is an Administrator
-  const userRole = await context.db.User.findOne({
-    where: { id: session.itemId },
-  });
-  if (userRole?.role?.title === "Administrator") {
-    return true;
-  }
+export const adminRoleTitle = process.env.ADMIN_ROLE_TITLE || "Administrator";
+
+export type Session = {
+  itemId: string;
+  data: {
+    name: string;
+    email: string;
+    role?: any;
+  };
+};
+
+export const hasSession = ({ session }: { session?: Session }) => {
+  return Boolean(session);
+};
+
+export const isAdmin = ({ session }: { session?: Session }) => {
+  if (session && session.data.role?.title === adminRoleTitle) return true;
+  return false;
+};
+
+const isOwner = ({
+  session,
+  item,
+}: {
+  session?: Session;
+  item: BaseItem & { createdBy: string };
+}) => {
+  if (session && session.itemId === item.createdBy) return true;
   return false;
 };
 
