@@ -1,5 +1,4 @@
 import { list, BaseFields } from "@keystone-6/core";
-import { allowAll } from "@keystone-6/core/access";
 import type { Lists } from ".keystone/types";
 
 import {
@@ -23,6 +22,7 @@ import {
   relationship,
   // rating,
 } from "./fields";
+import { allowAll } from "@keystone-6/core/access";
 import { KeystoneContext } from "@keystone-6/core/types";
 
 const auditable: BaseFields<any> = {
@@ -96,7 +96,42 @@ const auditable: BaseFields<any> = {
   }),
 };
 
+const hasAdministratorRole = async (
+  session: any,
+  context: KeystoneContext<any>
+) => {
+  if (!session) return false; // Ensure the user is logged in
+  // Check if the user is an Administrator
+  const userRole = await context.db.User.findOne({
+    where: { id: session.itemId },
+  });
+  if (userRole?.role?.title === "Administrator") {
+    return true;
+  }
+  return false;
+};
+
 export const lists: Lists = {
+  Role: list({
+    access: allowAll,
+    fields: {
+      ...auditable,
+      title: text({
+        validation: { isRequired: true },
+        isIndexed: "unique",
+      }),
+      users: relationship({
+        ref: "User.role",
+        many: true,
+        ui: {
+          displayMode: "cards",
+          cardFields: ["name", "email"],
+          inlineConnect: true,
+        },
+      }),
+    },
+  }),
+
   User: list({
     access: allowAll,
     fields: {
@@ -111,9 +146,16 @@ export const lists: Lists = {
         ref: "Advertiser.users",
         many: true,
         ui: {
-          displayMode: "cards",
-          cardFields: ["title"],
+          labelField: "title",
           linkToItem: true,
+          hideCreate: true,
+        },
+      }),
+      role: relationship({
+        ref: "Role.users",
+        ui: {
+          labelField: "title",
+          hideCreate: false,
         },
       }),
     },
@@ -133,7 +175,8 @@ export const lists: Lists = {
         ui: {
           displayMode: "cards",
           cardFields: ["name", "email"],
-          linkToItem: true,
+          inlineConnect: true,
+          hideCreate: true,
         },
       }),
       audiences: relationship({
@@ -141,7 +184,7 @@ export const lists: Lists = {
         many: true,
         ui: {
           displayMode: "cards",
-          cardFields: ["tags"],
+          cardFields: ["tags", "dataSource"],
           linkToItem: true,
         },
       }),
@@ -193,7 +236,13 @@ export const lists: Lists = {
       ...auditable,
       audience: relationship({
         ref: "Audience.processes",
-        many: true,
+        many: false,
+        ui: {
+          displayMode: "cards",
+          cardFields: ["advertisers", "tags"],
+          inlineConnect: false,
+          hideCreate: true,
+        },
       }),
       outputType: relationship({
         ref: "DataType",
@@ -215,6 +264,67 @@ export const lists: Lists = {
           },
         },
       }),
+    },
+    hooks: {
+      validateInput: async ({
+        operation,
+        resolvedData,
+        addValidationError,
+        context,
+      }) => {
+        if (operation === "create" || operation === "update") {
+          function where_equal(obj: any) {
+            return Object.entries(obj).reduce((acc, [key, value]) => {
+              acc[key] = { equals: value };
+              return acc;
+            }, {} as Record<string, any>);
+          }
+          const where = { AND: [] as Array<any> };
+          const audience =
+            resolvedData.audience?.connect || resolvedData.audience?.create;
+          if (audience) {
+            where.AND.push({
+              audience: where_equal(audience),
+            });
+          }
+          const outputType =
+            resolvedData.outputType?.connect || resolvedData.outputType?.create;
+          if (outputType) {
+            where.AND.push({
+              outputType: where_equal(outputType),
+            });
+          }
+          if (resolvedData.sort) {
+            where.AND.push({
+              sort: { equals: resolvedData.sort },
+            });
+          }
+          if (resolvedData.customCoding) {
+            where.AND.push({
+              customCoding: { equals: resolvedData.customCoding },
+            });
+          }
+
+          // Adjust this query based on the actual data structure and necessary comparisons
+          const existingRecords = await context.db.ProcessingStep.findMany({
+            where,
+          });
+
+          if (existingRecords.length > 0) {
+            addValidationError(
+              "A record with the same combination of audience, outputType, sort, and customCoding already exists."
+            );
+          }
+        }
+      },
+    },
+    db: {
+      extendPrismaSchema: (schema) => {
+        return schema.replace(
+          /(model [^}]+)}/g,
+          "$1@@unique([audienceId, outputTypeId, sort, customCoding])\n}"
+        );
+      },
     },
   }),
 
@@ -270,8 +380,7 @@ export const lists: Lists = {
         ref: "Advertiser.audiences",
         many: true,
         ui: {
-          displayMode: "cards",
-          cardFields: ["title"],
+          labelField: "title",
           inlineConnect: true,
         },
       }),
@@ -279,8 +388,7 @@ export const lists: Lists = {
         ref: "Tag",
         many: true,
         ui: {
-          displayMode: "cards",
-          cardFields: ["title"],
+          labelField: "title",
           inlineConnect: true,
           inlineCreate: { fields: ["title"] },
         },
@@ -379,16 +487,9 @@ export const lists: Lists = {
             resolvedData.dataSource?.connect || resolvedData.dataSource?.create;
           if (dataSource)
             where.AND.push({
-              dataSource: Object.entries(dataSource).reduce(
-                (acc, [key, value]) => {
-                  acc[key] = { equals: value };
-                  return acc;
-                },
-                {} as Record<string, any>
-              ),
+              dataSource: where_equal(dataSource),
             });
 
-          // Adjust this query based on the actual data structure and necessary comparisons
           const existingRecords = await context.db.Audience.findMany({ where });
 
           if (existingRecords.length > 0) {
