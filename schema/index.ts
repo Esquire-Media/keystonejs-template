@@ -1,4 +1,3 @@
-import type { Lists } from ".keystone/types";
 import Role from "./models/Role";
 import User from "./models/User";
 import Advertiser from "./models/Advertiser";
