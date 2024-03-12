@@ -6,7 +6,7 @@
     "dev": "cross-env NODE_ENV=development keystone dev",
     "start": "cross-env NODE_ENV=production keystone start",
     "build": "cross-env NODE_ENV=production keystone build",
-    "postinstall": "cross-env NODE_ENV=development keystone build --no-ui && keystone prisma generate && keystone prisma db push && ts-node seed-data.ts"
+    "postinstall": "cross-env NODE_ENV=development keystone build --no-ui && keystone prisma generate && keystone prisma db push && ts-node seed-data/index.ts"
   },
   "dependencies": {
     "@ant-design/icons": "^5.3.0",
