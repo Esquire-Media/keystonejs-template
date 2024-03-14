@@ -522,7 +522,6 @@ a.mapboxgl-ctrl-logo.mapboxgl-compact {
 }
 .mapboxgl-popup-track-pointer * {
   pointer-events: none;
-  user-select: none;
 }
 .mapboxgl-map:hover .mapboxgl-popup-track-pointer {
   display: flex;

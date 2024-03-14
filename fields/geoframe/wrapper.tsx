@@ -6,14 +6,30 @@ import {
   FieldControllerConfig,
   FieldProps,
 } from "@keystone-6/core/types";
-import { FieldContainer, FieldDescription, FieldLabel } from "@keystone-ui/fields";
+import {
+  FieldContainer,
+  FieldDescription,
+  FieldLabel,
+} from "@keystone-ui/fields";
 import { CellContainer, CellLink } from "@keystone-6/core/admin-ui/components";
+import MapMain from "./ReactMapGL/MapMain";
 
 export const Field = (props: FieldProps<typeof controller>) => {
+  /* States */
+  const [mapRef, setMapRef] = React.useState<any>();
+  const draw = mapRef?.current
+    .getMap()
+    ._controls.filter((e: any) => Object.keys(e).includes("getSelected"))[0];
+
   return (
     <FieldContainer as="fieldset">
       <FieldLabel as="legend">{props.field.label}</FieldLabel>
-      <FieldDescription id={`${props.field.path}-description`}>{props.field.description}</FieldDescription>
+      <FieldDescription id={`${props.field.path}-description`}>
+        {props.field.description}
+      </FieldDescription>
+      <div style={{ width: 400, height: 400 }}>
+        <MapMain passupFn={setMapRef} />
+      </div>
     </FieldContainer>
   );
 };
@@ -32,7 +48,11 @@ export const CardValue: CardValueComponent = ({ item, field }) => {
 // this is shown on the list view in the table
 export const Cell: CellComponent = ({ item, field, linkTo }) => {
   let value = item[field.path] + "";
-  return linkTo ? <CellLink {...linkTo}>{value}</CellLink> : <CellContainer>{value}</CellContainer>;
+  return linkTo ? (
+    <CellLink {...linkTo}>{value}</CellLink>
+  ) : (
+    <CellContainer>{value}</CellContainer>
+  );
 };
 // setting supportsLinksTo means the cell component allows containing a link to the item
 // for example, text fields support it but relationship fields don't because

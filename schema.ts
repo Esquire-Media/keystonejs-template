@@ -21,6 +21,7 @@ import {
   codeblock,
   filter,
   relationship,
+  geoframe
   // rating,
 } from "./fields";
 import { KeystoneContext } from "@keystone-6/core/types";
@@ -266,6 +267,7 @@ export const lists: Lists = {
     access: allowAll,
     fields: {
       ...auditable,
+      geoframe: geoframe({}),
       advertisers: relationship({
         ref: "Advertiser.audiences",
         many: true,
