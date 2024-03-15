@@ -12,16 +12,25 @@ var StaticMode = require("@mapbox/mapbox-gl-draw-static-mode");
 // As a reminder, this is how to acquire "draw"
 // mapRef.current.getMap()._controls.filter((e: any) => Object.keys(e).includes("getSelected"))[0];
 
+export type MapPolygonFeature = {
+  id: string;
+  type: "Feature";
+  properties: any;
+  geometry: {
+    coordinates: [number, number][];
+    type: "Polygon"
+  }
+}
 type MapMainProps = {
   btnFn?: Function;
   child?: any;
   features?: any;
   initialViewState?: ViewState;
   panel?: boolean;
-  passupFn?: (v: any) => any;
+  setFeatureState?: (v: any) => any;
+  setMapRef?: (v: any) => any;
   static?: boolean;
 };
-
 type ViewState = {
   longitude: number;
   latitude: number;
@@ -35,10 +44,10 @@ const durham = {
 };
 
 const MAPBOX_TOKEN =
-  "pk.eyJ1IjoidGp1c3Rzb3VwIiwiYSI6ImNsMWR1NzIxODAwejIzYm11Yng4cDBqc2gifQ.LkkdD6N9PvcTVXT7EJxhuA";
+  "pk.eyJ1IjoidGp1c3Rzb3VwIiwiYSI6ImNsdHJqcGFiMTBpdjkya3IwZDBuOW14cm8ifQ.p1drJMjOQ_l9UmGvsm0gSQ";
 
 export default function MapMain(props: MapMainProps) {
-  // Map Control
+  /* Map Control */
   const mapRef = React.useRef<any>();
   const [viewState, setViewState] = React.useState<ViewState>(
     props.initialViewState || durham
@@ -47,7 +56,6 @@ export default function MapMain(props: MapMainProps) {
   const [mapStyle, setMapStyle] = React.useState<string>(
     "mapbox://styles/esqtech/cl8nh2452002p15logaud46pv"
   );
-
   const childProps = {
     btnFn: props?.btnFn,
     mapRef,
@@ -55,12 +63,30 @@ export default function MapMain(props: MapMainProps) {
     setMapStyle,
   };
 
+  /* Feature State */
+  const [featureState, setFeatureState] = React.useState<MapPolygonFeature[]>([]);
+  React.useEffect(() => props.setFeatureState?.(featureState), [featureState]);
+  const handleCreate = (e: any) => {
+    setFeatureState((state) => [...state, ...e.features]);
+  };
+  const handleUpdate = (e: any) => {
+    setFeatureState((state) => [
+      ...state.filter((v) => !e.features.map((f) => f.id).includes(v.id)),
+      ...e.features,
+    ]);
+  };
+  const handleDelete = (e: any) => {
+    setFeatureState((state) =>
+      state.filter((v) => !e.features.map((f) => f.id).includes(v.id))
+    );
+  };
+
   return (
     <Map
       ref={mapRef}
       style={{ width: "100%", height: "100%" }}
       {...viewState}
-      onClick={() => console.log(mapRef.current.getMap())}
+      // onClick={() => console.log(mapRef.current.getMap())}
       onMove={(evt) => setViewState(evt.viewState)}
       // mapboxAccessToken={process.env.REACT_APP_MAPBOX_TOKEN}
       mapboxAccessToken={MAPBOX_TOKEN}
@@ -73,7 +99,7 @@ export default function MapMain(props: MapMainProps) {
             defaultMode: props.static ? "static" : "simple_select",
             controls: {
               polygon: true,
-              trash: true
+              trash: true,
             },
             modes: {
               ...MapboxDraw.modes,
@@ -100,8 +126,12 @@ export default function MapMain(props: MapMainProps) {
             )[0]
             .changeMode("static");
         }
+        mapRef.current.on("draw.create", handleCreate);
+        mapRef.current.on("draw.delete", handleDelete);
+        mapRef.current.on("draw.update", handleUpdate);
+
         setMapLoading(false);
-        props.passupFn?.(mapRef)
+        props.setMapRef?.(mapRef);
       }}>
       {!props.child ? null : mapLoading ? null : (
         <props.child {...childProps} />
