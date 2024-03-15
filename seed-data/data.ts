@@ -1,84 +1,87 @@
-import { adminRoleTitle } from "../schema/auth";
+import { KeystoneContext } from "@keystone-6/core/types";
+import { module } from "../modules/security";
 import filters from "./filters";
 
 const JSONify = (data: any) => JSON.stringify(data, undefined, 4);
 
 export const sudo_seed_data: { [listKey: string]: any } = {
-  Role: [{ title: adminRoleTitle }],
+  Tenant: [{ title: module.env?.TENANT_GLOBAL_TITLE }],
   User: [
     {
       name: process.env.ADMIN_NAME || "Admin",
       email: process.env.ADMIN_EMAIL || "admin@site.com",
       password: process.env.ADMIN_PASSWORD || "password",
-      role: () => ({ connect: { id: sudo_seed_data.Role[0].id } }),
+      permissions: async (context: KeystoneContext) => ({
+        connect: await context.query.Permission.findMany({
+          where: {
+            tenant: { title: { equals: module.env?.TENANT_GLOBAL_TITLE } },
+          },
+        }),
+      }),
     },
   ],
 };
 export const seed_data: { [listKey: string]: any } = {
+  Tenant: [
+    { title: "California Closets" },
+    { title: "American Furniture Warehouse" },
+    { title: "Skandinavia" },
+    { title: "Agren" },
+    {
+      title: "Ashley",
+      parent: async (context: KeystoneContext) => ({
+        connect: await context.query.Tenant.findOne({
+          where: { title: "American Furniture Warehouse" },
+        }),
+      }),
+    },
+    {
+      title: "NEAG",
+      children: async (context: KeystoneContext) => ({
+        connect: await context.query.Tenant.findMany({
+          where: {
+            OR: [{ title: { equals: "Agren" } }],
+          },
+        }),
+      }),
+    },
+    { title: "Relax the Back" },
+  ],
   User: [
     {
       name: "Test User 1",
       email: "test1@site.com",
       password: "password",
+      permissions: async (context: KeystoneContext) => ({
+        connect: await context.query.Permission.findMany({
+          where: {
+            tenant: {
+              title: { in: ["California Closets", "NEAG", "Relax the Back"] },
+            },
+          },
+        }),
+      }),
     },
     {
       name: "Test User 2",
       email: "test2@site.com",
       password: "password",
+      permissions: async (context: KeystoneContext) => ({
+        connect: await context.query.Permission.findMany({
+          where: {
+            operation: { equals: "R" }, // Read only
+            tenant: {
+              title: { in: ["American Furniture Warehouse", "Agren"] },
+            },
+          },
+        }),
+      }),
     },
-  ],
-  Tag: [
-    { title: "New Movers" },
-    { title: "Past Customer" },
-    { title: "Venue Replay" },
-    { title: "Friends & Family" },
-    { title: "Custom Demographic" },
-    { title: "Digital Neighbor" },
-    { title: "Atlanta" },
-    { title: "Arizona" },
-    { title: "Kentuky" },
-    { title: "Louisville" },
-  ],
-  Advertiser: [
-    {
-      title: "California Closets",
-      users: () => ({ connect: [{ id: seed_data.User[0].id }] }),
-    },
-    {
-      title: "American Furniture Warehouse",
-      users: () => ({ connect: [{ id: seed_data.User[0].id }] }),
-    },
-    {
-      title: "Skandinavia",
-      users: () => ({ connect: [{ id: seed_data.User[0].id }] }),
-    },
-    {
-      title: "Agren",
-      users: () => ({ connect: [{ id: seed_data.User[1].id }] }),
-    },
-    {
-      title: "Ashley",
-      users: () => ({ connect: [{ id: seed_data.User[0].id }] }),
-    },
-    {
-      title: "NEAG",
-      users: () => ({ connect: [{ id: seed_data.User[1].id }] }),
-    },
-    {
-      title: "Relax the Back",
-      users: () => ({ connect: [{ id: seed_data.User[1].id }] }),
-    },
-  ],
-  Publisher: [{ title: "Meta" }, { title: "OneView" }, { title: "Xandr" }],
-  DataType: [
-    { title: "Addresses" },
-    { title: "Device IDs" },
-    { title: "Polygons" },
   ],
   DataSource: [
     {
       title: "Attom's Estated Data",
-      dataType: () => ({ connect: { id: seed_data.DataType[0].id } }),
+      dataType: "addresses",
       filtering: JSONify({
         ID: {
           label: "ID",
@@ -97,7 +100,7 @@ export const seed_data: { [listKey: string]: any } = {
     },
     {
       title: "DeepSync's Movers Data",
-      dataType: () => ({ connect: { id: seed_data.DataType[0].id } }),
+      dataType: "addresses",
       filtering: JSONify({
         ...filters.address,
         date: {
@@ -146,7 +149,7 @@ export const seed_data: { [listKey: string]: any } = {
     },
     {
       title: "Esquire's Audience Data",
-      dataType: () => ({ connect: { id: seed_data.DataType[1].id } }),
+      dataType: "device_ids",
       filtering: JSONify({
         id: {
           label: "ID",
@@ -160,7 +163,7 @@ export const seed_data: { [listKey: string]: any } = {
     },
     {
       title: "Esquire's GeoFrame Data",
-      dataType: () => ({ connect: { id: seed_data.DataType[2].id } }),
+      dataType: "polygons",
       filtering: JSONify({
         id: {
           label: "ID",
@@ -174,7 +177,7 @@ export const seed_data: { [listKey: string]: any } = {
     },
     {
       title: "Esquire's Sales Data",
-      dataType: () => ({ connect: { id: seed_data.DataType[0].id } }),
+      dataType: "addresses",
       filtering: JSONify({
         ...filters.address,
         client: {
@@ -189,14 +192,14 @@ export const seed_data: { [listKey: string]: any } = {
     },
     {
       title: "FourSquare's POI Data",
-      dataType: () => ({ connect: { id: seed_data.DataType[0].id } }),
+      dataType: "addresses",
       filtering: JSONify({
         ...filters.address,
       }),
     },
     {
       title: "OpenStreetMaps' Building Footprints",
-      dataType: () => ({ connect: { id: seed_data.DataType[2].id } }),
+      dataType: "polygons",
       filtering: JSONify({
         ...filters.address,
       }),
@@ -204,13 +207,18 @@ export const seed_data: { [listKey: string]: any } = {
   ],
   Audience: [
     {
-      advertisers: () => ({ connect: [{ id: seed_data.Advertiser[0].id }] }),
-      tags: () => ({
-        connect: [{ id: seed_data.Tag[0].id }, { id: seed_data.Tag[6].id }],
+      tenant: async (context: KeystoneContext) => ({
+        connect: await context.query.Tenant.findOne({
+          where: { title: "California Closets" },
+        }),
       }),
       rebuildFrequency: 1,
       rebuildUnit: "weeks",
-      dataSource: () => ({ connect: { id: seed_data.DataSource[1].id } }),
+      dataSource: async (context: KeystoneContext) => ({
+        connect: await context.query.DataSource.findOne({
+          where: { title: "DeepSync's Movers Data" },
+        }),
+      }),
       dataFilter: JSONify({
         and: [
           { ">=": [{ var: "date" }, { date_add: [{ now: [] }, -9, "month"] }] },
@@ -289,13 +297,18 @@ export const seed_data: { [listKey: string]: any } = {
       }),
     },
     {
-      advertisers: () => ({ connect: [{ id: seed_data.Advertiser[2].id }] }),
-      tags: () => ({
-        connect: [{ id: seed_data.Tag[1].id }],
+      tenant: async (context: KeystoneContext) => ({
+        connect: await context.query.Tenant.findOne({
+          where: { title: "Skandinavia" },
+        }),
       }),
       rebuildFrequency: 1,
       rebuildUnit: "weeks",
-      dataSource: () => ({ connect: { id: seed_data.DataSource[4].id } }),
+      dataSource: async (context: KeystoneContext) => ({
+        connect: await context.query.DataSource.findOne({
+          where: { title: "Esquire's Sales Data" },
+        }),
+      }),
       dataFilter: JSONify({
         and: [
           { "==": [{ var: "client" }, "Skandinavia???"] },
@@ -305,17 +318,18 @@ export const seed_data: { [listKey: string]: any } = {
       }),
     },
     {
-      advertisers: () => ({ connect: [{ id: seed_data.Advertiser[6].id }] }),
-      tags: () => ({
-        connect: [
-          { id: seed_data.Tag[5].id },
-          { id: seed_data.Tag[8].id },
-          { id: seed_data.Tag[9].id },
-        ],
+      tenant: async (context: KeystoneContext) => ({
+        connect: await context.query.Tenant.findOne({
+          where: { title: "Relax the Back" },
+        }),
       }),
       rebuildFrequency: 1,
       rebuildUnit: "weeks",
-      dataSource: () => ({ connect: { id: seed_data.DataSource[4].id } }),
+      dataSource: async (context: KeystoneContext) => ({
+        connect: await context.query.DataSource.findOne({
+          where: { title: "Esquire's Sales Data" },
+        }),
+      }),
       dataFilter: JSONify({
         and: [
           { "==": [{ var: "client" }, "RTB???"] },
@@ -325,13 +339,18 @@ export const seed_data: { [listKey: string]: any } = {
       }),
     },
     {
-      advertisers: () => ({ connect: [{ id: seed_data.Advertiser[0].id }] }),
-      tags: () => ({
-        connect: [{ id: seed_data.Tag[2].id }, { id: seed_data.Tag[6].id }],
+      tenant: async (context: KeystoneContext) => ({
+        connect: await context.query.Tenant.findOne({
+          where: { title: "California Closets" },
+        }),
       }),
       rebuildFrequency: 1,
       rebuildUnit: "weeks",
-      dataSource: () => ({ connect: { id: seed_data.DataSource[3].id } }),
+      dataSource: async (context: KeystoneContext) => ({
+        connect: await context.query.DataSource.findOne({
+          where: { title: "Esquire's GeoFrame Data" },
+        }),
+      }),
       dataFilter: JSONify({
         and: [
           {
@@ -359,18 +378,18 @@ export const seed_data: { [listKey: string]: any } = {
       }),
     },
     {
-      advertisers: () => ({
-        connect: [
-          { id: seed_data.Advertiser[1].id },
-          { id: seed_data.Advertiser[4].id },
-        ],
-      }),
-      tags: () => ({
-        connect: [{ id: seed_data.Tag[3].id }, { id: seed_data.Tag[7].id }],
+      tenant: async (context: KeystoneContext) => ({
+        connect: await context.query.Tenant.findOne({
+          where: { title: "Ashley" },
+        }),
       }),
       rebuildFrequency: 1,
       rebuildUnit: "weeks",
-      dataSource: () => ({ connect: { id: seed_data.DataSource[4].id } }),
+      dataSource: async (context: KeystoneContext) => ({
+        connect: await context.query.DataSource.findOne({
+          where: { title: "Esquire's Sales Data" },
+        }),
+      }),
       dataFilter: JSONify({
         and: [
           { "==": [{ var: "client" }, "AFW???"] },
@@ -380,18 +399,18 @@ export const seed_data: { [listKey: string]: any } = {
       }),
     },
     {
-      advertisers: () => ({
-        connect: [
-          { id: seed_data.Advertiser[3].id },
-          { id: seed_data.Advertiser[5].id },
-        ],
-      }),
-      tags: () => ({
-        connect: [{ id: seed_data.Tag[4].id }],
+      tenant: async (context: KeystoneContext) => ({
+        connect: await context.query.Tenant.findOne({
+          where: { title: "Agren" },
+        }),
       }),
       rebuildFrequency: 1,
       rebuildUnit: "months",
-      dataSource: () => ({ connect: { id: seed_data.DataSource[0].id } }),
+      dataSource: async (context: KeystoneContext) => ({
+        connect: await context.query.DataSource.findOne({
+          where: { title: "Attom's Estated Data" },
+        }),
+      }),
       dataFilter: JSONify({
         and: [
           {
@@ -676,8 +695,16 @@ export const seed_data: { [listKey: string]: any } = {
   ],
   ProcessingStep: [
     {
-      audience: () => ({ connect: { id: seed_data["Audience"][3]["id"] } }),
-      outputType: () => ({ connect: { id: seed_data.DataType[1].id } }),
+      audience: async (context: KeystoneContext) => ({
+        connect: (await context.query.Audience.findMany({
+          where: {
+            tenant: { title: { equals: "California Closets" } },
+            dataSource: { title: { equals: "Esquire's GeoFrame Data" } },
+            dataFilter: { equals: seed_data["Audience"][3].dataFilter },
+          },
+        }))[0],
+      }),
+      outputType: "device_ids",
       sort: 0,
       customCoding: JSONify({
         request: {
@@ -687,8 +714,16 @@ export const seed_data: { [listKey: string]: any } = {
       }),
     },
     {
-      audience: () => ({ connect: { id: seed_data["Audience"][3]["id"] } }),
-      outputType: () => ({ connect: { id: seed_data.DataType[0].id } }),
+      audience: async (context: KeystoneContext) => ({
+        connect: (await context.query.Audience.findMany({
+          where: {
+            tenant: { title: { equals: "California Closets" } },
+            dataSource: { title: { equals: "Esquire's GeoFrame Data" } },
+            dataFilter: { equals: seed_data["Audience"][3].dataFilter },
+          },
+        }))[0],
+      }),
+      outputType: "addresses",
       sort: 1,
       customCoding: JSONify({
         filter: {
@@ -768,8 +803,16 @@ export const seed_data: { [listKey: string]: any } = {
       }),
     },
     {
-      audience: () => ({ connect: { id: seed_data["Audience"][3]["id"] } }),
-      outputType: () => ({ connect: { id: seed_data.DataType[1].id } }),
+      audience: async (context: KeystoneContext) => ({
+        connect: (await context.query.Audience.findMany({
+          where: {
+            tenant: { title: { equals: "California Closets" } },
+            dataSource: { title: { equals: "Esquire's GeoFrame Data" } },
+            dataFilter: { equals: seed_data["Audience"][3].dataFilter },
+          },
+        }))[0],
+      }),
+      outputType: "device_ids",
       sort: 2,
       customCoding: JSONify({
         demographics: {
@@ -780,8 +823,16 @@ export const seed_data: { [listKey: string]: any } = {
       }),
     },
     {
-      audience: () => ({ connect: { id: seed_data["Audience"][4]["id"] } }),
-      outputType: () => ({ connect: { id: seed_data.DataType[2].id } }),
+      audience: async (context: KeystoneContext) => ({
+        connect: (await context.query.Audience.findMany({
+          where: {
+            tenant: { title: { equals: "Ashley" } },
+            dataSource: { title: { equals: "Esquire's Sales Data" } },
+            dataFilter: { equals: seed_data["Audience"][4].dataFilter },
+          },
+        }))[0],
+      }),
+      outputType: "polygons",
       sort: 0,
       customCoding: JSONify({
         request: {
@@ -791,8 +842,16 @@ export const seed_data: { [listKey: string]: any } = {
       }),
     },
     {
-      audience: () => ({ connect: { id: seed_data["Audience"][4]["id"] } }),
-      outputType: () => ({ connect: { id: seed_data.DataType[1].id } }),
+      audience: async (context: KeystoneContext) => ({
+        connect: (await context.query.Audience.findMany({
+          where: {
+            tenant: { title: { equals: "Ashley" } },
+            dataSource: { title: { equals: "Esquire's Sales Data" } },
+            dataFilter: { equals: seed_data["Audience"][4].dataFilter },
+          },
+        }))[0],
+      }),
+      outputType: "device_ids",
       sort: 1,
       customCoding: JSONify({
         observation: {
@@ -803,8 +862,16 @@ export const seed_data: { [listKey: string]: any } = {
       }),
     },
     {
-      audience: () => ({ connect: { id: seed_data["Audience"][5]["id"] } }),
-      outputType: () => ({ connect: { id: seed_data.DataType[1].id } }),
+      audience: async (context: KeystoneContext) => ({
+        connect: (await context.query.Audience.findMany({
+          where: {
+            tenant: { title: { equals: "Agren" } },
+            dataSource: { title: { equals: "Attom's Estated Data" } },
+            dataFilter: { equals: seed_data["Audience"][5].dataFilter },
+          },
+        }))[0],
+      }),
+      outputType: "device_ids",
       sort: 0,
       customCoding: JSONify({
         request: {
