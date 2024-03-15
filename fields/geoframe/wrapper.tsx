@@ -1,3 +1,4 @@
+import "./wrapper.css"
 import React from "react";
 import {
   CardValueComponent,
@@ -12,23 +13,22 @@ import {
   FieldLabel,
 } from "@keystone-ui/fields";
 import { CellContainer, CellLink } from "@keystone-6/core/admin-ui/components";
-import MapMain from "./ReactMapGL/MapMain";
+import MapMain, { MapPolygonFeature } from "./ReactMapGL/MapMain";
 
 export const Field = (props: FieldProps<typeof controller>) => {
-  /* States */
-  const [mapRef, setMapRef] = React.useState<any>();
-  const draw = mapRef?.current
-    .getMap()
-    ._controls.filter((e: any) => Object.keys(e).includes("getSelected"))[0];
+  const [featureState, setFeatureState] = React.useState<MapPolygonFeature[]>([])
 
+  React.useEffect(() => props.onChange?.(JSON.stringify(featureState)), [featureState])
+
+  React.useEffect(() => console.log(props, featureState), [props])
   return (
     <FieldContainer as="fieldset">
       <FieldLabel as="legend">{props.field.label}</FieldLabel>
       <FieldDescription id={`${props.field.path}-description`}>
         {props.field.description}
       </FieldDescription>
-      <div style={{ width: 400, height: 400 }}>
-        <MapMain passupFn={setMapRef} />
+      <div className="mapMain">
+        <MapMain setFeatureState={setFeatureState} />
       </div>
     </FieldContainer>
   );

@@ -1,5 +1,5 @@
 import { list } from "@keystone-6/core";
-import { checkbox, integer, select, filter, relationship } from "../../fields";
+import { checkbox, integer, select, filter, relationship, json } from "../../fields";
 import { allowAll } from "@keystone-6/core/access";
 import { auditable } from "../auth";
 
@@ -7,6 +7,11 @@ const Audience = list({
   access: allowAll,
   fields: {
     ...auditable,
+    geoframe: json({
+      ui: {
+        views: "./fields/geoframe/wrapper"
+      }
+    }),
     advertisers: relationship({
       ref: "Advertiser.audiences",
       many: true,
