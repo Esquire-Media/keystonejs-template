@@ -48,7 +48,7 @@ export function isObject(item: any): item is AnyObject {
   return (item && typeof item === 'object' && !Array.isArray(item));
 }
 
-export function mergeDeep(target: AnyObject, source: AnyObject): AnyObject {
+export function mergeDeep(target: any, source: any): AnyObject {
   const output = { ...target };
   if (isObject(target) && isObject(source)) {
     Object.keys(source).forEach((key) => {

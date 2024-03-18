@@ -5,7 +5,11 @@ import { GraphQLError, GraphQLInputObjectType } from "graphql";
 import { KeystoneContext } from "@keystone-6/core/types";
 import { sudo_seed_data, seed_data } from "./data";
 
-function getUniqueInput(context: KeystoneContext<any>, listKey: string) {
+// load runtime environmental variables
+import * as dotenv from 'dotenv';
+dotenv.config();
+
+function getUniqueInput(context: KeystoneContext, listKey: string) {
   return Object.keys(
     (
       context.graphql.schema.getTypeMap()[
@@ -16,7 +20,7 @@ function getUniqueInput(context: KeystoneContext<any>, listKey: string) {
 }
 
 async function SeedData(
-  context: KeystoneContext<any>,
+  context: KeystoneContext,
   seed: typeof sudo_seed_data | typeof seed_data
 ) {
   for (const [listKey, items] of Object.entries(seed)) {
@@ -24,7 +28,7 @@ async function SeedData(
       for (const [key, value] of Object.entries(data)) {
         if (typeof value === "function") {
           // Call the factory function to get the resolved value
-          data[key] = value();
+          data[key] = await value(context);
           if (!data[key]) {
             continue itemLoop;
           }
@@ -48,12 +52,17 @@ async function SeedData(
           console.log(`Created ${listKey} record.`);
           data["id"] = item.id;
         } catch (error) {
-          console.warn((error as GraphQLError).message);
+          if (error instanceof GraphQLError) {
+            console.warn(error.message);
+          } else{
+            console.error(error)
+          }
+          
         }
       } else {
         console.log(`Updating existing ${listKey} record.`);
         await context.db[listKey].updateOne({
-          where: { id: existingItem.id },
+          where: { id: existingItem.id.toString() },
           data: data,
         });
         data["id"] = existingItem.id;
@@ -66,7 +75,7 @@ async function main() {
   console.log(`🌱 Inserting seed data`);
   const sudo = getContext(config, PrismaModule).sudo();
   await SeedData(sudo, sudo_seed_data);
-  if (!process.env.DB_SEED || process.env.DB_SEED !== "false")
+  if (process.env.DB_SEED || process.env.DB_SEED === "true")
     await SeedData(
       getContext(config, PrismaModule).withSession({
         itemId: (
@@ -77,7 +86,6 @@ async function main() {
         data: {
           name: sudo_seed_data.User[0].name,
           email: sudo_seed_data.User[0].email,
-          role: { title: sudo_seed_data.Role[0].title },
         },
       }),
       seed_data
