@@ -171,9 +171,7 @@ export function InlineCreate(props: InlineCreateProps) {
     });
 
     onBeforeCreate!(data, props)
-
-    console.log(data)
-
+    
     createItem({
       variables: {
         data,

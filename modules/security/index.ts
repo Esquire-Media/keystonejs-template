@@ -20,6 +20,8 @@ import { createAuth } from "@keystone-6/auth";
 
 // see https://keystonejs.com/docs/apis/session for the session docs
 import { statelessSessions } from "@keystone-6/core/session";
+import { merge } from "ts-deepmerge";
+import type { Module } from "../../types";
 
 // for a stateless session, a SESSION_SECRET should always be provided
 //   especially in production (statelessSessions will throw if SESSION_SECRET is undefined)
@@ -36,7 +38,7 @@ const { withAuth } = createAuth({
   // this is a GraphQL query fragment for fetching what data will be attached to a context.session
   //   this can be helpful for when you are writing your access control functions
   //   you can find out more at https://keystonejs.com/docs/guides/auth-and-access-control
-  sessionData: "email name role{title}",
+  sessionData: "email name",
   secretField: "password",
 
   // WARNING: remove initFirstItem functionality in production
@@ -63,4 +65,11 @@ const session = statelessSessions({
   secret: sessionSecret!,
 });
 
-export { withAuth, session };
+import { module as Identity } from "./identity";
+import { module as Tenancy } from "./tenancy";
+import { module as Authorization } from "./authorization";
+
+export const module: Module = merge(Identity, Tenancy, Authorization, {
+  session,
+});
+export { withAuth };
