@@ -22,6 +22,10 @@ export const Publisher: SelectFieldConfig<BaseListTypeInfo> = {
 export const PublisherEntityType: SelectFieldConfig<BaseListTypeInfo> = {
   type: "enum",
   options: [
+    { label: "Advertiser", value: "advertiser" },
+    { label: "Campaign", value: "campaign" },
+    { label: "Ad Set", value: "adset" },
+    { label: "Creative", value: "creative" },
     { label: "Audience", value: "audience" },
   ],
 };

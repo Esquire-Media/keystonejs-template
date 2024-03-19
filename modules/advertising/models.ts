@@ -1,4 +1,4 @@
-import { ListConfig } from "@keystone-6/core";
+import { ListConfig, graphql, group } from "@keystone-6/core";
 import {
   checkbox,
   codeblock,
@@ -7,6 +7,7 @@ import {
   relationship,
   select,
   text,
+  virtual,
 } from "../../fields";
 import { BaseListTypeInfo, ListAccessControl } from "@keystone-6/core/types";
 import { DataType, Publisher, PublisherEntityType } from "./types";
@@ -52,6 +53,9 @@ export const DataSource: ListConfig<BaseListTypeInfo> = {
     isHidden: async (context) => !(await isGlobalAdmin(context)),
     hideCreate: true,
     hideDelete: true,
+    listView: {
+      initialColumns: ["title", "dataType"],
+    },
   },
 };
 
@@ -93,14 +97,6 @@ export const ProcessingStep: ListConfig<BaseListTypeInfo> = {
     }) => {
       let errors = false;
       if (operation === "create") {
-        if (resolvedData.audience === undefined) {
-          errors = true;
-          addValidationError("An Audience must be selected");
-        }
-        if (resolvedData.sort === undefined) {
-          errors = true;
-          addValidationError("The Sort order must be set");
-        }
         if (resolvedData.outputType === undefined) {
           errors = true;
           addValidationError("An Output Type must be selected");
@@ -112,8 +108,8 @@ export const ProcessingStep: ListConfig<BaseListTypeInfo> = {
           audience: {
             id: {
               equals:
-                resolvedData.audience.connect?.id ??
-                resolvedData.audience.create?.id,
+                resolvedData.audience?.connect?.id ??
+                resolvedData.audience?.create?.id,
             },
           },
           sort: { equals: resolvedData.sort },
@@ -121,12 +117,7 @@ export const ProcessingStep: ListConfig<BaseListTypeInfo> = {
           customCoding: { equals: resolvedData.customCoding },
         },
       });
-      if (
-        existing.length > 0 &&
-        (operation === "create" ||
-          (operation === "update" &&
-            !existing.map((e) => e.id).includes(resolvedData.id)))
-      ) {
+      if (existing.length > 0 && operation === "create") {
         addValidationError(
           `The record ${JSON.stringify(existing[0])} already exists.`
         );
@@ -135,8 +126,11 @@ export const ProcessingStep: ListConfig<BaseListTypeInfo> = {
   },
   ui: {
     isHidden: async (context) => !(await isGlobalAdmin(context)),
-    hideCreate: true,
-    hideDelete: true,
+    hideCreate: async (context) => !(await isGlobalAdmin(context)),
+    hideDelete: async (context) => !(await isGlobalAdmin(context)),
+    listView: {
+      initialColumns: ["audience", "outputType", "sort"],
+    },
   },
 };
 
@@ -154,6 +148,9 @@ export const PublisherEntity: ListConfig<BaseListTypeInfo> = {
     isHidden: async (context) => !(await isGlobalAdmin(context)),
     hideCreate: true,
     hideDelete: true,
+    listView: {
+      initialColumns: ["publisher", "entityType", "entityId"],
+    },
   },
 };
 
@@ -218,47 +215,84 @@ export const Audience: ListConfig<BaseListTypeInfo> = {
     },
   } as Partial<ListAccessControl<BaseListTypeInfo>>) as ListAccessControl<BaseListTypeInfo>,
   fields: {
+    title: virtual({
+      field: graphql.field({
+        type: graphql.String,
+        args: { something: graphql.arg({ type: graphql.Int }) },
+        async resolve(item, args, context, info) {
+          if (info.variableValues?.listKey && info.variableValues?.id) {
+            const details = await context.query[
+              info.variableValues.listKey as string
+            ].findOne({
+              where: { id: info.variableValues.id as string },
+              query: "tenant{title} dataSource{title}",
+            });
+            return `${details.tenant.title} | ${details.dataSource.title}`;
+          }
+          return "";
+        },
+      }),
+    }),
     tenant: relationship({
       ref: "Tenant",
       many: false,
       ui: { hideCreate: true },
     }),
     status: checkbox({ defaultValue: true }),
-    rebuildFrequency: integer({ defaultValue: 1 }),
-    rebuildUnit: select({
-      type: "enum",
-      options: [
-        { label: "Day(s)", value: "days" },
-        { label: "Weeks(s)", value: "weeks" },
-        { label: "Month(s)", value: "months" },
-      ],
-      defaultValue: "days",
-    }),
-    timeToLive: integer({ defaultValue: 0 }),
-    TTLUnit: select({
-      type: "enum",
-      options: [
-        { label: "Day(s)", value: "days" },
-        { label: "Weeks(s)", value: "weeks" },
-        { label: "Month(s)", value: "months" },
-      ],
-      defaultValue: "days",
-    }),
-    dataSource: relationship({
-      ref: "DataSource",
-      ui: {
-        labelField: "title",
-        hideCreate: true,
+    ...group({
+      label: "Rebuild",
+      description: "How often should this audience be regenerated?",
+      fields: {
+        rebuild: integer({ defaultValue: 1 }),
+        rebuildUnit: select({
+          type: "enum",
+          options: [
+            { label: "Day(s)", value: "days" },
+            { label: "Weeks(s)", value: "weeks" },
+            { label: "Month(s)", value: "months" },
+          ],
+          defaultValue: "days",
+        }),
       },
     }),
-    dataFilter: filter({
-      ui: {
-        style: "antd",
-        dependency: {
-          field: "dataSource.filtering",
-        },
-        // ref: "DataSource.dataType",
-        // fields: {} // https://github.com/ukrbublik/react-awesome-query-builder/blob/master/CONFIG.adoc#configfields
+    ...group({
+      label: "Time To Live",
+      description:
+        "How long should an individual target stay in this audience?",
+      fields: {
+        TTL_Length: integer({ defaultValue: 0 }),
+        TTL_Unit: select({
+          type: "enum",
+          options: [
+            { label: "Day(s)", value: "days" },
+            { label: "Weeks(s)", value: "weeks" },
+            { label: "Month(s)", value: "months" },
+          ],
+          defaultValue: "days",
+        }),
+      },
+    }),
+    ...group({
+      label: "Primary Data",
+      description: "What data set should this audience be based on?",
+      fields: {
+        dataSource: relationship({
+          ref: "DataSource",
+          ui: {
+            labelField: "title",
+            hideCreate: true,
+          },
+        }),
+        dataFilter: filter({
+          ui: {
+            style: "antd",
+            dependency: {
+              field: "dataSource.filtering",
+            },
+            // ref: "DataSource.dataType",
+            // fields: {} // https://github.com/ukrbublik/react-awesome-query-builder/blob/master/CONFIG.adoc#configfields
+          },
+        }),
       },
     }),
     processes: relationship({
@@ -278,9 +312,15 @@ export const Audience: ListConfig<BaseListTypeInfo> = {
       many: true,
       ui: {
         displayMode: "cards",
-        cardFields: ["publisher", "entityType", "entityId"],
-        inlineCreate: { fields: ["publisher", "entityType", "entityId"] },
+        cardFields: ["publisher", "entityId"],
+        inlineCreate: { fields: ["publisher", "entityId"] },
         inlineConnect: true,
+      },
+      hooks: {
+        resolveInput: async ({ fieldKey, resolvedData, context }) => {
+          console.log(resolvedData[fieldKey]);
+          return resolvedData[fieldKey];
+        },
       },
     }),
   },
@@ -328,16 +368,23 @@ export const Audience: ListConfig<BaseListTypeInfo> = {
           dataFilter: { equals: resolvedData.dataFilter },
         },
       });
-      if (
-        existing.length > 0 &&
-        (operation === "create" ||
-          (operation === "update" &&
-            !existing.map((e) => e.id).includes(resolvedData.id)))
-      ) {
+      if (existing.length > 0 && operation === "create") {
         addValidationError(
           `The record ${JSON.stringify(existing[0])} already exists.`
         );
       }
+    },
+  },
+  ui: {
+    labelField: "title",
+    listView: {
+      initialColumns: [
+        "tenant",
+        "dataSource",
+        "rebuild",
+        "rebuildUnit",
+        "status",
+      ],
     },
   },
 };
