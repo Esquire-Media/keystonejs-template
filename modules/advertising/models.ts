@@ -149,7 +149,7 @@ export const PublisherEntity: ListConfig<BaseListTypeInfo> = {
     hideCreate: true,
     hideDelete: true,
     listView: {
-      initialColumns: ["publisher", "entityType", "entityId"],
+      initialColumns: ["publisher", "entityType", "Entity_ID"],
     },
   },
 };
@@ -312,8 +312,8 @@ export const Audience: ListConfig<BaseListTypeInfo> = {
       many: true,
       ui: {
         displayMode: "cards",
-        cardFields: ["publisher", "entityId"],
-        inlineCreate: { fields: ["publisher", "entityId"] },
+        cardFields: ["publisher", "Entity_ID"],
+        inlineCreate: { fields: ["publisher", "Entity_ID"] },
         inlineConnect: true,
       },
       hooks: {
