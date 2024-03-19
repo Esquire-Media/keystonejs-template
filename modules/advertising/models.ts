@@ -136,10 +136,10 @@ export const ProcessingStep: ListConfig<BaseListTypeInfo> = {
 
 export const PublisherEntity: ListConfig<BaseListTypeInfo> = {
   access: allowLoggedIn,
-  fields: {
+  fields: { 
     publisher: select(Publisher),
     entityType: select(PublisherEntityType),
-    entityId: text({
+    Entity_ID: text({
       validation: { isRequired: true },
       isIndexed: "unique",
     }),
