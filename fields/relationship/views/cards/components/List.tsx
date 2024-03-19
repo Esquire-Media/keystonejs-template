@@ -1,7 +1,11 @@
 import React, { Ref } from "react";
 import CardContainer from "./Container";
 import { Link, Stack, VisuallyHidden } from "@keystone-ui/core";
-import { DataGetter, ItemData, getRootGraphQLFieldsFromFieldController } from "@keystone-6/core/admin-ui/utils";
+import {
+  DataGetter,
+  ItemData,
+  getRootGraphQLFieldsFromFieldController,
+} from "@keystone-6/core/admin-ui/utils";
 import { FieldContainer, FieldLabel } from "@keystone-ui/fields";
 import { Button } from "@keystone-ui/button";
 import { Tooltip } from "@keystone-ui/tooltip";
@@ -167,18 +171,23 @@ export type ListCardContainerProps = CardProps & {
   listWrapper?: ListWrapperFactory;
   itemWrapper?: ItemWrapperFactory;
 };
-export default function ListCardContainer(props: ListCardContainerProps): React.JSX.Element {
+export default function ListCardContainer(
+  props: ListCardContainerProps
+): React.JSX.Element {
   const list = (
-    <Stack
-      gap="medium"
-      ref={props.listRef}
-    >
+    <Stack gap="medium">
       {props.currentIdsArrayWithFetchedItems
-        .sort((a,b) => a.itemGetter.path.slice(-1)[0] - b.itemGetter.path.slice(-1)[0])
+        .sort((a, b) => {
+          console.log(a, b)
+          return (
+            a.itemGetter.path.slice(-1)[0] - b.itemGetter.path.slice(-1)[0]
+          );
+        })
         .map(({ id, itemGetter }, index) => {
           const item = (
             <ItemCardContainer
               {...props}
+              key={id}
               itemId={id}
               index={index}
               itemGetter={itemGetter}

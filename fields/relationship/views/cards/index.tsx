@@ -19,7 +19,6 @@ import React from "react";
 import { FieldContainer, FieldLabel } from "@keystone-ui/fields";
 
 export type CardProps = {
-  listRef?: Ref<any>;
   listWrapper?: ListWrapperFactory;
   itemWrapper?: ItemWrapperFactory;
   onBeforeCreate?: DataHandler;
@@ -108,7 +107,6 @@ export const Cards = React.forwardRef((props: CardProps, ref) => {
         {currentIdsArrayWithFetchedItems.length !== 0 && (
           <ListCardContainer
             {...props}
-            listRef={ref}
             foreignList={foreignList}
             items={items}
             setItems={setItems}
