@@ -59,13 +59,13 @@ async function SeedData(
           }
           
         }
-      } else {
-        console.log(`Updating existing ${listKey} record.`);
-        await context.db[listKey].updateOne({
-          where: { id: existingItem.id.toString() },
-          data: data,
-        });
-        data["id"] = existingItem.id;
+      // } else {
+      //   console.log(`Updating existing ${listKey} record.`);
+      //   await context.db[listKey].updateOne({
+      //     where: { id: existingItem.id.toString() },
+      //     data: data,
+      //   });
+      //   data["id"] = existingItem.id;
       }
     }
   }
