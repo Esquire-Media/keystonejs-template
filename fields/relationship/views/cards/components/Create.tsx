@@ -170,7 +170,7 @@ export function InlineCreate(props: InlineCreateProps) {
       }
     });
 
-    onBeforeCreate!(data, props)
+    if (!!onBeforeCreate) onBeforeCreate(data, props)
     
     createItem({
       variables: {

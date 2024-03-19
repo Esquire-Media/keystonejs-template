@@ -212,7 +212,7 @@ export const seed_data: { [listKey: string]: any } = {
           where: { title: "California Closets" },
         }),
       }),
-      rebuildFrequency: 1,
+      rebuild: 1,
       rebuildUnit: "weeks",
       dataSource: async (context: KeystoneContext) => ({
         connect: await context.query.DataSource.findOne({
@@ -302,7 +302,7 @@ export const seed_data: { [listKey: string]: any } = {
           where: { title: "Skandinavia" },
         }),
       }),
-      rebuildFrequency: 1,
+      rebuild: 1,
       rebuildUnit: "weeks",
       dataSource: async (context: KeystoneContext) => ({
         connect: await context.query.DataSource.findOne({
@@ -323,7 +323,7 @@ export const seed_data: { [listKey: string]: any } = {
           where: { title: "Relax the Back" },
         }),
       }),
-      rebuildFrequency: 1,
+      rebuild: 1,
       rebuildUnit: "weeks",
       dataSource: async (context: KeystoneContext) => ({
         connect: await context.query.DataSource.findOne({
@@ -344,7 +344,7 @@ export const seed_data: { [listKey: string]: any } = {
           where: { title: "California Closets" },
         }),
       }),
-      rebuildFrequency: 1,
+      rebuild: 1,
       rebuildUnit: "weeks",
       dataSource: async (context: KeystoneContext) => ({
         connect: await context.query.DataSource.findOne({
@@ -383,7 +383,7 @@ export const seed_data: { [listKey: string]: any } = {
           where: { title: "Ashley" },
         }),
       }),
-      rebuildFrequency: 1,
+      rebuild: 1,
       rebuildUnit: "weeks",
       dataSource: async (context: KeystoneContext) => ({
         connect: await context.query.DataSource.findOne({
@@ -404,7 +404,7 @@ export const seed_data: { [listKey: string]: any } = {
           where: { title: "Agren" },
         }),
       }),
-      rebuildFrequency: 1,
+      rebuild: 1,
       rebuildUnit: "months",
       dataSource: async (context: KeystoneContext) => ({
         connect: await context.query.DataSource.findOne({
