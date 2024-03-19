@@ -24,7 +24,10 @@ export type MapPolygonFeature = {
 type MapMainProps = {
   btnFn?: Function;
   child?: any;
-  features?: any;
+  features?: {
+    type: "FeatureCollection",
+    features: MapPolygonFeature[];
+  };
   initialViewState?: ViewState;
   panel?: boolean;
   setFeatureState?: (v: any) => any;
@@ -64,7 +67,7 @@ export default function MapMain(props: MapMainProps) {
   };
 
   /* Feature State */
-  const [featureState, setFeatureState] = React.useState<MapPolygonFeature[]>([]);
+  const [featureState, setFeatureState] = React.useState<MapPolygonFeature[]>(props.features ? props.features.features : []);
   React.useEffect(() => props.setFeatureState?.(featureState), [featureState]);
   const handleCreate = (e: any) => {
     setFeatureState((state) => [...state, ...e.features]);
@@ -86,9 +89,7 @@ export default function MapMain(props: MapMainProps) {
       ref={mapRef}
       style={{ width: "100%", height: "100%" }}
       {...viewState}
-      // onClick={() => console.log(mapRef.current.getMap())}
       onMove={(evt) => setViewState(evt.viewState)}
-      // mapboxAccessToken={process.env.REACT_APP_MAPBOX_TOKEN}
       mapboxAccessToken={MAPBOX_TOKEN}
       mapStyle={mapStyle}
       onLoad={(e: any) => {
