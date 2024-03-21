@@ -1,5 +1,5 @@
 import "./wrapper.css";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   CardValueComponent,
   CellComponent,
@@ -13,15 +13,11 @@ import {
   FieldLabel,
 } from "@keystone-ui/fields";
 import { CellContainer, CellLink } from "@keystone-6/core/admin-ui/components";
-import MapMain, { MapPolygonFeature } from "./ReactMapGL/MapMain";
+import MapMain from "./ReactMapGL/MapMain";
 
-export const Field = (props: FieldProps<typeof controller>) => {
-  function setFeatureState(e: MapPolygonFeature[]) {
-    props.onChange?.(
-      JSON.stringify({ type: "FeatureCollection", features: e })
-    );
-  }
+export type WrapperProps = FieldProps<typeof controller>;
 
+export const Field = (props: WrapperProps) => {
   return (
     <FieldContainer as="fieldset">
       <FieldLabel as="legend">{props.field.label}</FieldLabel>
@@ -29,10 +25,7 @@ export const Field = (props: FieldProps<typeof controller>) => {
         {props.field.description}
       </FieldDescription>
       <div className="mapMain">
-        <MapMain
-          setFeatureState={setFeatureState}
-          features={props.value && JSON.parse(props.value)}
-        />
+        <MapMain {...props} />
       </div>
     </FieldContainer>
   );

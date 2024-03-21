@@ -6,6 +6,7 @@ import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import DrawRectangle from "./modules/DrawModes/rectangle-mode";
 import CircleMode from "./modules/DrawModes/circle-mode";
 import BuildingsMode from "./modules/DrawModes/buildings-mode";
+import { WrapperProps } from "../wrapper";
 // import mapStyles from "./modules/MapStyleLinks";
 var StaticMode = require("@mapbox/mapbox-gl-draw-static-mode");
 
@@ -18,16 +19,17 @@ export type MapPolygonFeature = {
   properties: any;
   geometry: {
     coordinates: [number, number][];
-    type: "Polygon"
-  }
-}
+    type: "Polygon";
+  };
+};
+type FeatureCollection = {
+  type: "FeatureCollection";
+  features: MapPolygonFeature[];
+};
 type MapMainProps = {
   btnFn?: Function;
   child?: any;
-  features?: {
-    type: "FeatureCollection",
-    features: MapPolygonFeature[];
-  };
+  features?: FeatureCollection;
   initialViewState?: ViewState;
   panel?: boolean;
   setFeatureState?: (v: any) => any;
@@ -46,58 +48,65 @@ const durham = {
   zoom: 15,
 };
 
-const MAPBOX_TOKEN =
-  "pk.eyJ1IjoidGp1c3Rzb3VwIiwiYSI6ImNsdHJqcGFiMTBpdjkya3IwZDBuOW14cm8ifQ.p1drJMjOQ_l9UmGvsm0gSQ";
-
-export default function MapMain(props: MapMainProps) {
+export default function MapMain(props: WrapperProps) {
   /* Map Control */
   const mapRef = React.useRef<any>();
-  const [viewState, setViewState] = React.useState<ViewState>(
-    props.initialViewState || durham
-  );
+  const [viewState, setViewState] = React.useState<ViewState>(durham);
   const [mapLoading, setMapLoading] = React.useState(true);
   const [mapStyle, setMapStyle] = React.useState<string>(
     "mapbox://styles/esqtech/cl8nh2452002p15logaud46pv"
   );
-  const childProps = {
-    btnFn: props?.btnFn,
-    mapRef,
-    mapStyle,
-    setMapStyle,
-  };
 
-  /* Feature State */
-  const [featureState, setFeatureState] = React.useState<MapPolygonFeature[]>(props.features ? props.features.features : []);
-  React.useEffect(() => props.setFeatureState?.(featureState), [featureState]);
-  const handleCreate = (e: any) => {
-    setFeatureState((state) => [...state, ...e.features]);
-  };
-  const handleUpdate = (e: any) => {
-    setFeatureState((state) => [
-      ...state.filter((v) => !e.features.map((f) => f.id).includes(v.id)),
-      ...e.features,
-    ]);
-  };
-  const handleDelete = (e: any) => {
-    setFeatureState((state) =>
-      state.filter((v) => !e.features.map((f) => f.id).includes(v.id))
+  /* Handle Features */
+  const onChange = (e: any) => {
+    const featureCollection = e.target._controls
+      .filter((e: any) => Object.keys(e).includes("getSelected"))[0]
+      .getAll();
+    props.onChange?.(
+      featureCollection.features.length > 0
+        ? JSON.stringify(featureCollection)
+        : null
     );
   };
+
+  // "Reset Changes" button clicked => update map
+  React.useEffect(() => {
+    if (
+      mapRef.current &&
+      props.value !==
+        JSON.stringify(
+          mapRef.current
+            .getMap()
+            ._controls.filter((e: any) =>
+              Object.keys(e).includes("getSelected")
+            )[0]
+            .getAll()
+        )
+    ) {
+      mapRef.current
+        .getMap()
+        ._controls.filter((e: any) => Object.keys(e).includes("getSelected"))[0]
+        .set(
+          props.value
+            ? (JSON.parse(props.value) as FeatureCollection)
+            : { type: "FeatureCollection", features: [] }
+        );
+    }
+  }, [props.value]);
 
   return (
     <Map
       ref={mapRef}
       style={{ width: "100%", height: "100%" }}
-      {...viewState}
-      onMove={(evt) => setViewState(evt.viewState)}
-      mapboxAccessToken={MAPBOX_TOKEN}
+      initialViewState={viewState}
+      mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
       mapStyle={mapStyle}
       onLoad={(e: any) => {
         mapRef.current.addControl(
           new MapboxDraw({
             displayControlsDefault: false,
             userProperties: true,
-            defaultMode: props.static ? "static" : "simple_select",
+            defaultMode: "simple_select",
             controls: {
               polygon: true,
               trash: true,
@@ -111,32 +120,20 @@ export default function MapMain(props: MapMainProps) {
             },
           })
         );
-        if (props.features) {
+        if (props.value) {
           mapRef.current
             .getMap()
             ._controls.filter((e: any) =>
               Object.keys(e).includes("getSelected")
             )[0]
-            .set(props.features);
+            .set(JSON.parse(props.value) as FeatureCollection);
         }
-        if (props.static) {
-          mapRef.current
-            .getMap()
-            ._controls.filter((e: any) =>
-              Object.keys(e).includes("getSelected")
-            )[0]
-            .changeMode("static");
-        }
-        mapRef.current.on("draw.create", handleCreate);
-        mapRef.current.on("draw.delete", handleDelete);
-        mapRef.current.on("draw.update", handleUpdate);
+        mapRef.current.on("draw.create", onChange);
+        mapRef.current.on("draw.delete", onChange);
+        mapRef.current.on("draw.update", onChange);
 
         setMapLoading(false);
-        props.setMapRef?.(mapRef);
-      }}>
-      {!props.child ? null : mapLoading ? null : (
-        <props.child {...childProps} />
-      )}
-    </Map>
+      }}
+    />
   );
 }
