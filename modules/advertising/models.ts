@@ -329,12 +329,6 @@ export const Audience: ListConfig<BaseListTypeInfo> = {
         inlineCreate: { fields: ["publisher", "Entity_ID"] },
         inlineConnect: true,
       },
-      hooks: {
-        resolveInput: async ({ fieldKey, resolvedData, context }) => {
-          console.log(resolvedData[fieldKey]);
-          return resolvedData[fieldKey];
-        },
-      },
     }),
   },
   hooks: {
@@ -386,6 +380,9 @@ export const Audience: ListConfig<BaseListTypeInfo> = {
           `The record ${JSON.stringify(existing[0])} already exists.`
         );
       }
+    },
+    afterOperation: async (args) => {
+      console.log(args.resolvedData)
     },
   },
   ui: {
