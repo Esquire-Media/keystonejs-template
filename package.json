@@ -22,6 +22,7 @@
     "@keystone-ui/tooltip": "^6.0.2",
     "@mapbox/mapbox-gl-draw": "^1.4.3",
     "@mapbox/mapbox-gl-draw-static-mode": "^1.0.1",
+    "@mapbox/mapbox-gl-geocoder": "4.7.4",
     "@monaco-editor/react": "^4.6.0",
     "@mui/icons-material": "^5.15.12",
     "@prisma/client": "4.16.2",

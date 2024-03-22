@@ -1,5 +1,6 @@
 import "./modules/css/mapbox-gl-draw-v2.css";
 import "./modules/css/mapbox-gl-draw.css";
+import "./modules/css/mapbox-gl-geocoder.css"
 import Map from "react-map-gl";
 import React from "react";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
@@ -8,6 +9,7 @@ import CircleMode from "./modules/DrawModes/circle-mode";
 import BuildingsMode from "./modules/DrawModes/buildings-mode";
 import { WrapperProps } from "../wrapper";
 import GetCenter from "./modules/GetCenter";
+import GeocoderControl from "./modules/GeoCoder";
 // import mapStyles from "./modules/MapStyleLinks";
 var StaticMode = require("@mapbox/mapbox-gl-draw-static-mode");
 
@@ -39,18 +41,20 @@ const durham = {
   zoom: 15,
 };
 function getInitialViewState(value) {
-  const center = GetCenter(value)
+  const center = GetCenter(value);
   return {
     longitude: center[0],
     latitude: center[1],
-    zoom: 15
-  }
+    zoom: 15,
+  };
 }
 
 export default function MapMain(props: WrapperProps) {
   /* Map Control */
   const mapRef = React.useRef<any>();
-  const [viewState, setViewState] = React.useState<ViewState>(props.value ? getInitialViewState(props.value) : durham);
+  const [viewState, setViewState] = React.useState<ViewState>(
+    props.value ? getInitialViewState(props.value) : durham
+  );
   const [mapLoading, setMapLoading] = React.useState(true);
   const [mapStyle, setMapStyle] = React.useState<string>(
     "mapbox://styles/esqtech/cl8nh2452002p15logaud46pv"
@@ -132,7 +136,11 @@ export default function MapMain(props: WrapperProps) {
         mapRef.current.on("draw.update", onChange);
 
         setMapLoading(false);
-      }}
-    />
+      }}>
+      <GeocoderControl
+        mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""}
+        position="top-left"
+      />
+    </Map>
   );
 }
