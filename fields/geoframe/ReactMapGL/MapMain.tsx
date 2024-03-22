@@ -7,6 +7,7 @@ import DrawRectangle from "./modules/DrawModes/rectangle-mode";
 import CircleMode from "./modules/DrawModes/circle-mode";
 import BuildingsMode from "./modules/DrawModes/buildings-mode";
 import { WrapperProps } from "../wrapper";
+import GetCenter from "./modules/GetCenter";
 // import mapStyles from "./modules/MapStyleLinks";
 var StaticMode = require("@mapbox/mapbox-gl-draw-static-mode");
 
@@ -22,19 +23,9 @@ export type MapPolygonFeature = {
     type: "Polygon";
   };
 };
-type FeatureCollection = {
+export type FeatureCollection = {
   type: "FeatureCollection";
   features: MapPolygonFeature[];
-};
-type MapMainProps = {
-  btnFn?: Function;
-  child?: any;
-  features?: FeatureCollection;
-  initialViewState?: ViewState;
-  panel?: boolean;
-  setFeatureState?: (v: any) => any;
-  setMapRef?: (v: any) => any;
-  static?: boolean;
 };
 type ViewState = {
   longitude: number;
@@ -47,11 +38,19 @@ const durham = {
   latitude: 35.99623,
   zoom: 15,
 };
+function getInitialViewState(value) {
+  const center = GetCenter(value)
+  return {
+    longitude: center[0],
+    latitude: center[1],
+    zoom: 15
+  }
+}
 
 export default function MapMain(props: WrapperProps) {
   /* Map Control */
   const mapRef = React.useRef<any>();
-  const [viewState, setViewState] = React.useState<ViewState>(durham);
+  const [viewState, setViewState] = React.useState<ViewState>(props.value ? getInitialViewState(props.value) : durham);
   const [mapLoading, setMapLoading] = React.useState(true);
   const [mapStyle, setMapStyle] = React.useState<string>(
     "mapbox://styles/esqtech/cl8nh2452002p15logaud46pv"
