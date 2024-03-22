@@ -4,6 +4,7 @@ import {
   codeblock,
   filter,
   integer,
+  json,
   relationship,
   select,
   text,
@@ -15,6 +16,18 @@ import { merge } from "ts-deepmerge";
 import { can, isGlobalAdmin } from "../security/authorization/logic";
 import { allowLoggedIn } from "../security/identity/logic";
 import { fetchTenantChildren } from "../security/tenancy/logic";
+
+export const Geoframe: ListConfig<BaseListTypeInfo> = {
+  access: allowLoggedIn,
+  fields: {
+    ESQID: text(),
+    polygon: json({
+      ui: {
+        views: "./fields/geoframe/wrapper"
+      }
+    }),
+  }
+}
 
 export const EnumList: ListConfig<BaseListTypeInfo> = {
   access: allowLoggedIn,
