@@ -17,7 +17,7 @@ import { can, isGlobalAdmin } from "../security/authorization/logic";
 import { allowLoggedIn } from "../security/identity/logic";
 import { fetchTenantChildren } from "../security/tenancy/logic";
 
-export const Geography: ListConfig<BaseListTypeInfo> = {
+export const GeoFrame: ListConfig<BaseListTypeInfo> = {
   access: allowLoggedIn,
   fields: {
     ESQID: text(),
