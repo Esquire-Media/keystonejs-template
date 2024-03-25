@@ -17,13 +17,13 @@ import { can, isGlobalAdmin } from "../security/authorization/logic";
 import { allowLoggedIn } from "../security/identity/logic";
 import { fetchTenantChildren } from "../security/tenancy/logic";
 
-export const Geoframe: ListConfig<BaseListTypeInfo> = {
+export const Geography: ListConfig<BaseListTypeInfo> = {
   access: allowLoggedIn,
   fields: {
     ESQID: text(),
     polygon: json({
       ui: {
-        views: "./fields/geoframe/wrapper"
+        views: "./fields/geography/wrapper"
       }
     }),
   }

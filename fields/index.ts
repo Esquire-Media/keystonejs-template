@@ -20,7 +20,7 @@ import codeblock from "./codeblock";
 import filter from "./filter";
 import relationship from "./relationship";
 import rating from "./rating";
-import geoframe from "./geoframe";
+import geography from "./geography";
 
 export {
   checkbox,
@@ -43,5 +43,5 @@ export {
   filter,
   relationship,
   rating,
-  geoframe
+  geography
 };

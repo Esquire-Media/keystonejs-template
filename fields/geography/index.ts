@@ -5,20 +5,20 @@ import {
   FieldTypeFunc,
 } from "@keystone-6/core/types";
 
-type GeoframeFieldConfig<ListTypeInfo extends BaseListTypeInfo> =
+type GeographyFieldConfig<ListTypeInfo extends BaseListTypeInfo> =
   CommonFieldConfig<ListTypeInfo>;
 
-export const geoframe =
+export const geography =
   <ListTypeInfo extends BaseListTypeInfo>({
     ...config
-  }: GeoframeFieldConfig<ListTypeInfo>): FieldTypeFunc<ListTypeInfo> =>
+  }: GeographyFieldConfig<ListTypeInfo>): FieldTypeFunc<ListTypeInfo> =>
   (data) => {
     const _config = { ...config };
     const context = json({ ...(_config as JsonFieldConfig<ListTypeInfo>) })(
       data
     );
     const AdminMeta = context.getAdminMeta;
-    context.views = "./fields/geoframe/wrapper";
+    context.views = "./fields/geography/wrapper";
     context.getAdminMeta = () => {
       const _meta = AdminMeta ? AdminMeta() : {};
       const meta: any = { ...(typeof _meta === "object" ? _meta : {}) };
@@ -27,4 +27,4 @@ export const geoframe =
     return context;
   };
 
-export default geoframe;
+export default geography;

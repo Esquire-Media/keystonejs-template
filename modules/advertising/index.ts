@@ -2,7 +2,7 @@ import type { Module } from "../../types";
 import {
   Audience,
   DataSource,
-  Geoframe,
+  Geography,
   ProcessingStep,
   PublisherEntity,
 } from "./models";
@@ -11,7 +11,7 @@ export const module: Module = {
   models: {
     Audience,
     DataSource,
-    Geoframe,
+    Geography,
     ProcessingStep,
     PublisherEntity,
   },
