@@ -26,3 +26,5 @@ export default withAuth(
     ...app,
   })
 );
+
+const test = "test"
